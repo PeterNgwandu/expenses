@@ -111,7 +111,7 @@ class RequisitionsController extends Controller
                                             // ->where('requisitions.gross_amount', '<=', $limitSupervisor->max_amount)
                                             ->get();
 
-            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels','requisition'))->withUser($user);
+            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels'))->withUser($user);
         }elseif (Auth::user()->stafflevel_id == $hod)
         {
 
@@ -138,7 +138,7 @@ class RequisitionsController extends Controller
                                             ->groupBy('requisitions.req_no')
                                             ->get();
 
-            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels','requisition'))->withUser($user);
+            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels'))->withUser($user);
         }elseif (Auth::user()->stafflevel_id == $ceo)
         {
 
@@ -161,7 +161,7 @@ class RequisitionsController extends Controller
                                                ->groupBy('requisitions.req_no')
                                                ->get();
 
-            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels','requisition'))->withUser($user);
+            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels'))->withUser($user);
         }elseif (Auth::user()->stafflevel_id == $financeDirector)
         {
 
@@ -184,7 +184,7 @@ class RequisitionsController extends Controller
                                                ->groupBy('requisitions.req_no')
                                                ->get();
 
-            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels','requisition'))->withUser($user);
+            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels'))->withUser($user);
         }
 
     }
