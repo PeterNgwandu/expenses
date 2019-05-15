@@ -86,7 +86,7 @@ class RequisitionsController extends Controller
                                                ->groupBy('requisitions.req_no')
                                                ->get();
 
-            return view('requisitions.view-requisitions', compact('pending_requisitions','staff_levels','requisition'))->withUser($user);
+            return view('requisitions.view-requisitions', compact('pending_requisitions','stafflevels','requisition'))->withUser($user);
         }elseif(Auth::user()->stafflevel_id == $supervisor)
         {
 
