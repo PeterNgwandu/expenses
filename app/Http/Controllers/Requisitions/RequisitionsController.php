@@ -665,7 +665,7 @@ class RequisitionsController extends Controller
                                   ->distinct('req_no')
                                   ->get();
 
-        return view('requisitions.all-requisitions', compact('submitted_requisitions','req_no','amount_paid'));
+        return view('requisitions.all-requisitions', compact('submitted_requisitions','req_no'));
     }
 
     public static function getAmountPaid($req_no)
