@@ -158,7 +158,7 @@ class RetirementController extends Controller
         //                             ->select('requisitions.req_no','users.username as username','departments.name as department')
         //                             ->distinct('requisitions.req_no')->get();
 
-        return view('retirements.create-retirements', compact('paid_requisitions','paid_no_budget_requsition'))->withAccounts($accounts);
+        return view('retirements.create-retirements', compact('paid_requisitions'))->withAccounts($accounts);
     }
 
     public static function getLatestRetNoCount()
