@@ -1907,7 +1907,7 @@ class RequisitionsController extends Controller
         $pdf = PDF::setOptions([
             'logOutputFile' => storage_path('logs/log.htm'),
             'tempDir' => storage_path('fontDir/')
-        ])->loadView('requisition.requisition-report', compact('submitted_requisitions','req_no','amount_paid','vat_amount'));
+        ])->loadView('requisition.requisition-report', compact('submitted_requisitions','req_no','vat_amount'));
         return $pdf->stream('requisition-report');
     }
 
