@@ -21,7 +21,9 @@
                                       <th scope="col" class="text-center">#ID</th>
                                       <th scope="col" class="text-center">Staff Level Name</th>
                                       <th scope="col" class="text-center">Status</th>
+                                      @if(Auth::user()->username == 'Admin')
                                       <th scope="col" class="text-center">Action</th>
+                                      @endif
                                   </tr>
                               </thead>
                               <tbody>
@@ -31,6 +33,7 @@
                                       <td class="align-middle text-center">{{ $level->id }}</td>
                                       <td class="align-middle text-center">{{ $level->name }}</td>
                                       <td class="align-middle text-center">{{ $level->status }}</td>
+                                      @if(Auth::user()->username == 'Admin')
                                       @if($level->status == 'Active')
                                         <td class="align-middle text-center">
                                             <a href="{{url('/disable-level/'.$level->id)}}" class="btn btn-sm btn-outline-danger">Disable</a>
@@ -43,12 +46,15 @@
                                             <a data-id="{{$level->id}}" href="{{url('/delete-level$level/'.$level->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
                                         </td>
                                       @endif
+                                      @endif
                                   </tr>
 
                                  @endforeach
                               </tbody>
                             </table><br>
+                            @if(Auth::user()->username == 'Admin')
                             <a href="{{url('/staffs')}}" class="float-right">Add Staff Level</a>
+                            @endif
                         </div>
                     </div>
                 </div>

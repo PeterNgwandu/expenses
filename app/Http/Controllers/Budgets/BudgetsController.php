@@ -7,7 +7,9 @@ use App\Item\Item;
 use App\Accounts\Account;
 use App\Budget\Budget;
 use Illuminate\Http\Request;
+use App\StaffLevel\StaffLevel;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 
 class BudgetsController extends Controller
@@ -20,7 +22,7 @@ class BudgetsController extends Controller
     public function index()
     {
         $accounts = Account::all();
-        $budgets = Budget::all();
+        $budgets = Budget::where('status', 'Confirmed')->get();
         // $items = Item::where('title_no', $budgets[1]->title_no)->get();
         $items = Item::all();
         $total = 0;
@@ -38,7 +40,7 @@ class BudgetsController extends Controller
     public function create()
     {
         $accounts = Account::all();
-        $budgets = Budget::limit(5)->latest()->get();
+        $budgets = Budget::where('status', 'Confirmed')->limit(5)->latest()->get();
         $items = Item::all();
         return view('budgets.create-budget')->withBudgets($budgets)->withItems($items)->withAccounts($accounts);
     }
@@ -53,16 +55,91 @@ class BudgetsController extends Controller
     public function store(Request $request)
     {
         $this->validate(request(), [
-            'title_no',
-            'title',
+            'title_no => required',
+            'title => required',
+            'description => required',
         ]);
 
         $budget = new Budget();
         $budget->title_no = $request->title_no;
         $budget->title = $request->title;
+        $budget->description = $request->description;
         $budget->save();
 
         return redirect(url('/budgets'));
+    }
+
+    public function approveBudget($budget_id)
+    {
+        $stafflevels = StaffLevel::all();
+
+        $hod = $stafflevels[0]->id;
+        $ceo = $stafflevels[1]->id;
+        $supervisor = $stafflevels[2]->id;
+        $normalStaff = $stafflevels[3]->id;
+        $financeDirector = $stafflevels[4]->id;
+
+        if(Auth::user()->stafflevel_id == $ceo){
+            $budget = Budget::where('id', $budget_id)->first();
+            if($budget->status == 'null')
+            {
+                alert()->error('Opps!', 'Budget not yet approved by Finance Director');
+                return redirect()->back();
+            }
+            $result = Budget::where('id', $budget_id)->update([
+                'status' => 'Confirmed',
+                'approver_id' => $ceo,
+            ]);
+        }elseif(Auth::user()->stafflevel_id == $financeDirector){
+            $result = Budget::where('id', $budget_id)->update([
+                'status' => 'Approved',
+                'approver_id' => $financeDirector,
+            ]);
+        }
+
+        return response()->json(['result' => $result]);
+        
+    }
+
+    public function rejectBudget($budget_id)
+    {
+        $stafflevels = StaffLevel::all();
+
+        $hod = $stafflevels[0]->id;
+        $ceo = $stafflevels[1]->id;
+        $supervisor = $stafflevels[2]->id;
+        $normalStaff = $stafflevels[3]->id;
+        $financeDirector = $stafflevels[4]->id;
+
+        if(Auth::user()->stafflevel_id == $ceo){
+            $budget = Budget::where('id', $budget_id)->first();
+            if($budget->status == 'null')
+            {
+                alert()->error('Opps!', 'Budget not yet approved by Finance Director');
+                return redirect()->back();
+            }
+            $result = Budget::where('id', $budget_id)->update([
+                'status' => 'Confirmed',
+                'approver_id' => $ceo,
+            ]);
+            $result = Budget::where('id', $budget_id)->update([
+                'status' => 'Rejected',
+                'approver_id' => $ceo,
+            ]);
+        }elseif(Auth::user()->stafflevel_id == $financeDirector){
+            $result = Budget::where('id', $budget_id)->update([
+                'status' => 'Rejected',
+                'approver_id' => $financeDirector,
+            ]);
+        }
+
+        return response()->json(['result' => $result]);
+    }
+
+    public function deleteBudget($budget_id)
+    {
+        $result = Budget::where('id', $budget_id)->delete();
+        return response()->json(['result' => $result]);
     }
 
     /**
@@ -78,7 +155,7 @@ class BudgetsController extends Controller
         $total = 0;
 
         $accounts = Account::all();
-        $budgets = Budget::all();
+        $budgets = Budget::where('status', 'Confirmed')->get();
         $items = Item::all();
 
         foreach ($items as $item) {
@@ -86,6 +163,8 @@ class BudgetsController extends Controller
         }
         return view('budgets.view-budget', compact('id','itemsUnderBudget'))->withBudget($budget)->withBudgets($budgets)->withAccounts($accounts)->withItems($items)->withTotal($total);
     }
+
+    
 
     /**
      * Show the form for editing the specified resource.

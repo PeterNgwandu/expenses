@@ -59,6 +59,12 @@ class LimitsController extends Controller
 
     }
 
+    public function adjustLimit($data_id, $max_amount)
+    {
+        $result = Limit::where('id', $data_id)->update(['max_amount' => $max_amount]);
+        return response()->json(['result' => $result]);
+    }
+
     /**
      * Display the specified resource.
      *

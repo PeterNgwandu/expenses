@@ -24,7 +24,7 @@ class StaffController extends Controller
         $users = DB::table('users')->join('departments', 'users.department_id', 'departments.id')
                                    ->join('staff_levels', 'users.stafflevel_id', 'staff_levels.id')
                                    ->select('users.*', 'departments.name as department', 'staff_levels.name as stafflevel')
-                                   ->get(); 
+                                   ->get();
         return view('staffs.show-staffs')->withUsers($users);
     }
 
@@ -36,7 +36,7 @@ class StaffController extends Controller
     public function create()
     {
         $staff_level = StaffLevel::all();
-        $departments = Department::all();
+        $departments = Department::where('status', 'Active')->get();
         $accounts = SubAccountType::where('account_subtype_name', 'Staff Advance Accounts')->first();
         return view('staffs.add-staff', compact('staff_level'))->withDepartments($departments)->withAccounts($accounts);
     }
@@ -94,7 +94,16 @@ class StaffController extends Controller
      */
     public function edit($id)
     {
-        //
+        $staff = User::findOrFail($id);
+
+        return view('staffs.edit-staff')->withStaff($staff);
+    }
+
+    public function deleteUser($user_id)
+    {
+        $user = User::findOrFail($user_id);
+        $result = $user->where('id', $user_id)->delete();
+        return response()->json(['result' => $result]);
     }
 
     /**

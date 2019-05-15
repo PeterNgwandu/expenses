@@ -53,9 +53,9 @@ class CommentsController extends Controller
         $comment->body = $request->body;
         $comment->save();
 
-        alert()->success('Comments added successfuly', 'Good Job');
+        alert()->success('Comments added successfuly', '');
         session()->flash('message', 'Comment has being added');
-        return redirect(url('pending-requisitions'));
+        return redirect(url('submitted-requisitions/'.$request->req_no));
     }
 
     /**
@@ -117,7 +117,7 @@ class CommentsController extends Controller
         $comment->body = $request->body;
         $comment->save();
 
-        Alert::success('Comments added successfuly', 'Good Job');
+        Alert::success('Comments added successfuly', '');
         session()->flash('message', 'Comment has being added');
         return redirect(url('all-retirements/'.$request->ret_no));
     }
@@ -136,7 +136,7 @@ class CommentsController extends Controller
         $comment->body = $request->body;
         $comment->save();
 
-        alert()->success('Comments added successfuly', 'Good Job');
+        alert()->success('Comments added successfuly', '');
         session()->flash('message', 'Comment has being added');
         return redirect(url('/expense_retirements/'.$request->ret_no));
     }

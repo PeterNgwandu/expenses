@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Journal;
 use DB;
 use PDF;
 use App\Journal\Journal;
+use App\Journal\RetirementsJournal;
 use Illuminate\Http\Request;
-use App\Retirements\Retirement;
+use App\Retirement\Retirement;
 use App\Requisition\Requisition;
 use App\Http\Controllers\Controller;
 use App\Accounts\FinanceSupportiveDetail;
@@ -20,7 +21,7 @@ class JournalController extends Controller
      */
     public function index()
     {
-        
+
     }
 
     /**
@@ -31,15 +32,29 @@ class JournalController extends Controller
     public function create()
     {
 
-        // $requisitions = DB::table('finance_supportive_details')->join('requisitions','finance_supportive_details.req_no','requisitions.req_no')->join('users','requisitions.user_id','users.id')->join('sub_account_types','users.sub_acc_type_id','sub_account_types.id')->join('accounts','requisitions.account_id','accounts.id')->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),'requisitions.req_no','requisitions.activity_name','users.username as username','users.account_no as account_no')->groupBy('requisitions.id')->groupBy('requisitions.user_id')->groupBy('requisitions.account_id')->groupBy('requisitions.req_no')->distinct('requisitions.req_no')->get();
+        // $requisitions = DB::table('requisitions')->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')
+        //                                          ->join('users','requisitions.user_id','users.id')
+        //                                          ->join('accounts','requisitions.account_id','accounts.id')
+        //                                          ->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),
+        //                                          'requisitions.req_no','requisitions.created_at','requisitions.activity_name',
+        //                                          'requisitions.gross_amount','users.username as username','users.account_no as account_no',
+        //                                          'accounts.account_name as account')
+        //                                          ->where('requisitions.status', 'Paid')
+        //                                          ->where('requisitions.post_status', 'Not Posted')
+        //                                          ->groupBy('requisitions.id')
+        //                                          ->distinct('req_no')
+        //                                          ->get();
+        $requisitions = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')->join('users','requisitions.user_id','users.id')->join('accounts','requisitions.account_id','accounts.id')->where('requisitions.post_status','Not Posted')->where('requisitions.status','!=', 'Deleted')->where('requisitions.status','!=', 'Edited')->select('finance_supportive_details.*','requisitions.req_no','users.username','users.account_no as account_no','accounts.account_name as account')->distinct('finance_supportive_details.id')->distinct('finance_supportive_details.req_no')->distinct('finance_supportive_details.created_at')->get();
 
-        $requisitions = DB::table('requisitions')->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')->join('users','requisitions.user_id','users.id')->join('accounts','requisitions.account_id','accounts.id')->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),'requisitions.*','users.username as username','users.account_no as account_no','accounts.account_name as account')->groupBy('requisitions.id')->distinct('req_no')->get();
-
-        // $retirements = DB::table('retirements')->join('requisitions','retirements.req_no','requisitions.req_no')->join('users','requisitions.user_id','users.id')->join('accounts','requisitions.account_id','accounts.id')->select(DB::raw("SUM((retirements.quantity * retirements.unit_price) * 1.18) as amount_paid"),DB::raw("SUM(retirements.vat_amount) as vat"),'requisitions.req_no','users.username as username','accounts.account_name as account')->groupBy('requisitions.id')->distinct('req_no')->get();
-
-        // $retirements = DB::table('retirements')->join('requisitions','retirements.req_no','requisitions.req_no')->join('users','retirements.user_id','users.id')->join('sub_account_types','users.sub_acc_type_id','sub_account_types.id')->join('accounts','retirements.account_id','accounts.id')->select('retirements.created_at','retirements.ret_no','retirements.supplier_id','retirements.item_name','retirements.description','users.username as username','users.account_no as account_no','accounts.account_name as account', DB::raw("SUM((requisitions.quantity * requisitions.unit_price) * 1.18) as amount_paid"),DB::raw("SUM(retirements.vat_amount) as vat"))->where('retirements.status','Confirmed')->groupBy('retirements.id')->distinct()->get();
-
-        $retirements = DB::select(DB::raw("SELECT retirements.*, SUM(retirements.gross_amount),ret_no,item_name FROM `retirements` GROUP BY retirements.id"));
+        $retirements = Retirement::join('users','retirements.user_id','users.id')
+                                   ->join('accounts','retirements.account_id','accounts.id')
+                                   ->join('requisitions','retirements.req_no','requisitions.req_no')
+                                   ->select(DB::raw("SUM(retirements.gross_amount)as total"),'retirements.*','users.username as staff','users.account_no as Account_No','accounts.account_name as Account_Name','requisitions.req_no')
+                                   ->where('retirements.status', 'Confirmed')
+                                   ->where('retirements.post_status', 'Not Posted')
+                                   ->groupBy('retirements.id')
+                                   ->distinct('retirements.ret_no')
+                                   ->get();
 
 
 
@@ -48,7 +63,7 @@ class JournalController extends Controller
 
     public static function getDebitTotal($req_no)
     {
-        
+
         $net = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')
                ->where('finance_supportive_details.req_no',$req_no)
                ->sum('amount_paid');
@@ -57,7 +72,7 @@ class JournalController extends Controller
 
     public static function getCreditTotal($req_no)
     {
-        
+
         $net = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')
                ->where('finance_supportive_details.req_no',$req_no)
                ->sum('amount_paid');
@@ -72,31 +87,100 @@ class JournalController extends Controller
 
     public function printJournal(Request $request)
     {
-        $requisitions = DB::table('requisitions')->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')->join('users','requisitions.user_id','users.id')->join('accounts','requisitions.account_id','accounts.id')->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),'requisitions.*','users.username as username','users.account_no as account_no','accounts.account_name as account')->groupBy('requisitions.id')->distinct('req_no')->get();
+        // $requisitions = DB::table('requisitions')->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')
+        //                                          ->join('users','requisitions.user_id','users.id')
+        //                                          ->join('accounts','requisitions.account_id','accounts.id')
+        //                                          ->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),
+        //                                          'requisitions.req_no','requisitions.created_at','requisitions.activity_name',
+        //                                          'requisitions.gross_amount','users.username as username','users.account_no as account_no',
+        //                                          'accounts.account_name as account')
+        //                                          ->where('requisitions.status', 'Paid')
+        //                                          ->where('requisitions.post_status', 'Not Posted')
+        //                                          ->groupBy('requisitions.id')
+        //                                          ->distinct('req_no')
+        //                                          ->get();
+        $requisitions = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')->join('users','requisitions.user_id','users.id')->join('accounts','requisitions.account_id','accounts.id')->where('finance_supportive_details.status','Not Posted')->select('finance_supportive_details.*','requisitions.req_no','users.username','users.account_no as account_no','accounts.account_name as account')->distinct('finance_supportive_details.id')->distinct('finance_supportive_details.req_no')->distinct('finance_supportive_details.created_at')->get();
 
-        $retirements = DB::table('retirements')->join('requisitions','retirements.req_no','requisitions.req_no')->join('users','retirements.user_id','users.id')->join('sub_account_types','users.sub_acc_type_id','sub_account_types.id')->join('accounts','retirements.account_id','accounts.id')->select('retirements.created_at','retirements.ret_no','retirements.supplier_id','retirements.item_name','retirements.description','users.username as username','users.account_no as account_no','accounts.account_name as account', DB::raw("SUM((retirements.quantity * retirements.unit_price) * 1.18) as amount_paid"),DB::raw("SUM(retirements.vat_amount) as vat"))->where('retirements.status','Confirmed')->groupBy('retirements.id')->distinct()->get();
+        $retirements = Retirement::join('users','retirements.user_id','users.id')
+                                   ->join('accounts','retirements.account_id','accounts.id')
+                                   ->join('requisitions','retirements.req_no','requisitions.req_no')
+                                   ->select(DB::raw("SUM(retirements.gross_amount)as total"),'retirements.*','users.username as staff','users.account_no as Account_No','accounts.account_name as Account_Name','requisitions.req_no')
+                                   ->where('retirements.status', 'Confirmed')
+                                   ->where('retirements.post_status', 'Not Posted')
+                                   ->groupBy('retirements.id')
+                                   ->distinct('retirements.ret_no')
+                                   ->get();
 
-
-        //JournalController::postJournal($request);
-
-
-        $pdf = PDF::loadView('journals.journal-pdf', compact('requisitions','retirements'));
+        $pdf = PDF::setOptions([
+            'logOutputFile' => storage_path('logs/log.htm'),
+            'tempDir' => storage_path('fontDir/')
+        ])->loadView('journals.journal-pdf', compact('requisitions','retirements'));
         return $pdf->stream('journal-pdf');
     }
 
     public static function postJournal(Request $request)
     {
-        $journal = new Journal();
-        $journal->journal_no = JournalController::generateJournalNo();
-        $journal->req_no = $request->req_no;
-        $journal->status = 'Posted';
-        $journal->save();
+        $requisitions = DB::table('requisitions')->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')
+                                                 ->join('users','requisitions.user_id','users.id')
+                                                 ->join('accounts','requisitions.account_id','accounts.id')
+                                                 ->select(DB::raw("SUM(finance_supportive_details.amount_paid) as amount_paid"),
+                                                 'requisitions.req_no','requisitions.created_at','requisitions.activity_name',
+                                                 'requisitions.gross_amount','users.username as username','users.account_no as account_no',
+                                                 'accounts.account_name as account')
+                                                 ->where('requisitions.status', 'Paid')
+                                                 ->where('requisitions.post_status', 'Not Posted')
+                                                 ->groupBy('requisitions.id')
+                                                 ->distinct('req_no')
+                                                 ->get();
 
-        $finance_supportive_details = DB::table('finance_supportive_details')
-                                      ->where('req_no', $journal->req_no)
-                                      ->update([
-                                        'status' => 'Posted'
-                                      ]);
+        $retirements = Retirement::join('users','retirements.user_id','users.id')
+                                   ->join('accounts','retirements.account_id','accounts.id')
+                                   ->join('requisitions','retirements.req_no','requisitions.req_no')
+                                   ->select(DB::raw("SUM(retirements.gross_amount)as total"),'retirements.*','users.username as staff','users.account_no as Account_No','accounts.account_name as Account_Name','requisitions.req_no')
+                                   ->where('retirements.status', 'Confirmed')
+                                   ->where('retirements.post_status', 'Not Posted')
+                                   ->groupBy('retirements.id')
+                                   ->distinct('retirements.ret_no')
+                                   ->get();
+
+        $finance_supportive_details = DB::table('finance_supportive_details')->where('finance_supportive_details.status', 'Not Posted')->get();
+
+        foreach ($requisitions as $requisition) {
+            $journal = new Journal();
+            $journal->journal_no = $request->journal_no;
+            $journal->req_no = $requisition->req_no;
+            $journal->status = 'Posted';
+            $journal->save();
+
+            $requisition = new Requisition();
+            $requisition->where('requisitions.status', 'Paid')->where('requisitions.post_status', 'Not Posted')->update([
+                'post_status' => 'Posted',
+            ]);
+
+        }
+
+        foreach ($retirements as $retirement) {
+            $journal = new RetirementsJournal();
+            $journal->journal_no = $request->journal_no;
+            $journal->ret_no = $retirement->ret_no;
+            $journal->req_no = $retirement->req_no;
+            $journal->status = 'Posted';
+            $journal->save();
+
+            $retirement->where('retirements.status', 'Confirmed')->where('retirements.post_status', 'Not Posted')->update([
+                'post_status' => 'Posted',
+            ]);
+        }
+
+        foreach ($finance_supportive_details as $payment) {
+            $finance_supportive_detail = new FinanceSupportiveDetail();
+            $finance_supportive_detail->where('finance_supportive_details.status', 'Not Posted')->update([
+                'status' => 'Posted',
+            ]);
+        }
+
+        alert()->success('Journal Posted Successfuly', 'Good Job')->persistent('close');
+        return redirect()->back();
     }
 
     public static function generateJournalNo()
@@ -112,7 +196,76 @@ class JournalController extends Controller
 
     public static function getJournalCount()
     {
-        return Journal::count();
+        return Journal::distinct('journal_no')->count('journal_no');
+    }
+
+    public static function getTotalofPaidRequisitions()
+    {
+        // return FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')
+        //                                 ->where('finance_supportive_details.status','!=', 'Posted')
+        //                                 ->where('requisitions.status', 'Paid')
+        //                                 ->where('requisitions.post_status', 'Not Posted')
+        //                                 ->sum('amount_paid');
+        return FinanceSupportiveDetail::where('finance_supportive_details.status', 'Not Posted')->sum('finance_supportive_details.amount_paid');
+
+    }
+
+    public static function getTotalofJournalRequisitions()
+    {
+        return FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')
+                                        ->where('finance_supportive_details.status', 'Posted')
+                                        ->where('requisitions.post_status', 'Posted')
+                                        ->sum('amount_paid');
+    }
+
+    public static function getTotalofRetiredRequisitions()
+    {
+        return Retirement::where('status','Confirmed')
+                         ->where('retirements.post_status', 'Not Posted')
+                         ->sum('gross_amount');
+    }
+
+    public static function getTotalofRetiredRequisitionsInJournals($journal_no)
+    {
+        return Retirement::join('retirements_journals','retirements.ret_no','retirements_journals.ret_no')
+                         ->where('retirements.status','Confirmed')
+                         ->where('retirements.post_status', 'Posted')
+                         ->where('retirements_journals.journal_no', $journal_no)
+                         ->sum('gross_amount');
+    }
+
+    public function viewJournals()
+    {
+        $journals = DB::table('journals')->join('retirements_journals','journals.req_no','retirements_journals.req_no')->distinct('journal_no')->get();
+        return view('journals.view-journal')->withJournals($journals->unique('journal_no'));
+    }
+
+    public function viewJournalEntry($journal_no)
+    {
+        $journal = DB::table('journals')->join('requisitions','requisitions.req_no','journals.req_no')
+                     ->join('accounts','requisitions.account_id','accounts.id')->where('journals.journal_no',$journal_no)
+                     ->join('finance_supportive_details','requisitions.req_no','finance_supportive_details.req_no')
+                     ->join('users','requisitions.user_id','users.id')
+                     ->select('journals.*','requisitions.*','accounts.account_name as account','users.account_no as account_no','users.username as username','finance_supportive_details.amount_paid as amount_paid')
+                     ->get();
+
+        $retirement_journal = DB::table('retirements_journals')->join('retirements','retirements_journals.ret_no','retirements.ret_no')
+                                ->join('accounts','retirements.account_id','accounts.id')
+                                ->where('retirements_journals.journal_no',$journal_no)
+                                ->join('users','retirements.user_id','users.id')
+                                ->select('retirements_journals.*','retirements.*','accounts.account_name as Account_Name','users.account_no as Account_No')
+
+                                ->distinct('retirements.ret_no')
+                                ->get();
+
+        return view('journals.journal-entry', compact('retirement_journal','journal_no'))->withJournal($journal);
+    }
+
+    public static function getSumOfRetirement($journal_no)
+    {
+        return DB::table('retirements')->join('retirements_journals','retirements.ret_no','retirements_journals.ret_no')
+                                       ->where('retirements_journals.journal_no',$journal_no)
+                                       ->sum('retirements.gross_amount');
     }
 
 

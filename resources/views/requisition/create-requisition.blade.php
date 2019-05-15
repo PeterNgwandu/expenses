@@ -96,7 +96,7 @@ select,option {
                                             {{RequisitionsController::getTheLatestRequisitionNumber()}}
                                         </p>
                                     </span>
-
+                                    <a href="{{url('create-requisition')}}" data-value="{{Auth::user()->id}}" class="btn btn-sm btn-twitter refresh float-right" style="margin-top: -2px; margin-right:25px; border-radius:0px !important">Refresh</a>
 
                                 </div>
                             </div>
@@ -110,7 +110,7 @@ select,option {
                                         @csrf
                                         <input type="hidden" name="req_no" value="{{RequisitionsController::getTheLatestRequisitionNumber()}}">
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" name="budget_id" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
+                                        <select style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" name="budget_id" class="form-control budget-restrict" data-toogle="tooltip" data-placement="top" title="Select Budget">
                                              <option value="Select Budget" selected disabled>
                                                  Budget
                                              </option>
@@ -127,9 +127,9 @@ select,option {
                                                 <option value="{{$item->id}}">{{$item->item_name}}</option>
                                              @endforeach
                                         </select>
-                                        <input id="line_description" type="text" style="width: 360px;margin-right: 50px;" value="" disabled class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description">
+                                        <input disabled id="line_description" type="text" style="width: 360px;margin-right: 50px;" value="" disabled class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description">
 
-                                        <input id="activity_name" style="width: 185px; margin-right: 10px; margin-left: -55px;" type="text" name="activity_name" class="form-control activity_name" placeholder="Activity Name" data-toogle="tooltip" data-placement="top" title="Activity Name" value="">
+                                        <input id="activity_name" style="width: 185px; margin-right: 10px; margin-left: -55px;" type="text" name="activity_name" class="form-control activity_name" placeholder="Activity Name" data-toogle="tooltip" data-placement="top" title="Activity Name" value="<?php isset($activity) ? $activity->activity_name : ''; ?>">
 
                                         <input id="item_name2" style="width: 150px;" type="text" name="item_name" class="form-control item_name" placeholder="Item" data-toogle="tooltip" data-placement="top" title="Item To Purchase" value="">
                                         <input id="unit_measure" style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" data-toogle="tooltip" data-placement="top" title="Unit of Measure" value="">
@@ -148,19 +148,21 @@ select,option {
                                             @endforeach
                                         </select>
                                         <input id="description" style="width: 280px;" type="text" name="description" class="form-control description" data-toogle="tooltip" data-placement="top" title="Description of Item to Purchase" placeholder="Description">
+                                        &nbsp;
+                                        <button style="height:35px;" class="btn  btn-sm btn-twitter submit-requisition">
+                                            <span>
+                                                <i style="cursor: pointer;" class="material-icons submit-requisition md-10 align-middle mb-1 text-white">add_circle</i>
+                                                Add Line
+                                                <!-- <i style="cursor: pointer;" class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove_circle</i> -->
+                                             </span>
+                                        </button>
 
-                                        <span>
-                                           <i style="cursor: pointer;" class="material-icons submit-requisition md-10 align-middle mb-1 text-primary">add_circle</i>
-                                           <!-- <i style="cursor: pointer;" class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove_circle</i> -->
-                                        </span>
                                         <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
                                         <hr><hr>
                                     </form>
 
-                                        <div class="" style="margin-right: -15px; margin-top: -10px">
-                                           <button type="submit" req-no="{{RequisitionsController::getTheLatestRequisitionNumber()}}" class="btn permanent-requisition float-right btn-outline-primary mt-3 ml-1">Create Requisition</button>
-                                        </div>
+
                                     </div>
 
 
@@ -178,11 +180,13 @@ select,option {
                                               <th scope="col" class="text-center">VAT</th>
                                               <th scope="col" class="text-center">Account</th>
                                               <th scope="col" class="text-center">Description</th>
+                                              <th scope="col" class="text-center">Action</th>
                                           </tr>
                                       </thead>
                                       <tbody class="render-requisition">
 
                                       </tbody>
+
                                 </table>
                             </div>
                         </div>
@@ -202,12 +206,13 @@ select,option {
         $(document).on('change', '#budget', function() {
             var budget_id = $(this).val();
             if(budget_id) {
-               $(".item").show();
-               $("#line_description").show();
-               $( ".item" ).prop( "disabled", false );
-               $( "#line_description" ).prop( "disabled", false );
+                $(".item").show();
+                $("#line_description").show();
+                $( ".item" ).prop( "disabled", false );
+                $( "#line_description" ).prop( "disabled", false );
+                $('option', this).not(':eq(0), :selected').remove();
 
-               var url = '/get-items-list/'+budget_id;
+                var url = '/get-items-list/'+budget_id;
                 $.get(url, function(data) {
                     if(data){
                         $('.item').empty();
@@ -227,6 +232,23 @@ select,option {
                 $( ".item" ).prop( "disabled", true );
                 $( "#line_description" ).prop( "disabled", true );
             }
+        });
+
+        $(document).on('change', '.budget-restrict', function(e) {
+            e.preventDefault();
+            var budget_id = $(this).val();
+            var url = 'budget-restrict/'+ budget_id;
+
+            $.get(url, function(data) {
+                console.log(data.result);
+                if(data.result != 'undefined'){
+                    swal("Warning!", "Make sure you do not use a different budget, otherwise your requisition will not be created.", "warning");
+                }else{
+                    swal("Opps!", "Cannot submit.", "error");
+                }
+
+                // window.location = "create-requisition";
+            });
         });
 
         // $(document).on('click', '.new-row', function(){
@@ -253,9 +275,24 @@ select,option {
             $.get(url, function(data) {
                 console.log(data.result.description);
                 $('#line_description').val(data.result.description);
-
+                $('#line_description').prop('disabled', true);
             })
         });
+
+        $(document).ready(function() {
+          var activity_name = $("#activity_name");
+          var activity_name_value = $(".activity_name").val();
+          activity_name.on('mouseover',function(){
+            if(activity_name_value != 'null'){
+              console.log(activity_name_value);
+            }else{
+              // swal('Alert', 'Please use only one activity name for one requisition', 'warning');
+            }
+          });
+        })
+
+
+
 
         $(document).on('change', '#item', function(e) {
             var item_id = $(this).val();
@@ -268,6 +305,7 @@ select,option {
         $(document).on('click', '.submit-requisition', function(e) {
             e.preventDefault();
 
+
             localStorage.setItem("budget_id", $(this).closest('form').find('select[name=budget_id]').val());
             if (localStorage.getItem("budget_id")) {
               $(this).closest('form').find('select[name=budget_id]').val(localStorage.getItem("budget_id"));
@@ -279,7 +317,7 @@ select,option {
             var item_id = $(this).closest('form').find('select[name=item_id]').val();
             var req_no = $(this).closest('form').find('input[name=req_no]').val();
             var activity_name = $(this).closest('form').find('input[name=activity_name]').val();
-            alert(activity_name);
+
             var item_name2 = $(this).closest('form').find('input[name=item_name]').val();
             var unit_measure = $(this).closest('form').find('input[name=unit_measure]').val();
             var unit_price = $(this).closest('form').find('input[name=unit_price]').val();
@@ -301,10 +339,18 @@ select,option {
                 success: function(data) {
                     console.log(data.result);
                     $('.render-requisition').html(data.result);
+                    swal("Good Job", "Requisition line created successfuly.", "success");
                     if (budget_id == localStorage.getItem("budget_id")) {
                         $(this).closest('form').find('select[name=budget_id]').attr('selected', true);
                     }
-                    $("#data").find("#activity_name").val('');
+                    if($("#data").find("#activity_name").val() != null){
+                        var activity_name = $("#activity_name");
+                        activity_name.on('mouseover',function(){
+                          if($("#data").find("#activity_name").val() != null){
+                            swal('Alert', 'Please do not change activity name', 'warning');
+                          }
+                        });
+                    }
                     $("#data").find("#item_name2").val('');
                     $("#data").find("#unit_measure").val('');
                     $("#data").find("#quantity").val('');
@@ -316,6 +362,15 @@ select,option {
                 }
             });
 
+        });
+
+        $(document).on('click', '.refresh', function(e) {
+            var user_id = $(this).attr("data-value");
+            var url = '/truncate-requisitions-line/' + user_id;
+            $.get(url, function(data) {
+                console.log(data.result);
+                window.location('create-requisition');
+            });
         });
 
         $(document).on('click', '.permanent-requisition', function(e) {
@@ -334,36 +389,41 @@ select,option {
         });
 
         $(document).on('click', '.delete-row', function(e) {
-          if (confirm('Are you sure you want to deleter this?')) {
-            var id = [];
-            $("table tbody").find('input[name="record"]').each(function(){
-                if($(this).is(":checked")){
-                  id[i] = $(this).val();
-                  $.ajaxSetup({
-                    headers: {
-                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                  });
+            e.preventDefault();
+            var req_no = attr('data-req').val();
+            var req_id = attr('data-id').val();
+            alert(req_no);
+            // $("table tbody").find('input[name="record"]').each(function(){
+            //     if($(this).is(":checked")){
+            //       id[i] = $(this).val();
+            //     }
+            // });
+            // $("table tbody tr td").find('.delete-requisition-line').remove();
 
-                  $.ajax({
-                      type: 'POST',
-                      url:'delete-record',
-                      data:{id:id},
-                      success: function () {
-                          for (var i = 0; i < id.length; i++) {
-                             $(this).parents("tr").remove();
-                          }
-                      }
-                  });
-                }
-            });
-            if (id.length === 0) {
-                alert('Please select at least one line');
-            }
+        });
 
-          }else{
-            return false;
-          }
+        $(document).on('click', '.delete-requisition-line', function(e) {
+            e.preventDefault();
+            var currentRow = $(this);
+        	var req_id = $(this).attr('id');
+            var url = 'delete-requisition/'+req_id;
+            // swal({
+            //     title: "Delete",
+            //     text: "Are you sure you want to delete this?",
+            //     type: "error",
+            //     showCancelButton: true,
+            //     confirmButtonClass: 'btn-danger waves-effect waves-light',
+            //     confirmButtonText: "Delete",
+            //     cancelButtonText: "Cancel",
+            //     closeOnConfirm: true,
+            //     closeOnCancel: true,
+            //   }),
+
+              $.get(url, function(data) {
+                  console.log(data.result);
+                  currentRow.parent().parent().remove();
+                  swal("Deleted!", "Your line has been deleted successfuly.", "success");
+              });
 
         });
 

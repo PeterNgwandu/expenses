@@ -1,5 +1,6 @@
 
 <script type="text/javascript" src="{{url('assets/js/jquery.js')}}"></script>
+<script type="text/javascript" src="{{url('assets/js/bootstable.js')}}"></script>
 <script src="{{url('assets/vendor/jquery.min.js')}}"></script>
 <script type="text/javascript" src="{{url('js/bootstrap-confirm-delete.js')}}"></script>
 <!-- <script src="https://unpkg.com/sweetalert2@7.18.0/dist/sweetalert2.all.js"></script>

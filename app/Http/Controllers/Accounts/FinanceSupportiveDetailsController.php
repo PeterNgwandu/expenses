@@ -48,39 +48,59 @@ class FinanceSupportiveDetailsController extends Controller
         //     'payment_date' => 'required',
         // ]);
 
-        $amount_requested = Requisition::where('req_no', $request->req_no)->sum('gross_amount');
+        $amount_requested = Requisition::where('req_no', $request->req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->sum('gross_amount');
+        $current_paid_amount = FinanceSupportiveDetail::where('req_no', $request->req_no)->sum('amount_paid');
+        $amount_remained_to_pay = $amount_requested - $current_paid_amount;
+
+        if ($amount_remained_to_pay < $request->amount_paid)
+        {
+            alert()->error('You cannot pay more than requested amount', 'Ooops! Error')->persistent('Close');
+            return redirect()->back();
+        }
 
         $financeSupportiveDetails = new FinanceSupportiveDetail();
         $financeSupportiveDetails->req_no = $request->req_no;
-        $financeSupportiveDetails->serial_no = $request->serial_no;
+        // $financeSupportiveDetails->serial_no = $request->serial_no;
         $financeSupportiveDetails->cash_collector = $request->cash_collector;
         $financeSupportiveDetails->amount_paid = $request->amount_paid;
         $financeSupportiveDetails->account_id = $request->account_id;
         $financeSupportiveDetails->ref_no = $request->ref_no;
         $financeSupportiveDetails->comment = $request->comment;
         $financeSupportiveDetails->payment_date = $request->payment_date;
-        if ($request->amount_paid > $amount_requested) {
+
+        if ($amount_remained_to_pay < $request->amount_paid)
+        {
             alert()->error('You cannot pay more than requested amount', 'Ooops! Error')->persistent('Close');
             return redirect()->back();
         }
-        alert()->error('You have successfuly paid ' . number_format($request->amount_paid) , 'Good Job')->persistent('Close');
-        $financeSupportiveDetails->save();
 
-        $requisition = Requisition::where('req_no',$request->req_no)->first();
-
-        if ($requisition->status == 'Confirmed') {
-            $result = DB::table('requisitions')->where('req_no', $requisition->req_no)->update([
-                'status' => "Paid"
-            ]);
-            session()->flash('message', 'Finance Supportive Details added');
-            return redirect(url('submitted-requisitions/'.$requisition->requisition_no));
+        if ($amount_remained_to_pay < $request->amount_paid) {
+            alert()->error('You cannot pay more than requested amount', 'Ooops! Error')->persistent('Close');
+            return redirect()->back();
+        }else{
+            alert()->error('You have successfuly paid ' . number_format($request->amount_paid) , 'Good Job')->persistent('Close');
+            $financeSupportiveDetails->save();
         }
+
+
+        $requisition = Requisition::where('req_no',$request->req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->get();
+        foreach ($requisition as $requisition) {
+            if ($requisition->status == 'Confirmed') {
+                $result = DB::table('requisitions')->where('req_no', $requisition->req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->update([
+                    'status' => "Paid"
+                ]);
+                session()->flash('message', 'Finance Supportive Details added');
+                return redirect(url('/paid-requisitions'));
+            }
+        }
+
+
         if ($requisition->status == 'Paid') {
             session()->flash('message', 'Finance Supportive Details added');
-            return redirect(url('submitted-requisitions/'.$requisition->requisition_no));
+            return redirect(url('/paid-requisitions'));
         }
 
-        return redirect(url('submitted-requisitions/'.$requisition->requisition_no));
+        return redirect(url('/paid-requisitions'));
     }
 
     public static function generateReferenceNo()
@@ -151,4 +171,15 @@ class FinanceSupportiveDetailsController extends Controller
     {
         //
     }
+
+    public static function amountPaid($req_no)
+    {
+        return FinanceSupportiveDetail::where('req_no', $req_no)->sum('amount_paid');
+    }
+
+    public static function balanceRemained($req_no)
+    {
+
+    }
+
 }

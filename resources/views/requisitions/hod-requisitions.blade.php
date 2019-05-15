@@ -39,6 +39,23 @@ $limitHOD = Limit::where('stafflevel_id',$hod)
                             </div>
                         </div> 
                             <div class="py-4">
+                                    <p class="text-twitter ml-4">Filter by Date</p>
+                                    <form action="{{ route('submitted_filter_by_date') }}" method="POST" class="form-inline ml-4">
+                                        @csrf
+                                        <div class="input-group input-group--inline">
+                                            <div class="input-group-addon">
+                                                <i class="material-icons">date_range</i>
+                                            </div>
+                                            <input type="text" class="form-control datepicker" name="from" placeholder="From" value="">&nbsp;
+                                        </div>
+                                        <div class="input-group input-group--inline">
+                                            <div class="input-group-addon">
+                                                <i class="material-icons">date_range</i>
+                                            </div>
+                                            <input type="text" class="form-control datepicker" name="to" placeholder="To" value="">&nbsp;
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-twitter">Filter</button>
+                                    </form>
                                 <div class="table-responsive">
                                     @if(Auth::user()->stafflevel_id == 1)
                             <table id="data-table" class="table table-sm table-striped table-dark mb-0">

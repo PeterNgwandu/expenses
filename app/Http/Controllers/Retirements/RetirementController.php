@@ -127,9 +127,36 @@ class RetirementController extends Controller
         }
 
         $accounts = Account::all();
-        $paid_requisitions = Requisition::where('requisitions.status','Paid')->where('user_id',Auth::user()->id)->join('budgets','requisitions.budget_id','budgets.id')->join('items','requisitions.item_id','items.id')->join('users','requisitions.user_id','users.id')->join('departments','users.department_id','departments.id')->select('requisitions.req_no','requisitions.created_at','users.username as username','departments.name as department')->distinct('requisitions.req_no')->get();
+        // $paid_requisitions = Requisition::where('requisitions.status','Paid')
+        //                     ->where('user_id',Auth::user()->id)
+        //                     ->join('budgets','requisitions.budget_id','budgets.id')
+        //                     ->join('items','requisitions.item_id','items.id')
+        //                     ->join('users','requisitions.user_id','users.id')
+        //                     ->join('departments','users.department_id','departments.id')
+        //                     ->select('requisitions.req_no','requisitions.created_at','users.username as username','departments.name as department')
+        //                     ->where('budgets.status', 'Confirmed')
+        //                     ->distinct('requisitions.req_no')
+        //                     ->groupBy('requisitions.req_no')
+        //                     ->get();
 
-        $paid_no_budget_requsition = Requisition::where('requisitions.status','Paid')->where('user_id',Auth::user()->id)->where('budget_id',0)->join('users','requisitions.user_id','users.id')->join('departments','users.department_id','departments.id')->select('requisitions.req_no','users.username as username','departments.name as department')->distinct('requisitions.req_no')->get();
+        $paid_requisitions = Requisition::where('requisitions.status','Paid')
+                            ->where('user_id',Auth::user()->id)
+                            // ->join('budgets','requisitions.budget_id','budgets.id')
+                            // ->join('items','requisitions.item_id','items.id')
+                            ->join('users','requisitions.user_id','users.id')
+                            ->join('departments','users.department_id','departments.id')
+                            ->select('requisitions.req_no','requisitions.created_at','users.username as username','departments.name as department')
+                            // ->where('budgets.status', 'Confirmed')
+                            ->distinct('requisitions.req_no')
+                            ->groupBy('requisitions.req_no')
+                            ->get();
+
+        // $paid_no_budget_requsition = Requisition::where('requisitions.status','Paid')
+        //                             ->where('user_id',Auth::user()->id)->where('budget_id',0)
+        //                             ->join('users','requisitions.user_id','users.id')
+        //                             ->join('departments','users.department_id','departments.id')
+        //                             ->select('requisitions.req_no','users.username as username','departments.name as department')
+        //                             ->distinct('requisitions.req_no')->get();
 
         return view('retirements.create-retirements', compact('paid_requisitions','paid_no_budget_requsition'))->withAccounts($accounts);
     }
@@ -185,16 +212,24 @@ class RetirementController extends Controller
         DB::table('retirement_temporary_tables')->insert(['req_no' => $request->req_no, 'serial_no' => $request->serial_no, 'account_id' => $request->account_id, 'user_id' => $request->user_id, 'ret_no' => $request->ret_no, 'supplier_id' => $request->supplier_id, 'ref_no' => $request->ref_no, 'item_name' => $request->item_name2, 'purchase_date' => $request->purchase_date, 'unit_measure' => $request->unit_measure, 'quantity' => $request->quantity, 'unit_price' => $request->unit_price,
             'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => $request->status, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
 
-        $data = DB::table('retirement_temporary_tables')
-                    ->join('requisitions','retirement_temporary_tables.req_no','requisitions.req_no')
-                    ->join('budgets','requisitions.budget_id','budgets.id')
-                    ->join('items','requisitions.item_id','items.id')
-                    ->join('accounts','requisitions.account_id','accounts.id')
-                    ->select('retirement_temporary_tables.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')
-                    ->where('requisitions.serial_no', $request->serial_no)
-                    ->get();
+        
 
-        $view = view('retirements.render-retired-items')->with('data', $data)->render();
+            $data = DB::table('retirement_temporary_tables')
+                        ->join('requisitions','retirement_temporary_tables.req_no','requisitions.req_no')
+                        ->join('budgets','requisitions.budget_id','budgets.id')
+                        ->join('items','requisitions.item_id','items.id')
+                        ->join('accounts','requisitions.account_id','accounts.id')
+                        ->select('retirement_temporary_tables.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')
+                        ->where('requisitions.serial_no', $request->serial_no)
+                        ->where('budgets.status', 'Confirmed')
+                        ->get();
+
+            $data_no_budget = DB::table('retirement_temporary_tables')->join('requisitions','retirement_temporary_tables.req_no','requisitions.req_no')->join('accounts','requisitions.account_id','accounts.id')->select('retirement_temporary_tables.*','accounts.account_name as account')->get();
+            
+            $view = view('retirements.render-retired-items', compact('data_no_budget'))->with('data', $data)->render();            
+        
+
+        
 
         return response()->json(['result' => $view]);
     }
@@ -227,7 +262,7 @@ class RetirementController extends Controller
                 'updated_at' => Carbon::now(),
                 'approver_id' => null,
             ]);
-            Requisition::where('req_no', $retirement->req_no)->update(['requisitions.status' => $retirement->status]);
+            // Requisition::where('req_no', $retirement->req_no)->update(['requisitions.status' => $retirement->status]);
         }
 
         RetirementTemporaryTable::truncate();
@@ -581,9 +616,10 @@ class RetirementController extends Controller
                                   ->join('budgets','requisitions.budget_id','budgets.id')
                                   ->join('items','requisitions.item_id','items.id')
                                   ->select('requisitions.*','budgets.title as budget','items.item_name as item')
+                                  ->where('budgets.status', 'Confirmed')
                                   ->get();
 
-        $submitted_paid_no_budget = Requisition::where('requisitions.status','Paid')->where('user_id',Auth::user()->id)->where('budget_id',0)->get();
+        $submitted_paid_no_budget = Requisition::where('requisitions.status','Paid')->where('user_id',Auth::user()->id)->where('req_no', $req_no)->where('budget_id',0)->get();
 
         return view('retirements.retire', compact('submitted_requisitions','req_no','submitted_paid_no_budget'))->withAccounts($accounts)->withRequisition($requisition);
     }
@@ -595,6 +631,7 @@ class RetirementController extends Controller
                           ->join('budgets','requisitions.budget_id','budgets.id')
                           ->join('items','requisitions.item_id','items.id')
                           ->select('requisitions.*','budgets.title as budget','items.item_name as item')
+                          ->where('budgets.status', 'Confirmed')
                           ->get();
         $retirements = Retirement::where('ret_no', $ret_no)
                        ->get();
@@ -626,5 +663,13 @@ class RetirementController extends Controller
     {
         $totalRequestedAmount = Requisition::where('req_no', $req_no)->sum('gross_amount');
         return $totalRequestedAmount;
+    }
+
+    public function deleteRetirementLine($ret_id)
+    {
+        $retirement= RetirementTemporaryTable::findOrFail($ret_id);
+        $result = $retirement->where('id', $retirement->id)->delete();
+        alert()->success('Requisition Line deleted successfuly', 'Good Job');
+        return redirect()->back();
     }
 }

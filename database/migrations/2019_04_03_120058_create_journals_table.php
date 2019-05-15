@@ -17,6 +17,7 @@ class CreateJournalsTable extends Migration
             $table->increments('id');
             $table->string('journal_no');
             $table->string('req_no');
+            $table->string('ret_no');
             $table->string('status');
             $table->timestamps();
         });

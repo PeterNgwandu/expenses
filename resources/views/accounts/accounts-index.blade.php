@@ -70,12 +70,12 @@ use App\Http\Controllers\Accounts\AccountController;
 
                                                 </td>
                                                 @foreach(AccountController::get_accounts_by_account_subtype_id($sub_account_type->id) as $account)
-                                                <td  class="align-middle text-center text-success font-weight-bold">
+                                                <td class="align-middle text-center text-success font-weight-bold">
                                                   <span>
                                                      <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">subdirectory_arrow_right</i>
                                                   </span>
                                                   {{ $account->account_no }}</td>
-                                                <td  class="align-middle text-center text-success font-weight-bold">{{ $account->account_name }}</td>
+                                                <td class="align-middle text-center text-success font-weight-bold">{{ $account->account_name }}</td>
                                                 @endforeach
                                             </tr>
                                            @endforeach

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddActivityNameToRequisitionTemporaryTables extends Migration
+class AddPostStatusToRequsitions extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddActivityNameToRequisitionTemporaryTables extends Migration
      */
     public function up()
     {
-        Schema::table('requisition_temporary_tables', function (Blueprint $table) {
-            $table->string('activity_name');
+        Schema::table('requisitions', function (Blueprint $table) {
+            $table->string('post_status')->default('Not Posted');
         });
     }
 
@@ -25,8 +25,8 @@ class AddActivityNameToRequisitionTemporaryTables extends Migration
      */
     public function down()
     {
-        Schema::table('requisition_temporary_tables', function (Blueprint $table) {
-            $table->dropColumn('activity_name');
+        Schema::table('requisitions', function (Blueprint $table) {
+            $table->dropColumn('post_status');
         });
     }
 }

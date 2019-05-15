@@ -185,45 +185,45 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="req_no" value="{{$submitted_requisitions[0]->req_no}}">
                                         <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}"> 
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
+                                        <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
                                             @foreach($submitted_requisitions as $requisition)
                                                 <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
                                             @endforeach
                                         </select>
-                                        <input type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" / data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">                   
-                                                
-                                        <input style="width: 100px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No." data-toogle="tooltip" data-placement="top" title="Enter Receipt Number">
+                                        <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">                   
+                                                 
+                                        <input required style="width: 100px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No." data-toogle="tooltip" data-placement="top" title="Enter Receipt Number">
 
-                                        <input style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="" data-toogle="tooltip" data-placement="top" title="Pick Purchase Date">
+                                        <input required style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="" data-toogle="tooltip" data-placement="top" title="Pick Purchase Date">
 
-                                        <input id="item_name" style="width: 100px;" type="text" name="item_name" class="form-control item_name" placeholder="Item" value="" data-toogle="tooltip" data-placement="top" title="Enter Item Purchased">
+                                        <input required id="item_name" style="width: 100px;" type="text" name="item_name" class="form-control item_name" placeholder="Item" value="" data-toogle="tooltip" data-placement="top" title="Enter Item Purchased">
                                       
-                                        <input style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="" data-toogle="tooltip" data-placement="top" title="Unit of Measure">
+                                        <input required style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="" data-toogle="tooltip" data-placement="top" title="Unit of Measure">
                                        
-                                        <input style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="" data-toogle="tooltip" data-placement="top" title="Quantity">
+                                        <input required style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="" data-toogle="tooltip" data-placement="top" title="Quantity">
                                         
-                                        <input style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="" data-toogle="tooltip" data-placement="top" title="Unit Price">
+                                        <input required style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="" data-toogle="tooltip" data-placement="top" title="Unit Price">
                                            
-                                        <select style="width: 85px;" name="vat" value="" class="form-control vat" data-toogle="tooltip" data-placement="top" title="Select VAT Options">
+                                        <select required style="width: 85px;" name="vat" value="" class="form-control vat" data-toogle="tooltip" data-placement="top" title="Select VAT Options">
                                             <option value="VAT_Options" selected disabled>VAT</option>
                                             <option value="VAT Exclusive">VAT Exclusive</option>
                                             <option value="VAT Inclusive">VAT Inclusive</option>
                                             <option value="Non VAT">Non VAT</option>
                                         </select>
                                 
-                                        <select id="account" style="width: 125px;" name="account_id" class="form-control accounts" data-toogle="tooltip" data-placement="top" title="Select Account">
+                                        <select required id="account" style="width: 125px;" name="account_id" class="form-control accounts" data-toogle="tooltip" data-placement="top" title="Select Account">
                                             <option value="VAT Options" selected disabled>Account</option>
                                             @foreach($accounts as $account)
                                                 <option value="{{$account->id}}">{{$account->account_name}}</option>
                                             @endforeach
                                         </select>
                              
-                                        <input style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" data-toogle="tooltip" data-placement="top" title="Description of the Item Purchased">
+                                        <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" data-toogle="tooltip" data-placement="top" title="Description of the Item Purchased">
                                         
-                                        <span>
-                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add</i>
-                                           <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i> 
+                                        <span>&nbsp;
+                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
+                                           {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
                                         </span>
                                         <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
@@ -240,45 +240,45 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="req_no" value="{{$submitted_paid_no_budget[0]->req_no}}">
                                         <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}"> 
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no">
+                                        <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
                                             @foreach($submitted_paid_no_budget as $requsition)
                                                 <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
                                             @endforeach
                                         </select>
-                                        <input type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" />                   
+                                        <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" />                   
                                                 
-                                        <input style="width: 100px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No.">
+                                        <input required style="width: 100px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No.">
 
-                                        <input style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="">
+                                        <input required style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="">
 
-                                        <input id="item_name" style="width: 100px;" type="text" name="item_name" class="form-control item_name" placeholder="Item" value="">
+                                        <input required id="item_name" style="width: 100px;" type="text" name="item_name" class="form-control item_name" placeholder="Item" value="">
                                       
-                                        <input style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="">
+                                        <input required style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="">
                                        
-                                        <input style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="">
+                                        <input required style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="">
                                         
-                                        <input style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="">
+                                        <input required style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="">
                                            
-                                        <select style="width: 85px;" name="vat" value="" class="form-control vat">
+                                        <select required style="width: 85px;" name="vat" value="" class="form-control vat">
                                             <option value="VAT_Options" selected disabled>VAT</option>
                                             <option value="VAT Exclusive">VAT Exclusive</option>
                                             <option value="VAT Inclusive">VAT Inclusive</option>
                                             <option value="Non VAT">Non VAT</option>
                                         </select>
                                 
-                                        <select id="account" style="width: 125px;" name="account_id" class="form-control accounts">
+                                        <select required id="account" style="width: 125px;" name="account_id" class="form-control accounts">
                                             <option value="VAT Options" selected disabled>Account</option>
                                             @foreach($accounts as $account)
                                                 <option value="{{$account->id}}">{{$account->account_name}}</option>
                                             @endforeach
                                         </select>
                              
-                                        <input style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
+                                        <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
                                         
                                         <span>
-                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add</i>
-                                           <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i> 
+                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
+                                           {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
                                         </span>
                                         <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
@@ -291,7 +291,6 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     <table class="table table-sm mb-0">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th scope="col" class="text-center">Select</th>
                                                 <th scope="col" class="text-center">Budget</th>
                                                 <th scope="col" class="text-center">Budget Line</th>
                                                 <th scope="col" class="text-center">Supplier</th>
@@ -304,6 +303,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 <th scope="col" class="text-center">VAT</th>
                                                 <th scope="col" class="text-center">Account</th>
                                                 <th scope="col" class="text-center">Description</th>
+                                                <th scope="col" class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody class="render-retired-items">
@@ -391,6 +391,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
             }
         });
     });
+
 
     $(document).ready(function() {
         $('.preload').fadeOut('3000', function() {

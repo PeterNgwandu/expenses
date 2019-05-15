@@ -175,7 +175,8 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                     <table class="table table-sm mb-0">
                         <thead class="thead-dark">
                             <tr>
-                                <th scope="col" class="text-center">Select</th>
+                                <th scope="col" class="text-center">Budget</th>
+                                <th scope="col" class="text-center">Budget Line</th>
                                 <th scope="col" class="text-center">Supplier</th>
                                 <th scope="col" class="text-center">Reference No.</th>
                                 <th scope="col" class="text-center">Purchase Date</th>
@@ -186,9 +187,10 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                 <th scope="col" class="text-center">VAT</th>
                                 <th scope="col" class="text-center">Account</th>
                                 <th scope="col" class="text-center">Description</th>
+                                <th scope="col" class="text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="render-retired-items">
+                        <tbody class="render-retired-item">
                                 
                         </tbody>
                 </table>
@@ -281,6 +283,8 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
             }
         });
     });
+
+    
 
 </script>
 

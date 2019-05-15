@@ -11,12 +11,14 @@ use App\Http\Controllers\Accounts\FinanceSupportiveDetailsController;
 
 // foreach ($data as $data) :
 
-$requisitions = Requisition::where('req_no',$req_no)->distinct()->get();
+$requisitions = Requisition::where('req_no',$requisitionID->req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->distinct()->get();
 
-$requisitions2 = Requisition::where('requisitions.req_no', $req_no)
+$requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_no)
                           ->join('budgets','requisitions.budget_id','budgets.id')
                           ->join('items','requisitions.item_id','items.id')
                           ->select('requisitions.*','budgets.title as budget','items.item_name as item')
+                          ->where('requisitions.status', '!=', 'Deleted')
+                          ->where('requisitions.status', '!=', 'Edited')
                           ->get();
 
 ?>
@@ -100,7 +102,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                             </tr>
                                         </thead>
                                         <tbody>
-
+                                                <?php $req = Requisition::where('req_no', $requisition_no)->where('budget_id',0)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->get(); ?>
                                                 @if($req[0]->budget_id == 0)
                                                     <tr>
                                                    <td scope="col" class="text-center">{{$req[0]->req_no}}</td>
@@ -125,7 +127,6 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                                 <th>Totals Summary</th>
                                             </tr>
                                             <tr>
-                                                <th scope="col" class="text-center">Serial No.</th>
                                                 <th scope="col" class="text-center">Budget Line</th>
                                                 <th scope="col" class="text-center">Item Name</th>
                                                 <th scope="col" class="text-center">Desciption</th>
@@ -142,16 +143,15 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                         <tbody>
                                             @foreach($requisitions2 as $requisition)
                                                 <tr>
-                                                   <td scope="col" class="text-center">{{$requisition->serial_no}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->item}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->description}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->created_at->toFormattedDateString()}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
                                                    <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($requisition->unit_price,2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($requisition->vat_amount,2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($requisition->gross_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($requisition->unit_price,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($requisition->vat_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($requisition->gross_amount,2)}}</td>
 
                                                 </tr>
                                             @endforeach
@@ -163,11 +163,32 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
+                                                <td scope="col" class="text-left">Total</td>
+                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
+
+
+                                            </tr>
+                                            <tr>
                                                 <td></td>
-                                                <td scope="col" class="text-center">Total</td>
-                                                <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
-
-
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Amount Paid</td>
+                                                <td scope="col" class="text-right">{{number_format(FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Remained</td>
+                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no) - FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
                                             </tr>
                                         </tbody>
                                         @endif
@@ -177,7 +198,6 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                                 <th>Totals Summary</th>
                                             </tr>
                                             <tr>
-                                                <th scope="col" class="text-center">Serial No.</th>
                                                 <th scope="col" class="text-center">Item Name</th>
                                                 <th scope="col" class="text-center">Desciption</th>
                                                 <th scope="col" class="text-center">Unit of Measure</th>
@@ -187,24 +207,21 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                                 <th scope="col" class="text-center">Gross Amount</th>
                                                 <th scope="col" class="text-center">Amount Paid</th>
                                                 <th scope="col" class="text-center">Amount Remained</th>
-                                                <th scope="col" class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $req = Requisition::where('req_no', $req_no)->where('budget_id',0)->get(); ?>
+                                            <?php $req = Requisition::where('req_no', $requisition_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->where('budget_id',0)->get(); ?>
                                             @foreach($req as $req)
                                                 <tr>
-                                                   <td scope="col" class="text-center">{{$req->serial_no}}</td>
                                                    <td scope="col" class="text-center">{{$req->item_name}}</td>
                                                    <td scope="col" class="text-center">{{$req->description}}</td>
                                                    <td scope="col" class="text-center">{{$req->unit_measure}}</td>
                                                    <td scope="col" class="text-center">{{$req->quantity}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($req->unit_price,2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($req->vat_amount,2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format($req->gross_amount,2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format(RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                   <td scope="col" class="text-center">{{number_format(RequisitionsController::getTotalPerSerialNo($req->req_no,$req->serial_no) - RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                   <td scope="col" class="text-center"><a href="{{url('edit-requisition/'.$requisition->id)}}" class="btn btn-sm btn-outline-info">Edit</a></td>
+                                                   <td scope="col" class="text-right">{{number_format($req->unit_price,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($req->vat_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($req->gross_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getTotalPerSerialNo($req->req_no,$req->serial_no) - RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
                                                 </tr>
                                             @endforeach
                                             <tr>
@@ -214,28 +231,32 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td scope="col" class="text-center">Total</td>
-                                                <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Total</td>
+                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
+
+                                            </tr>
+                                            <tr>
                                                 <td></td>
                                                 <td></td>
-                                                <td style="width: 150px;" scope="col" class="text-center">
-
-                                                    @if($requisitioIDn->status == 'Paid')
-
-                                                            <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
-                                                             Process Payment
-                                                            </a>
-
-
-                                                    @elseif($requisitionID->user_id != Auth::user()->id)
-
-                                                        <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">Approve</a>
-                                                        <a href="{{url('reject-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-warning">Reject</a>
-                                                    <!-- <p>No Action</p> -->
-                                                    @endif
-
-
-                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Amount Paid</td>
+                                                <td scope="col" class="text-right">{{number_format(FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Remained</td>
+                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no) - FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
                                             </tr>
                                         </tbody>
                                         @endif
@@ -250,15 +271,10 @@ $requisitions2 = Requisition::where('requisitions.req_no', $req_no)
                                 <input type="hidden" name="payment_date" value="{{ now() }}">
                                 <input type="hidden" name="req_id" value="{{ $requisitionID->id }}">
                                 <input type="hidden" name="req_no" value="{{$requisitionID->req_no}}">
-                                <select name="serial_no" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
-                                    <option value="Serial Number" selected disabled>Select Requisition Line No.</option>
-                                    @foreach($requisitions as $requisition)
-                                        <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
-                                    @endforeach
-                                </select>
+                                <!--  -->
 
                                         <div class="form-group">
-                                            <input type="hidden" name="req_no" value="{{$req_no}}">
+                                            <input type="hidden" name="req_no" value="{{$requisitionID->req_no}}">
                                             <input style="width: 140px;" type="text" name="ref_no" class="form-control" placeholder="Enter Reference No." value="{{FinanceSupportiveDetailsController::generateReferenceNo()}}" data-toogle="tooltip" data-placement="top" title="Receipt Number (Automatic Generated)">
                                         </div>
 

@@ -35,7 +35,9 @@ use App\Limits\Limit;
                                             <th scope="col" class="text-center">#ID</th>
                                             <th scope="col" class="text-center">Staff Level</th>
                                             <th scope="col" class="text-center">Maximum Amount</th>
-                                            <th scope="col" class="text-center">Action</th>
+                                            @if(Auth::user()->username == 'Admin')
+                                              <th scope="col" class="text-center">Action</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -45,10 +47,11 @@ use App\Limits\Limit;
                                             <td class="align-middle text-center">{{ $limit->id }}</td>
                                             <td class="align-middle text-center">{{ $limit->stafflevel }}</td>
                                             <td class="align-middle text-center">{{ number_format($limit->max_amount) }}</td>
-                                            <td class="align-middle text-center">
-                                                <a href="{{route('limits.edit', $limit->id)}}" class="btn btn-sm btn-success">Adjust Limits</a>
-                                            </td>
-
+                                            @if(Auth::user()->username == 'Admin')
+                                              <td class="align-middle text-center">
+                                                  <a href="{{route('limits.edit', $limit->id)}}" class="btn btn-sm btn-success">Adjust Limits</a>
+                                              </td>
+                                            @endif
                                         </tr>
 
                                        @endforeach

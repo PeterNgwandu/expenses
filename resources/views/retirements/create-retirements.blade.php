@@ -73,7 +73,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                         @endforeach
                                     </tbody>
                                     @endif
-                                    @if($paid_requisitions->isEmpty())
+                                    {{-- @if($paid_requisitions->isEmpty())
                                     <thead>
                                         <tr>
                                             <th scope="col" class="text-center">Requester</th>
@@ -100,7 +100,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                    @endif
+                                    @endif --}}
                             </table>
                         </div>
                 </div>

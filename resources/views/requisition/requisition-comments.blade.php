@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Item\ItemController;
@@ -28,9 +28,9 @@ use App\Http\Controllers\Budgets\BudgetsController;
         bottom: 10px;
         right: 20px;
         z-index: 10;
-    } 
+    }
 </style>
-<div class="mdk-drawer-layout js-mdk-drawer-layout" data-fullbleed data-push data-has-scrolling-region>
+<div class="mdk-drawer-layout js-mdk-drawer-layout mydata" data-fullbleed data-push data-has-scrolling-region>
     <div class="mdk-drawer-layout__content mdk-header-layout__content--scrollable">
         <div class="container">
             <div class="row">
@@ -52,7 +52,7 @@ use App\Http\Controllers\Budgets\BudgetsController;
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <textarea style="resize: none;" rows="7" class="form-control" name="body" placeholder="Add Comments">
-                                                
+
                                             </textarea>
                                         </div>
                                     </div>

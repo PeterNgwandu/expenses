@@ -15,22 +15,22 @@ class CreateRetirementTemporaryTablesTable extends Migration
     {
         Schema::create('retirement_temporary_tables', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('req_no')->nullable();
+            $table->string('req_no');
             $table->integer('serial_no');
-            $table->unsignedInteger('account_id')->nullable();
-            $table->unsignedInteger('user_id')->nullable();
-            $table->string('ret_no')->nullable(); // Retirement Number (Unique for Each Retirement)
-            $table->string('supplier_id')->nullable();
-            $table->string('ref_no')->nullable();
-            $table->string('purchase_date')->nullable();
-            $table->string('item_name')->nullable();
-            $table->text('description')->nullable();
-            $table->string('unit_measure')->nullable();
-            $table->decimal('quantity', 8, 0)->nullable();
-            $table->decimal('unit_price', 10, 2)->nullable();
-            $table->string('vat')->nullable();
-            $table->decimal('vat_amount', 10, 2)->nullable();
-            $table->decimal('gross_amount', 10, 2)->nullable();
+            $table->unsignedInteger('account_id');
+            $table->unsignedInteger('user_id');
+            $table->string('ret_no'); // Retirement Number (Unique for Each Retirement)
+            $table->string('supplier_id');
+            $table->string('ref_no');
+            $table->string('purchase_date');
+            $table->string('item_name');
+            $table->text('description');
+            $table->string('unit_measure');
+            $table->decimal('quantity', 8, 0);
+            $table->decimal('unit_price', 10, 2);
+            $table->string('vat');
+            $table->decimal('vat_amount', 10, 2);
+            $table->decimal('gross_amount', 10, 2);
             $table->string('status')->nullable();
             $table->timestamps();
 

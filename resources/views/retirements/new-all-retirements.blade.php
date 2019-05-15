@@ -2,11 +2,21 @@
 
 use App\User;
 use App\Comments\Comment;
+use App\StaffLevel\StaffLevel;
 use App\Retirement\Retirement;
 use App\Requisition\Requisition;
 use App\Comments\RetirementComment;
 use App\Http\Controllers\Retirements\RetirementController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
+
+$stafflevels = StaffLevel::all();
+
+        $hod = $stafflevels[0]->id;
+        $ceo = $stafflevels[1]->id;
+        $supervisor = $stafflevels[2]->id;
+        $normalStaff = $stafflevels[3]->id;
+        $financeDirector = $stafflevels[4]->id;
+        $user = User::where('id', Auth::user()->id)->first();
 
 $retirement = Retirement::where('ret_no', $ret_no)
                        ->first();
@@ -201,14 +211,25 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
                                                             <!-- @if($retirement->approver_id == Auth::user()->id)
                                                               <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
                                                             @endif -->
-                                                            @if($retirement->user_id != Auth::user()->id)
+                                                            @if ($retirement->status == 'Confirmed')
+                                                                <p class="text-twitter">Already Approved</p>
+                                                            @endif
+                                                            @if($retirement->user_id != Auth::user()->id && $retirement->status = 'Retired' && Auth::user()->stafflevel_id == $supervisor)
 
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-
                                                                 <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
 
+                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By Supervisor' && Auth::user()->stafflevel_id == $hod)
+                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                            
+                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By HOD' && Auth::user()->stafflevel_id == $ceo)
+                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By CEO' && Auth::user()->stafflevel_id == $financeDirector)
+                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
                                                             @endif
-
                                                         </td>
                                                     </tr>
                                                 </tbody>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Item;
 
+use Alert;
 use App\Item\Item;
+use App\Accounts\Account;
 use App\Budget\Budget;
 use Illuminate\Http\Request;
 USE Illuminate\Support\Facades\DB;
@@ -87,7 +89,9 @@ class ItemController extends Controller
      */
     public function edit($id)
     {
-        //
+        $accounts = Account::all();
+        $item = Item::findOrFail($id);
+        return view('items.edit-item')->withItem($item)->withAccounts($accounts);
     }
 
     /**
@@ -99,7 +103,21 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $item = Item::findOrFail($id);
+        $result = Item::where('id', $item->id)->update([
+          'budget_id' => $request->budget_id,
+          'account_id' => $request->account_id,
+          'item_no' => $request->item_no,
+          'item_name' => $request->item_name,
+          'description' => $request->description,
+          'unit_price' => $request->unit_price,
+          'unit_measure' => $request->unit_measure,
+          'quantity' => $request->quantity,
+          'total' => $request->unit_price * $request->quantity,
+        ]);
+
+        alert()->success('Item Updated Successfuly', 'Good Job');
+        return redirect(url('budgets/'.$item->budget_id));
     }
 
     /**

@@ -16,7 +16,7 @@ class CreateFinanceSupportiveDetailsTable extends Migration
         Schema::create('finance_supportive_details', function (Blueprint $table) {
             $table->increments('id');
             $table->string('req_no');
-            $table->integer('serial_no');
+            $table->integer('serial_no')->nullable();
             $table->unsignedInteger('account_id');
             $table->string('cash_collector');
             $table->string('ref_no');

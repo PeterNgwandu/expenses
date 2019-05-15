@@ -27,7 +27,23 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                         </div>
                             <div class="py-4">
                                 <div class="table-responsive">
-
+                                    <p class="text-twitter ml-4">Filter by Date</p>
+                                    <form action="{{ route('submitted_filter_by_date') }}" method="POST" class="form-inline ml-4">
+                                        @csrf
+                                        <div class="input-group input-group--inline">
+                                            <div class="input-group-addon">
+                                                <i class="material-icons">date_range</i>
+                                            </div>
+                                            <input type="text" class="form-control datepicker" name="from" placeholder="From" value="">&nbsp;
+                                        </div>
+                                        <div class="input-group input-group--inline">
+                                            <div class="input-group-addon">
+                                                <i class="material-icons">date_range</i>
+                                            </div>
+                                            <input type="text" class="form-control datepicker" name="to" placeholder="To" value="">&nbsp;
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-twitter">Filter</button>
+                                    </form>
                             <table id="data-table" class="table table-bordered table-sm table-striped table-dark mb-0">
                                     <thead>
                                         <tr>
@@ -49,7 +65,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                     {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no)) }} /=
                                                 </td>
                                                 <td scope="col" class="text-center">
-                                                    <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
+                                                    <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View Requisition</a>
                                                 </td>
 
                                             </tr>

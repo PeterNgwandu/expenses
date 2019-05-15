@@ -11,8 +11,10 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
 $requisitions = Requisition::where('requisitions.id', $id)
                           ->join('budgets','requisitions.budget_id','budgets.id')
                           ->join('items','requisitions.item_id','items.id')
-                          ->select('requisitions.*','budgets.title as budget','items.item_name as item')
+                          ->select('requisitions.*','budgets.title as budget','items.item_name as item','items.description as descriptions')
                           ->get();
+                         
+$req = Requisition::where('req_no', $req_no)->where('status','!=','Deleted')->where('budget_id',0)->get();                         
 
 ?>
 
@@ -29,9 +31,9 @@ $requisitions = Requisition::where('requisitions.id', $id)
         margin-bottom: 10px;
         background: #E5E8E8;
     }
-    #item_name {
+    /* #item_name {
         margin-left: -140px;
-    }
+    } */
 </style>
 <div class="mdk-drawer-layout js-mdk-drawer-layout mydata" data-fullbleed data-push data-has-scrolling-region>
     <div class="mdk-drawer-layout__content mdk-header-layout__content--scrollable">
@@ -45,7 +47,14 @@ $requisitions = Requisition::where('requisitions.id', $id)
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Edit Requisition</h4>
+                                    <a href="{{url('submitted-requisitions/'.$req_id->req_no)}}" style="border-radius: 0px !important;" class="btn btn-sm btn-twitter mt-2">
+                                            <span>
+                                                <i style="cursor: pointer;" class="material-icons  md-2 align-middle">keyboard_arrow_left</i>
+                                            </span>
+                                            Go Back
+                                        </a>
                                     <span class="float-right">
+                                        
                                         <p class="lead" style="color: #35A45A;">
                                             {{ $requisition->req_no }}
                                         </p>
@@ -163,7 +172,9 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                         <input type="hidden" name="req_no" value="{{$requisition->req_no}}">
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="serial_no" value="{{$requisition->serial_no}}">
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #566573" id="budget" name="budget_id" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
+                                        <input type="hidden" name="budget_id" value="{{$requisition->budget_id}}">
+                                        <input type="hidden" name="item_id" value="{{$requisition->item_id}}">
+                                        {{-- <select style="width: 140px;background: #ffffff;border: 1px solid #566573" id="budget" name="budget_id" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
                                              <option value="Select Budget" selected disabled>
                                                  Budget
                                              </option>
@@ -171,7 +182,7 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                              @foreach($budgets as $budget)
                                                 <option value="{{$budget->id}}">{{$budget->title}}</option>
                                              @endforeach
-                                        </select>
+                                        </select> --}}
                                         <select id="item_name" style="width: 140px;background: #ffffff;border: 1px solid #566573" name="item_id" class="form-control item" data-toogle="tooltip" data-placement="top" title="Select Budget Line">
                                              <option value="Select Budget" selected disabled>
                                                  Budget Line
@@ -179,9 +190,9 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                              @foreach($items as $item)
                                                 <option value="{{$item->id}}">{{$item->item_name}}</option>
                                              @endforeach
-                                        </select>
+                                        </select> 
 
-                                        <input id="line_description" type="text" style="width: 370px;" value="" class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description">
+                                        {{-- <input id="line_description" type="text" style="width: 370px;" value="" class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description"> --}}
                                         <input id="item_name" style="width: 160px;" type="text" name="item_name" class="form-control item_name" value="{{$requisition->item_name}}" placeholder="Item" data-toogle="tooltip" data-placement="top" title="Item To Purchase">
 
                                         <input style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="{{$requisition->unit_measure}}" data-toogle="tooltip" data-placement="top" title="Unit of Measure">
@@ -204,24 +215,24 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                             @endforeach
                                         </select>
 
-                                        <input style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" value="{{$requisition->description}}" data-toogle="tooltip" data-placement="top" title="Description of Item to Purchase">
+                                        <input style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" value="{{$requisition->description}}" data-toogle="tooltip" data-placement="top" title="Description of Item to Purchase">&nbsp;
 
                                         <span>
-                                            <button  type="submit" req-id="{{$requisition->id}}" class="btn btn-sm edit-requisition float-right btn-primary mt-1 ">Edit
+                                            <button  type="submit" req-id="{{$requisition->id}}" class="btn btn-sm edit-requisition float-right btn-primary  ">Edit
                                             </button>
                                         </span>
                                         <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
                                         <hr><hr>
                                     </form>
-
-                                    <h5 style="margin-top:20px;" class="lead text-primary">
+                                    
+                                    {{-- <h5 style="margin-top:20px;" class="lead text-primary">
                                       <span>
                                          <i style="cursor: pointer;" class="material-icons submit-requisition md-10 align-middle mb-1 text-primary">receipt</i>
                                       </span>
-                                      Summary</h5>
+                                      Summary</h5> --}}
                                     <div class="col-lg-12" style="margin-left:-30px;">
-                                        <div class="col-lg-6 mt-2">
+                                        <div class="col-lg-8 mt-2">
                                                 <table class="table table-sm table-striped table-bordered">
                                                     @if(!$requisitions->isEmpty())
                                                     <thead>
@@ -231,6 +242,7 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                         <tr>
                                                             <th  scope="col" class="text-center">Requisition No.</th>
                                                             <th scope="col" class="text-center">Budget</th>
+                                                            <th scope="col" class="text-center">Budget Line Desciption</th>
                                                             <th scope="col" class="text-center">Status</th>
                                                         </tr>
                                                     </thead>
@@ -239,6 +251,7 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                         <tr>
                                                            <td scope="col" class="text-center">{{$requisitions[0]->req_no}}</td>
                                                            <td scope="col" class="text-center">{{$requisitions[0]->budget}}</td>
+                                                           <td scope="col" class="text-center">{{$requisitions[0]->descriptions}}</td>
                                                            @if($requisitions[0]->status == 'onprocess')
                                                             <td scope="col" class="text-center text-danger">{{$requisitions[0]->status}}</td>
                                                            @else
@@ -255,21 +268,27 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                         </tr>
                                                         <tr>
                                                             <th scope="col" class="text-center">Requisition No.</th>
+                                                            <th scope="col" class="text-center">Budget</th>
                                                             <th scope="col" class="text-center">Status</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
 
                                                             @if($req[0]->budget_id == 0)
-                                                                <tr>
-                                                               <td scope="col" class="text-center">{{$req[0]->req_no}}</td>
-                                                               @if($req[0]->status == 'onprocess')
-                                                                <td scope="col" class="text-center text-danger">{{$req[0]->status}}</td>
-                                                               @endif
-                                                               <td scope="col" style="color:#088958" class="text-center">{{$req[0]->status}}</td>
-
-                                                            </tr>
+                                                            <tr>
+                                                                <td scope="col" class="text-center">{{$req[0]->req_no}}</td>
+                                                                <td scope="col" class="text-center">
+                                                                    @if ($req[0]->budget_id == 0)
+                                                                        <p>No Budget</p>
+                                                                    @endif
+                                                                </td>
+                                                            @if($req[0]->status == 'onprocess')
+                                                                <td scope="col" style="color:#088958" class="text-center text-danger">{{$req[0]->status}}</td>
+                                                            @else
+                                                                <td scope="col" style="color:#088958" class="text-center text-success">{{$req[0]->status}}</td>
                                                             @endif
+                                                        </tr>
+                                                        @endif
                                                     </tbody>
                                                     @endif
                                                 </table>
@@ -315,16 +334,16 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                             </tr>
                                                         @endforeach
                                                         <tr>
+                                                            {{-- <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td scope="col" class="text-center">Total</td>
-                                                            <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td>
+                                                            <td></td> --}}
+                                                            {{-- <td scope="col" class="text-center">Total</td>
+                                                            <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td> --}}
 
 
                                                         </tr>
@@ -344,13 +363,10 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                             <th scope="col" class="text-center">Unit Price</th>
                                                             <th scope="col" class="text-center">VAT Amount</th>
                                                             <th scope="col" class="text-center">Gross Amount</th>
-                                                            <th scope="col" class="text-center">Amount Paid</th>
-                                                            <th scope="col" class="text-center">Amount Remained</th>
-                                                            <th scope="col" class="text-center">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <?php $req = Requisition::where('req_no', $req_no)->where('budget_id',0)->get(); ?>
+                                                        <?php $req = Requisition::where('id', $requisition->id)->where('status','!=','Deleted')->where('budget_id',0)->get(); ?>
                                                         @foreach($req as $req)
                                                             <tr>
                                                                <td scope="col" class="text-center">{{$req->serial_no}}</td>
@@ -361,40 +377,18 @@ $requisitions = Requisition::where('requisitions.id', $id)
                                                                <td scope="col" class="text-center">{{number_format($req->unit_price,2)}}</td>
                                                                <td scope="col" class="text-center">{{number_format($req->vat_amount,2)}}</td>
                                                                <td scope="col" class="text-center">{{number_format($req->gross_amount,2)}}</td>
-                                                               <td scope="col" class="text-center">{{number_format(RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                               <td scope="col" class="text-center">{{number_format(RequisitionsController::getTotalPerSerialNo($req->req_no,$req->serial_no) - RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                               <td scope="col" class="text-center"><a href="{{url('edit-requisition/'.$requisition->id)}}" class="btn btn-sm btn-outline-info">Edit</a></td>
                                                             </tr>
                                                         @endforeach
                                                         <tr>
+                                                            {{-- <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td scope="col" class="text-center">Total</td>
-                                                            <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td>
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td style="width: 150px;" scope="col" class="text-center">
+                                                            <td></td> --}}
+                                                            {{-- <td scope="col" class="text-center">Total</td>
+                                                            <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td> --}}
 
-                                                                @if($requisition->status == 'Paid')
-
-                                                                        <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
-                                                                         Process Payment
-                                                                        </a>
-
-
-                                                                @elseif($requisition->user_id != Auth::user()->id)
-
-                                                                    <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">Approve</a>
-                                                                    <a href="{{url('reject-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-warning">Reject</a>
-                                                                <!-- <p>No Action</p> -->
-                                                                @endif
-
-
-                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                     @endif

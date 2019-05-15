@@ -182,22 +182,14 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($retirement->req_no),2)}}</td>
                                                         <td scope="col" class="text-center">
+                                                           
                                                             @if($retirement->user_id != Auth::user()->id)
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                                @if($retirement->gross_amount > 100000)
+                                                               
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                           
                                                             @endif
-                                                            @endif
-                                                            @if($retirement->user_id == Auth::user()->id)
-                                                                <!-- <span class="badge badge-danger">
-                                                                    No Action
-                                                                </span> -->
-                                                                <!-- @if($retirement->status !== 'Retired')
-                                                                <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
-                                                                @else
-                                                                <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
-                                                                @endif -->
-                                                            @endif
+                                                            
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -248,11 +240,11 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                                <!--  <span class="badge badge-danger">
                                                                     No Action
                                                                 </span> -->
-                                                                @if($retirement->status !== 'Retired')
+                                                                {{-- @if($retirement->status !== 'Retired')
                                                                 <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
                                                                 @else
                                                                 <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
-                                                                @endif
+                                                                @endif --}}
                                                             @endif
                                                         </td>
                                                     </tr>

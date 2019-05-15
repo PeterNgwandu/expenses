@@ -18,7 +18,9 @@
                                       <th scope="col" class="text-center">Department Name</th>
                                       <th scope="col" class="text-center">Date Registered</th>
                                       <th scope="col" class="text-center">Status</th>
-                                      <th scope="col" class="text-center">Action</th>
+                                      @if (Auth::user()->usename == 'Admin')  
+                                        <th scope="col" class="text-center">Action</th>
+                                      @endif
                                   </tr>
                               </thead>
                               <tbody>
@@ -29,24 +31,29 @@
                                       <td class="align-middle text-center">{{ $department->name }}</td>
                                       <td class="align-middle text-center">{{ $department->created_at->toFormattedDateString() }}</td>
                                       <td class="align-middle text-center">{{ $department->status }}</td>
+                                      @if (Auth::user()->username == 'Admin')
                                       @if($department->status == 'Active')
                                         <td class="align-middle text-center">
-                                            <a href="{{url('/disable-deparment/'.$department->id)}}" class="btn btn-sm btn-outline-danger">Disable</a>
-                                            <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
+                                          <a href="{{url('/disable-deparment/'.$department->id)}}" class="btn btn-sm btn-outline-danger">Disable</a>
+                                          <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
                                         </td>
-                                      @endif
-                                      @if($department->status == 'Disabled')
+                                        @endif
+                                        @if($department->status == 'Disabled')
                                         <td class="align-middle text-center">
                                             <a href="{{url('/enable-deparment/'.$department->id)}}" class="btn btn-sm btn-outline-success">Enable</a>
                                             <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
                                         </td>
+                                        @endif   
                                       @endif
+                                      
                                   </tr>
 
                                  @endforeach
                               </tbody>
                             </table><br>
+                            @if(Auth::user()->username == 'Admin')
                             <a class="float-right" href="{{route('departments.index')}}">Add Department</a>
+                            @endif
                         </div>
                     </div>
                 </div>

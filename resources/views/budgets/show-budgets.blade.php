@@ -1,6 +1,15 @@
 <?php
 use App\Http\Controllers\Item\ItemController;
 use App\Http\Controllers\Budgets\BudgetsController;
+use App\StaffLevel\StaffLevel;
+
+$stafflevels = StaffLevel::all();
+
+$hod = $stafflevels[0]->id;
+$ceo = $stafflevels[1]->id;
+$supervisor = $stafflevels[2]->id;
+$normalStaff = $stafflevels[3]->id;
+$financeDirector = $stafflevels[4]->id;
 ?>
 
 @extends('layout.app')
@@ -23,7 +32,9 @@ use App\Http\Controllers\Budgets\BudgetsController;
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Budget</h4>
+                                    @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $financeDirector)
                                     <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Items</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -60,7 +71,9 @@ use App\Http\Controllers\Budgets\BudgetsController;
                                     </tbody>
                                 </table>
                             </div>
+                            @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $financeDirector)
                             <a href="{{url('budgets/create')}}" class="float-right">Add Another Budget</a>
+                            @endif
                 </div>
             </div>
         </div>
@@ -84,7 +97,7 @@ use App\Http\Controllers\Budgets\BudgetsController;
                                     @csrf
                                     <div class="row">
 
-                                        <div class="col-lg-6">
+                                        <div class="col-lg-4">
                                             <div class="form-group">
                                                <select id="budget" name="budget_id" class="form-control">
                                                 <option value="Select Budget Line" selected disabled>Select Budget</option>
@@ -95,7 +108,7 @@ use App\Http\Controllers\Budgets\BudgetsController;
                                             </div>
 
                                         </div>
-                                        <div class="col-lg-6">
+                                        <div class="col-lg-4">
                                             <div class="form-group">
                                                <select name="account_id" class="form-control">
                                                 <option value="Select Account">Select Account</option>
@@ -107,23 +120,23 @@ use App\Http\Controllers\Budgets\BudgetsController;
 
                                         </div>
 
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+                                               <input type="text" name="item_name" class="form-control" placeholder="Item Name">
+                                            </div>
 
+                                        </div>
 
                                     </div>
 
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                               <input type="text" id="item_no" name="item_no" class="form-control" value="" placeholder="Item Number">
+                                               <input type="hidden" id="item_no" name="item_no" class="form-control" value="" placeholder="Item Number">
                                             </div>
 
                                         </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                               <input type="text" name="item_name" class="form-control" placeholder="Item Name">
-                                            </div>
 
-                                        </div>
 
 
                                     </div>
