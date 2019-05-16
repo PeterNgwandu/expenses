@@ -368,6 +368,14 @@ class RequisitionsController extends Controller
     }
 
     public function submit_single_row($budget, $item, $accounts) {
+
+        if($budget != 0)
+        {
+            Validator::make(Input::name('item_id'), [
+                'item_id' => 'required',
+            ]);
+        }
+
         $user_id = Auth::user()->id;
         $items = Item::all();
         $budgets = Budget::where('budgets.status', 'Confirmed')->get();

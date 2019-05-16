@@ -220,6 +220,7 @@ select,option {
                         $('.item').append('<option value="">-- Select Item --</option>');
                         $.each(data, function(key, value){
                         $('select[name="item_id"]').append('<option value="'+ value.id +'">' + value.item_name+ '</option>');
+                        $('.item').css({'border' : '1px solid #CD5C5C'});
                     });
                   }else{
                       $('.item').empty();
@@ -347,7 +348,8 @@ select,option {
                         var activity_name = $("#activity_name");
                         activity_name.on('mouseover',function(){
                           if($("#data").find("#activity_name").val() != null){
-                            swal('Alert', 'Please do not change activity name', 'warning');
+                            // swal('Alert', 'Please do not change activity name', 'warning');
+                            alert('Please do not change activity name', 'warning');
                           }
                         });
                     }
