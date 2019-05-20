@@ -744,6 +744,7 @@ class RequisitionsController extends Controller
         $requisition_total_amount = Requisition::where('req_no', $requisition_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->sum('gross_amount');
 
         $user_id = Auth::user()->id;
+        $user_staff_level = Requisition::join('users','requisitions.user_id','users.id')->join('staff_levels','users.stafflevel_id','staff_levels.id')->select('users.stafflevel_id')->where('req_no', $requisition_no)->first();
 
         $limitTotal = Limit::join('staff_levels','limits.stafflevel_id','staff_levels.id')
                            ->join('users','users.stafflevel_id','staff_levels.id')
@@ -851,9 +852,9 @@ class RequisitionsController extends Controller
                   return view('requisition.finance-supportive-details', compact('requisitionID','financeStaffs','accounts','requisition_no'));
               }
 
-              if($requisition_total_amount > $ceoLimit->max_amount){
-                  $result = DB::table('requisitions')->where('req_no', $requisition_no)->where('status','!=','Deleted')->where('status','!=','Edited')->update([
-                      'status' => "Approved By Finance",
+              if($requisition_total_amount >= $ceoLimit->max_amount && $user_staff_level->stafflevel_id != $ceo || $user_staff_level->stafflevel_id == $hod){
+                  $result = DB::table('requisitions')->join('users','requisitions.user_id','users.id')->where('req_no', $requisition_no)->where('requisitions.status','!=','Deleted')->where('requisitions.status','!=','Edited')->where('users.stafflevel_id', '!=', $ceo)->update([
+                      'requisitions.status' => "Approved By Finance",
                       'approver_id' => Auth::user()->stafflevel_id,
                   ]);
               }else{
@@ -862,6 +863,7 @@ class RequisitionsController extends Controller
                       'approver_id' => Auth::user()->stafflevel_id,
                   ]);
               }
+
 
 
             //   alert()->success('Requisition approved successful', 'Good Job');

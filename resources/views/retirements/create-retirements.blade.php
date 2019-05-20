@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\Retirements\RetirementController;
@@ -44,7 +44,8 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                 </div>
                             </div>
                         </div>
-                            <table class="table table-sm table-striped table-dark mb-0">
+                        <br>
+                            <table id="data-table" class="table table-sm table-striped table-dark mb-0">
                                     @if(!$paid_requisitions->isEmpty())
                                     <thead>
                                         <tr>
@@ -53,7 +54,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -68,7 +69,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">
                                                     <a href="{{route('paid-requisition',$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>
-                                                
+
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -81,7 +82,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -96,7 +97,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">
                                                     <a href="{{route('paid-requisition',$paid_no_budget->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>
-                                                
+
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -114,7 +115,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
 
 <script type="text/javascript" src="{{url('assets/js/jquery.js')}}"></script>
 <script type="text/javascript">
-    
+
     $(document).ready(function() {
         $('.preload').fadeOut('3000', function() {
             $('.mydata').fadeIn('2000');

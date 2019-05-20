@@ -174,7 +174,7 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Retired Amount</th>
                                                         <th scope="col" class="text-center">Requested Amount</th>
-                                                        <th scope="col" class="text-center">Offset</th>
+                                                        <!-- <th scope="col" class="text-center">Offset</th> -->
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -191,7 +191,7 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
                                                            <td scope="col" class="text-center">{{number_format($retirement->vat_amount,2)}}</td>
                                                            <td scope="col" class="text-center">{{number_format($retirement->gross_amount,2)}}</td>
                                                            <td scope="col" class="text-center">{{number_format(RetirementController::getRequestedAmount($retirement->req_no,$retirement->serial_no),2)}}</td>
-                                                           <td scope="col" class="text-center">{{number_format(RetirementController::getRequestedAmount($retirement->req_no,$retirement->serial_no) - $retirement->gross_amount,2)}}</td>
+                                                           <!-- <td scope="col" class="text-center">{{number_format(RetirementController::getRequestedAmount($retirement->req_no,$retirement->serial_no) - $retirement->gross_amount,2)}}</td> -->
 
                                                         </tr>
                                                     @endforeach
@@ -207,30 +207,7 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(RetirementController::getRetirementTotal($retirement->ret_no),2)}}</td>
                                                         <td scope="col" class="text-center">{{number_format(RetirementController::getTotalRequestedAmount($retirement->req_no),2)}}</td>
-                                                        <td style="width: 129px;" scope="col" class="text-center">
-                                                            <!-- @if($retirement->approver_id == Auth::user()->id)
-                                                              <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            @endif -->
-                                                            @if ($retirement->status == 'Confirmed')
-                                                                <p class="text-twitter">Already Approved</p>
-                                                            @endif
-                                                            @if($retirement->user_id != Auth::user()->id && $retirement->status = 'Retired' && Auth::user()->stafflevel_id == $supervisor)
 
-                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-
-                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By Supervisor' && Auth::user()->stafflevel_id == $hod)
-                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            
-                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By HOD' && Auth::user()->stafflevel_id == $ceo)
-                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            @elseif($retirement->user_id != Auth::user()->id && $retirement->status = 'Approved By CEO' && Auth::user()->stafflevel_id == $financeDirector)
-                                                                <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                                <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            @endif
-                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -252,7 +229,31 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>&nbsp;&nbsp;&nbsp;
+                                                <td style="width: 129px;" scope="col" class="text-center">
+                                                    <!-- @if($retirement->approver_id == Auth::user()->id)
+                                                      <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                    @endif -->
+                                                    @if ($retirement->status == 'Confirmed')
+                                                        <span class="badge badge-twitter text-twitter">Retirement Confirmed</span>
+                                                    @endif
+                                                    @if($retirement->user_id != Auth::user()->id && $retirement->status == 'Retired' && Auth::user()->stafflevel_id == $supervisor)
+
+                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+
+                                                    @elseif($retirement->status == 'Approved By Supervisor' && Auth::user()->stafflevel_id == $hod)
+                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+
+                                                    @elseif($retirement->user_id != Auth::user()->id && $retirement->status == 'Approved By Finance' && Auth::user()->stafflevel_id == $ceo)
+                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                    @elseif($retirement->status == 'Approved By HOD' || $retirement->status == 'Approved By Supervisor' && Auth::user()->stafflevel_id == $financeDirector && $retirement->user_id != Auth::user()->id)
+                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                    @endif
+                                                </td>
                                         </form>
                                         @if($flash = session('messages'))
                                             <div id="flash" class="alert alert-info">
