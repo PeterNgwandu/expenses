@@ -495,7 +495,7 @@ $(document).on('click', '.submit-new-requisition', function(e) {
             if (budget_id == localStorage.getItem("budget_id")) {
                 $(this).closest('form').find('select[name=budget_id]').attr('selected', true);
             }
-            $("#data").find("#activity_name").val('');
+            // $("#data").find("#activity_name").val('');
             $("#data").find("#item_name2").val('');
             $("#data").find("#unit_measure").val('');
             $("#data").find("#quantity").val('');
@@ -606,6 +606,29 @@ $(document).on('click', '.enable-edit-requisition-line', function(e) {
 
 });
 
+$(document).on('click', '.enable-edit-retirement-line', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+
+    var ret_no = $(this).attr("retirement-number");
+    var url = '/send-retirement-line/' + ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/edit-retirement-line/' + ret_no;
+    });
+
+});
+
+$(document).on('click', '.enable-edit-expense-retirement-line', function(e) {
+    e.preventDefault();
+    var ex_ret_no = $(this).attr("ret-number");
+    var url = '/send-expense-retirement-line/' + ex_ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/edit-expense-retirement-line/' + ex_ret_no;
+    });
+});
+
 $(document).on('click', '.reset', function(e) {
     e.preventDefault();
     var user_id = $(this).attr('data-value');
@@ -641,6 +664,308 @@ $(document).on('click', '.save-requisition-line', function(e) {
         // console.log(data.result);
         window.location.href = '/submitted-requisitions/' + data_no;
         // swal('', 'Requisition line saved', 'success');
+    });
+});
+
+$(document).on('click', '.discard-changes', function(e) {
+    e.preventDefault();
+    var user_id = $(this).attr('user-id');
+    var ret_no = $(this).attr('retirement-no');
+    var url = '/truncate-retirement-edited-lines/' + user_id + '/' + ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/all-retirements/' + ret_no;
+    });
+
+});
+
+$(document).on('keyup', '#supplier_id', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var supplier = $tr.find('#supplier_id').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-supplier/' + supplier + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '#ref_no', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var ref_no = $tr.find('#ref_no').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-ref_no/' + ref_no + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '#item_name', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var item_name = $tr.find('#item_name').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-item_name/' + item_name + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '#unit_measure', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var unit_measure = $tr.find('#unit_measure').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-unit_measure/' + unit_measure + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '#quantity', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var quantity = $tr.find('#quantity').val();
+    var data_id =$(this).attr('data-id');
+    var url = '/update-retirement-quantity/' + quantity + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    })
+});
+
+$(document).on('keyup', '#unit_price', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var unit_price = $tr.find('#unit_price').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-unit_price/' + unit_price + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '#description', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var description = $tr.find('#description').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-retirement-description/' + description + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('click', '.update-retirement', function(e) {
+    e.preventDefault();
+    var user_id = $(this).attr('user-id');
+    var ret_no = $(this).attr('retire-no');
+    var url = '/update-retirement/' + user_id + '/' + ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/all-retirements/' + ret_no;
+    });
+});
+
+$(document).on('click', '.reset-data', function(e) {
+    e.preventDefault();
+    var user_id = $(this).attr('user-id');
+    var ex_ret_no = $(this).attr('retirement-no');
+    var url = '/reset-expense-retirement/' + user_id + '/' + ex_ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/expense_retirements/create';
+    });
+});
+
+$(document).on('click', '.reset-data-back', function(e) {
+    e.preventDefault();
+    var user_id = $(this).attr('user-id');
+    var ex_ret_no = $(this).attr('retirement-no');
+    var url = '/reset-expense-retirement/' + user_id + '/' + ex_ret_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/';
+    });
+});
+
+$(document).on('click', '.delete-expense-retirement-line', function(e) {
+    e.preventDefault();
+    var currentRow = $(this);
+    var ret_no = $(this).attr('retirement-no');
+    var data_id = $(this).attr('data-id');
+    var url = '/delete-expense-retirement-line/' + ret_no + '/' + data_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+        currentRow.parent().parent().parent().remove();
+        swal("Deleted!", "Line has been deleted successfuly.");
+    });
+});
+
+$(document).on('click', '.submit-edit-expense-retire', function(e) {
+    e.preventDefault();
+
+    localStorage.setItem("budget_id", $(this).closest('form').find('select[name=budget_id]').val());
+    if (localStorage.getItem("budget_id")) {
+      $(this).closest('form').find('select[name=budget_id]').val(localStorage.getItem("budget_id"));
+      $("#budget").val(localStorage.getItem("budget_id"));
+      console.log(localStorage.getItem("budget_id"));
+    }
+    var ret_no = $(this).attr("ret-no");
+    var budget_id = $(this).closest('form').find('select[name=budget_id]').val();
+    var item_id = $(this).closest('form').find('select[name=item_id]').val();
+    var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
+    var ref_no = $(this).closest('form').find('input[name=ref_no]').val();
+    var purchase_date = $(this).closest('form').find('input[name=purchase_date]').val();
+    var item_name2 = $(this).closest('form').find('input[name=item_name]').val();
+    var unit_measure = $(this).closest('form').find('input[name=unit_measure]').val();
+    var unit_price = $(this).closest('form').find('input[name=unit_price]').val();
+    var quantity = $(this).closest('form').find('input[name=quantity]').val();
+    var vat = $(this).closest('form').find('select[name=vat]').val();
+    var account_id = $(this).closest('form').find('select[name=account_id]').val();
+    var description = $(this).closest('form').find('input[name=description]').val();
+    $.ajaxSetup({
+      headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: '/submit-single-edit-expense-retire-row/' + ret_no,
+        data: $('.retire-form').serialize()+"&"+$.param({'budget_id':budget_id,'item_id':item_id,'supplier_id':supplier_id,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description,'account_id':account_id}),
+        dataType: "json",
+        success: function(data) {
+            console.log(data.result);
+            $('.render-edit-expense-retired-items').html(data.result);
+            if (budget_id == localStorage.getItem("budget_id")) {
+                $(this).closest('form').find('input[name=budget_id]').attr('selected', true);
+            }
+        },
+        error: function(){
+            //alert('opps error occured');
+        }
+    });
+});
+
+$(document).on('keyup', '.supplier_id', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var supplier = $tr.find('#supplier_id').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-supplier/' + data_id + '/' + supplier;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '.ref_no', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var ref_no = $tr.find('#ref_no').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-ref_no/' + data_id + '/' + ref_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('click', '.purchase_date', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var purchase_date = $tr.find('#purchase_date').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-purchase_date/' + data_id + '/' + purchase_date;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '.item_namme', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var item_namme = $tr.find('#item_namme').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-item_name/' + data_id + '/' + item_namme;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '.unit_measure', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var unit_measure = $tr.find('#unit_measure').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-unit_measure/' + data_id + '/' + unit_measure;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '.quantity', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var quantity = $tr.find('#quantity').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-quantity/' + data_id + '/' + quantity;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('keyup', '.unit_price', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var unit_price = $tr.find('#unit_price').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-unit_price/' + data_id + '/' + unit_price;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('change', '.vat', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var vat = $tr.find('#vat').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-vat/' + data_id + '/' + vat;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('change', '.account', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var account = $tr.find('#account').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-account/' + data_id + '/' + account;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('change', '.description', function(e) {
+    e.preventDefault();
+    var $tr = $(this).closest("tr");
+    var description = $tr.find('#description').val();
+    var data_id = $(this).attr('data-id');
+    var url = '/update-expense-retirement-description/' + data_id + '/' + description;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+});
+
+$(document).on('click', '.update-expense-retirement', function(e) {
+    e.preventDefault();
+    var user_id = $(this).attr('user-id');
+    var exp_retire_no = $(this).attr('expense-retire-no');
+    var url = '/bring-expense-retirement-to-permanent-table/' + user_id + '/' + exp_retire_no;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/expense_retirements/' + exp_retire_no;
     });
 });
 

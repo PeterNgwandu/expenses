@@ -146,7 +146,7 @@ class RequisitionsController extends Controller
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                                ->join('departments','users.department_id','departments.id')
                                                ->select('requisitions.req_no','users.username as username','departments.name as department')
-                                               ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo])
+                                               ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo,$financeDirector])
                                                ->whereBetween('requisitions.gross_amount', [$limitHOD->max_amount, 100000000000])
                                             //    ->where('requisitions.status', 'onprocess')
                                             //    ->where('requisitions.gross_amount', '>=', $ceoLimit)

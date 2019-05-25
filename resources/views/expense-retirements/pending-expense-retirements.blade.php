@@ -48,7 +48,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Manage Expense Retirements
+                                    <h4 class="card-title">Pending Expense Retirements
                                     </h4>
                                 </div>
                             </div>

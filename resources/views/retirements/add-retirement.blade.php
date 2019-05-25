@@ -66,7 +66,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     <h4 class="card-title">Create Retirement
 
                                         <span class="float-right">
-                                            <p class="lead" style="color: #35A45A;">{{RetirementController::getTheLatestRetirementNumber() }}
+                                            <p class="lead" style="color: #35A45A;">{{$ret_no}}
 
                                             </p>
                                         </span>
@@ -184,7 +184,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="req_no" value="{{$submitted_requisitions[0]->req_no}}">
-                                        <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}">
+                                        <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
                                             <?php $counter = 1; ?>
@@ -230,9 +230,9 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                            <!-- <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i> -->
                                            {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
                                         </span>
-                                        <button style="height:35px;" class="btn  btn-sm btn-twitter submit-retire">
+                                        <button style="height:35px;" class="btn  btn-sm btn-twitter add-retirement">
                                             <span>
-                                                <i style="cursor: pointer;" class="material-icons submit-retire md-10 align-middle mb-1 text-white">add_circle</i>
+                                                <i style="cursor: pointer;" class="material-icons add-retirement md-10 align-middle mb-1 text-white">add_circle</i>
                                                 Add Line
                                                 <!-- <i style="cursor: pointer;" class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove_circle</i> -->
                                              </span>
@@ -289,7 +289,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
 
                                         <span>
-                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
+                                           <i class="material-icons add-retirement md-10 align-middle mb-1 text-primary">add_circle</i>
                                            {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
                                         </span>
 
@@ -325,7 +325,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     </table>
                                     <div class="">
                                         <div class="col-lg-2 float-right" style="margin-right: -15px">
-                                           <button type="submit" retire-no="{{RetirementController::getTheLatestRetirementNumber()}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
+                                           <button type="submit" retire-no="{{$ret_no}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
                                         </div>
                                     </div>
                             </div>
@@ -345,7 +345,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
     var data = [];
     var coun = 0 ;
 
-    $(document).on('click', '.submit-retire', function(e) {
+    $(document).on('click', '.add-retirement', function(e) {
             e.preventDefault();
             var serial_no = $(this).closest('form').find('select[name=serial_no]').val();
             var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
@@ -365,7 +365,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
             $.ajax({
                 type: "POST",
-                url: '/submit-single-retire-row',
+                url: '/add-retirement-row',
                 data: $('.retire-form').serialize()+"&"+$.param({'serial_no':serial_no,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description}),
                 dataType: "json",
                 success: function(data) {

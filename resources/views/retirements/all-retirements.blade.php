@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\User;
 use App\Comments\Comment;
@@ -16,7 +16,7 @@ $user = User::where('users.id', Requisition::where('req_no', $req_no)->distinct(
 
 $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','users.id')->select('comments.*', 'users.username as username')->get();
 
-       
+
 
  ?>
 @extends('layout.app')
@@ -44,7 +44,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
 </div>
 <div class="mdk-drawer-layout js-mdk-drawer-layout mydata" data-fullbleed data-push data-has-scrolling-region>
     <div class="mdk-drawer-layout__content mdk-header-layout__content--scrollable">
-       
+
         <div class="container">
 
 
@@ -56,8 +56,8 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Paid Requisitions</h4>
                                     <p class="lead float-right" style="color: #35A45A;">
-                                     
-                                    </p> 
+
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                     <tr>
                                                         <th>Requester Details</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     <tr>
                                                         <td>Username : {{$user->username}}</td>
@@ -92,7 +92,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                 </div>
                                 <div class="col-lg-12 ml-1">
                                     <div class="float-right mr-4 mt-4">
-                                        <a href="{{route('retire',$req_no)}}" class="btn btn-lg btn-outline-primary float-right">Retire</a> 
+
                                     </div>
                                     <div class="col-lg-6 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
@@ -105,9 +105,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <th scope="col" class="text-center">Budget</th>
                                                         <th scope="col" class="text-center">Status</th>
-                                                        
+
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                         <tr>
                                                            <td scope="col" class="text-center">{{$submitted_requisitions[0]->req_no}}</td>
@@ -125,9 +125,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                     <tr>
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <th  scope="col" class="text-center">Status</th>
-                                                        
+
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     @foreach($submitted_paid_no_budget as $retirement)
                                                         <tr>
@@ -158,7 +158,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     @foreach($submitted_requisitions as $retirement)
                                                         <tr>
@@ -181,16 +181,16 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($retirement->req_no),2)}}</td>
-                                                        <td scope="col" class="text-center">
-                                                           
+                                                        <!-- <td scope="col" class="text-center">
+
                                                             @if($retirement->user_id != Auth::user()->id)
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                               
+
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                           
+
                                                             @endif
-                                                            
-                                                        </td>
+
+                                                        </td> -->
                                                     </tr>
                                                 </tbody>
                                                 @endif
@@ -208,7 +208,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     @foreach($submitted_paid_no_budget as $retirement)
                                                         <tr>
@@ -229,7 +229,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($retirement->req_no),2)}}</td>
-                                                        <td scope="col" class="text-center">
+                                                        <!-- <td scope="col" class="text-center">
                                                             @if($retirement->user_id != Auth::user()->id)
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>
                                                                 @if($retirement->gross_amount > 100000)
@@ -237,20 +237,21 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                             @endif
                                                             @endif
                                                             @if($retirement->user_id == Auth::user()->id)
-                                                               <!--  <span class="badge badge-danger">
+                                                                <span class="badge badge-danger">
                                                                     No Action
-                                                                </span> -->
+                                                                </span>
                                                                 {{-- @if($retirement->status !== 'Retired')
                                                                 <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
                                                                 @else
                                                                 <a href="{{route('retire',$retirement->req_no)}}" class="btn btn-sm btn-outline-primary">Retire</a>
                                                                 @endif --}}
                                                             @endif
-                                                        </td>
+                                                        </td> -->
                                                     </tr>
                                                 </tbody>
                                                 @endif
                                             </table>
+                                            <a href="{{route('retire',$req_no)}}" class="btn btn-twitter float-left">Retire</a>
                                         </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
@@ -264,20 +265,20 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         {{$comment->username}}
                                                     </span>
                                                 </li>
-                                               @endforeach 
+                                               @endforeach
                                             @else
                                                 <p>No Comments</p>
-                                            @endif   
+                                            @endif
                                         </ul>
                                     </div>
                                 </div>
-                            </div>   
-                                
-                                
-                                
-                            </div>   
+                            </div>
+
+
+
+                            </div>
                         </div>
-                    </div>    
+                    </div>
                 </div>
             </div>
         </div>
@@ -289,7 +290,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
 
 <script type="text/javascript" src="{{url('assets/js/jquery.js')}}"></script>
 <script type="text/javascript">
-    
+
     $(document).ready(function() {
         $('.preload').fadeOut('3000', function() {
             $('.mydata').fadeIn('2000');
@@ -303,4 +304,3 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
     });
 
 </script>
-

@@ -86,11 +86,13 @@ $financeDirector = $stafflevels[4]->id;
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
                 <div class="dropdown-menu">
                     <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
-                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Expense Retirements</a>
+                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
                     <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
                     <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
-                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Manange Expense Retirements</a>
-                    {{-- <a href="{{ route('unretired-requisitions') }}" class="dropdown-item dropdown-item-action">Unretired Requisitions</a> --}}
+                    <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                    <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
 
                 </div>
             </li>
@@ -151,11 +153,13 @@ $financeDirector = $stafflevels[4]->id;
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
                 <div class="dropdown-menu">
                     <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
-                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Expense Retirements</a>
+                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
                     <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
                     <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
-                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Manange Expense Retirements</a>
-                    {{-- <a href="{{ route('unretired-requisitions') }}" class="dropdown-item dropdown-item-action">Unretired Requisitions</a> --}}
+                    <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                    <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
 
                 </div>
             </li>
@@ -215,11 +219,13 @@ $financeDirector = $stafflevels[4]->id;
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
                     <div class="dropdown-menu">
                         <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
-                        <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Expense Retirements</a>
+                        <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
                         <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
                         <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
-                        <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Manange Expense Retirements</a>
-                        {{-- <a href="{{ route('unretired-requisitions') }}" class="dropdown-item dropdown-item-action">Unretired Requisitions</a> --}}
+                        <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                        <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                        <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                        <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
 
                     </div>
                 </li>
@@ -272,11 +278,13 @@ $financeDirector = $stafflevels[4]->id;
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
                 <div class="dropdown-menu">
                     <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
-                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Expense Retirements</a>
+                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
                     <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
                     <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
-                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Manange Expense Retirements</a>
-                    {{-- <a href="{{ route('unretired-requisitions') }}" class="dropdown-item dropdown-item-action">Unretired Requisitions</a> --}}
+                    <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                    <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
 
                 </div>
             </li>
@@ -304,11 +312,13 @@ $financeDirector = $stafflevels[4]->id;
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
                 <div class="dropdown-menu">
                     <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
-                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Expense Retirements</a>
+                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
                     <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
                     <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
-                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Manange Expense Retirements</a>
-                    {{-- <a href="{{ route('unretired-requisitions') }}" class="dropdown-item dropdown-item-action">Unretired Requisitions</a> --}}
+                    <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                    <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
 
                 </div>
             </li>

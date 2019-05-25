@@ -71,6 +71,9 @@ Route::resource('finance-supportive-detail', 'Accounts\FinanceSupportiveDetailsC
 
 Route::post('submit-single-requisition-row', 'Requisitions\RequisitionsController@submit_requisition');
 Route::get('/edit-requisition-line/{req_no}', 'Requisitions\RequisitionsController@edit_requisition');
+Route::get('/edit-retirement-line/{ret_no}', 'Retirements\RetirementController@editRetirement');
+Route::get('/send-retirement-line/{ret_no}', 'Retirements\RetirementController@sendRetirement');
+Route::get('/truncate-retirement-edited-lines/{user_id}/{ret_no}', 'Retirements\RetirementController@truncateRetirementLines');
 Route::post('submit-new-single-requisition-row', 'Requisitions\RequisitionsController@newPermanentRequisitionSubmission');
 Route::get('permanent-requisition/{req_no}', 'Requisitions\RequisitionsController@permanentRequisitionSubmission');
 // Route::get('edit-requisition/{req_id}', 'Requisitions\RequisitionsController@edit');
@@ -98,6 +101,7 @@ Route::get('delete-requsition-by-id/{req_id}', 'Requisitions\RequisitionsControl
 Route::get('requisition/report/{req_no}', 'Requisitions\RequisitionsController@printRequisition');
 
 Route::get('budget-restrict/{budget_id}', 'Requisitions\RequisitionsController@budgetRestrict');
+Route::get('/expense-retirement-budget-restrict/{budget_id}', 'ExpenseRetirements\ExpenseRetirementController@budgetRestrict');
 
 Route::get('/get-total-on-edit/{req_no}', 'Requisitions\RequisitionsController@getTotalOnEdit');
 
@@ -116,9 +120,12 @@ Route::get('/bring-edited-line-to-permanent-table/{user_id}/{data_no}', 'Requisi
 
 Route::get('expense_retirements/create', 'ExpenseRetirements\ExpenseRetirementController@create')->name('expense-retirements.create');
 Route::get('expense_retirements/manage', 'ExpenseRetirements\ExpenseRetirementController@index')->name('expense-retirements.index');
+Route::get('expense_retirements/pending', 'ExpenseRetirements\ExpenseRetirementController@pendingExpenseRetirement')->name('expense-retirements.pending');
+Route::get('expense_retirements/confirmed', 'ExpenseRetirements\ExpenseRetirementController@confirmedExpenseRetirement')->name('expense-retirements.confirmed');
 Route::get('expense_retirements/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@show')->name('expense_retirements.show');
 Route::get('get-items-list/{id}', 'ExpenseRetirements\ExpenseRetirementController@getItemsList');
 Route::post('/submit-single-expense-retire-row', 'ExpenseRetirements\ExpenseRetirementController@submit_expense_retire_row');
+Route::post('/submit-single-edit-expense-retire-row/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@submit_edit_expense_retire_row');
 Route::get('expense-permanent-retire/{exp_retire_no}', 'ExpenseRetirements\ExpenseRetirementController@permanentExpenseRetirementSubmission');
 Route::get('approve-expense-retirement/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@approveExpenseRetirement')->name('approve-expense-retirement');
 Route::get('reject-expense-retirement/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@rejectExpenseRetirement')->name('reject-expense-retirement');
@@ -136,6 +143,8 @@ Route::get('reject-retirement/{ret_no}/{user_id}', 'Retirements\RetirementContro
 Route::post('retirement/comment', 'Comments\CommentsController@retirementComment')->name('retirements.comments');
 Route::post('retirements-store', 'Retirements\RetirementController@store');
 Route::post('/submit-single-retire-row', 'Retirements\RetirementController@submit_retire_row');
+Route::post('/add-retirement-row', 'Retirements\RetirementController@add_retirement_row');
+Route::post('/submit-single-edit-retire-row', 'Retirements\RetirementController@submit_edit_retire_row');
 Route::get('permanent-retire/{retire_no}', 'Retirements\RetirementController@permanentRetirementSubmission');
 
 Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@getAllPaidRequisition')->name('paid-requisition');
@@ -143,9 +152,11 @@ Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@ge
 // Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@getAllPaidRequisition')->name('paid-requisition');
 
 Route::get('retire/{req_no}', 'Retirements\RetirementController@getRetirementForm')->name('retire');
+Route::get('add-retirement/{ret_no}/{req_no}', 'Retirements\RetirementController@addRetirement');
 Route::get('all-retirements/{ret_no}', 'Retirements\RetirementController@getAllRetirement')->name('view-retirements');
 
 Route::get('submitted-retirements', 'Retirements\RetirementController@submittedRetirements')->name('retirements.submitted');
+Route::get('confirmed-retirements', 'Retirements\RetirementController@confirmedRetirements')->name('retirements.confirmed');
 
 Route::post('filter_by_date', 'Requisitions\RequisitionsController@filterByDate')->name('filter_by_date');
 Route::post('pending_filter_by_date', 'Requisitions\RequisitionsController@filterByDatePending')->name('pending_filter_by_date');
@@ -232,13 +243,38 @@ Route::get('/update-requisition-with-no-budget-description/{data_id}/{descriptio
 Route::get('/update-requisition-vat/{data_id}/{vat}', 'Requisitions\RequisitionsController@updateNoBudgetRequisitionVat');
 Route::get('/update-requisition-account/{data_id}/{account}', 'Requisitions\RequisitionsController@updateNoBudgetRequisitionAccount');
 
+Route::get('/update-retirement-supplier/{supplier_id}/{data_id}', 'Retirements\RetirementController@updateSupplier');
+Route::get('/update-retirement-ref_no/{ref_no}/{data_id}', 'Retirements\RetirementController@updateRefNo');
+Route::get('/update-retirement-item_name/{item_name}/{data_id}', 'Retirements\RetirementController@updateItemName');
+Route::get('/update-retirement-unit_measure/{unit_measure}/{data_id}', 'Retirements\RetirementController@updateUnitMeasure');
+Route::get('/update-retirement-quantity/{quantity}/{data_id}', 'Retirements\RetirementController@updateQuantity');
+Route::get('/update-retirement-unit_price/{unit_price}/{data_id}', 'Retirements\RetirementController@updateUnitPrice');
+Route::get('/update-retirement-description/{description}/{data_id}', 'Retirements\RetirementController@updateDescription');
+Route::get('/update-retirement/{user_id}/{ret_no}', 'Retirements\RetirementController@updateRetirement');
 
+Route::get('/reset-expense-retirement/{user_id}/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@resetExpenseRetirement');
+Route::get('/delete-expense-retirement-line/{ret_no}/{data_id}', 'ExpenseRetirements\ExpenseRetirementController@deleteExpenseRetirementLine');
 /*
 	Handling Retirement AJAX Requests
 */
 
 Route::get('get-supplier/{req_id}/{budget}/{item}/{account}/{supplier}', 'Retirements\RetirementController@getSupplier');
 Route::get('get_ref_no/{req_id}/{ref_no}', 'Retirements\Retirements\RetirementController@getRefNo');
+
+Route::get('/edit-expense-retirement-line/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@editExpenseRetirement');
+Route::get('/send-expense-retirement-line/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@sendExpenseRetirement');
+
+Route::get('/update-expense-retirement-supplier/{data_id}/{supplier_id}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementSupplier');
+Route::get('/update-expense-retirement-ref_no/{data_id}/{ref_no}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementRefNo');
+Route::get('/update-expense-retirement-purchase_date/{data_id}/{purchase_date}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementPurchaseDate');
+Route::get('/update-expense-retirement-item_name/{data_id}/{item_name}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementItemName');
+Route::get('/update-expense-retirement-unit_measure/{data_id}/{unit_measure}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementUnitMeasure');
+Route::get('/update-expense-retirement-quantity/{data_id}/{quantity}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementQuantity');
+Route::get('/update-expense-retirement-unit_price/{data_id}/{unit_price}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementUnitPrice');
+Route::get('/update-expense-retirement-vat/{data_id}/{vat}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementVat');
+Route::get('/update-expense-retirement-account/{data_id}/{account}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementAccount');
+Route::get('/update-expense-retirement-description/{data_id}/{description}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementDescription');
+Route::get('/bring-expense-retirement-to-permanent-table/{user_id}/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirement');
 
 
 /*

@@ -63,15 +63,15 @@ select,option {
                         <div class="card-header bg-faded" style="height: 80px;">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Expense Retirement
+                                    <h4 class="card-title">Edit Expense Retirement
                                         <span class="float-right">
-                                            <p class="lead" style="color: #35A45A;">{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber() }}</p>
+                                            <p class="lead" style="color: #35A45A;">{{$ret_no}}</p>
                                         </span>
-                                        <span class="float-right mr-3">
+                                        <!-- <span class="float-right mr-3">
                                             <button style="border-radius:0px;" type="button" user-id="{{Auth::user()->id}}" retirement-no="{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber()}}" class="reset-data btn btn-sm btn-twitter" name="button">Reset</button>
-                                        </span>
+                                        </span> -->
                                         <span class="float-right mr-1">
-                                            <button style="border-radius:0px;" type="button" user-id="{{Auth::user()->id}}" retirement-no="{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber()}}" class="reset-data-back btn btn-sm btn-twitter" name="button">Back</button>
+                                            <button style="border-radius:0px;" type="button" user-id="{{Auth::user()->id}}" retirement-no="{{$ret_no}}" class="reset-data-back btn btn-sm btn-twitter" name="button">Back</button>
                                         </span>
                                     </h4>
                                 </div>
@@ -91,7 +91,7 @@ select,option {
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="ret_no" value="{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber() }}">
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" name="budget_id" class="form-control budget-restrict" data-toogle="tooltip" data-placement="top" title="Select Budget">
+                                        <select style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" name="budget_id" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
                                              <option value="Select Budget" selected disabled>
                                                  Budget
                                              </option>
@@ -111,17 +111,17 @@ select,option {
                                         <input id="line_description" type="text" style="width: 280px;" value="" class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description">
                                         <input type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" / data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">
 
-                                        <input id="ref_no" style="width: 150px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No." data-toogle="tooltip" data-placement="top" title="Enter Receipt Number">
+                                        <input style="width: 150px;" type="text" name="ref_no" class="form-control ref_no" placeholder="Ref No." data-toogle="tooltip" data-placement="top" title="Enter Receipt Number">
 
-                                        <input id="purchase_date" style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="" data-toogle="tooltip" data-placement="top" title="Pick Purchase Date">
+                                        <input style="width: 100px;" type="text" placeholder="Date" name="purchase_date" class="form-control datepicker purchase_date" value="" data-toogle="tooltip" data-placement="top" title="Pick Purchase Date">
 
                                         <input id="item_name" style="width: 160px; margin-left: 0px" type="text" name="item_name" class="form-control item_name" placeholder="Item" value="" data-toogle="tooltip" data-placement="top" title="Enter Item Purchase">
 
-                                        <input id="unit_measure" style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="" data-toogle="tooltip" data-placement="top" title="Unit of Measure">
+                                        <input style="width: 70px;" type="text" name="unit_measure" class="form-control unit_measure" placeholder="UoM" value="" data-toogle="tooltip" data-placement="top" title="Unit of Measure">
 
-                                        <input id="quantity" style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="" data-toogle="tooltip" data-placement="top" title="Quantity">
+                                        <input style="width: 60px;" type="text" name="quantity" class="form-control quantity" placeholder="Qty" value="" data-toogle="tooltip" data-placement="top" title="Quantity">
 
-                                        <input id="unit_price" style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="" data-toogle="tooltip" data-placement="top" title="Unit Price">
+                                        <input style="width: 120px;" type="number" name="unit_price" class="form-control unit_price" placeholder="Price" value="" data-toogle="tooltip" data-placement="top" title="Unit Price">
 
                                         <select style="width: 125px;" name="vat" value="" class="form-control vat" data-toogle="tooltip" data-placement="top" title="Select VAT Options">
                                             <option value="VAT_Options" selected disabled >VAT</option>
@@ -137,15 +137,15 @@ select,option {
                                             @endforeach
                                         </select>
 
-                                        <input id="description" style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" data-toogle="tooltip" data-placement="top" title="Description of the Item Purchased">&nbsp;&nbsp;
+                                        <input style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" data-toogle="tooltip" data-placement="top" title="Description of the Item Purchased">&nbsp;&nbsp;
 
                                         <!-- <span>
                                            <i class="material-icons submit-expense-retire md-10 align-middle mb-1 text-primary">add_circle</i>
                                            <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove_circle</i>
                                         </span> -->
-                                        <button style="height:35px;" class="btn  btn-sm btn-twitter submit-expense-retire">
+                                        <button style="height:35px;" ret-no="{{$ret_no}}" class="btn  btn-sm btn-twitter submit-edit-expense-retire">
                                             <span>
-                                                <i style="cursor: pointer;" class="material-icons submit-expense-retire md-10 align-middle mb-1 text-white">add_circle</i>
+                                                <i style="cursor: pointer;" ret-no="{{$ret_no}}" class="material-icons submit-edit-expense-retire md-10 align-middle mb-1 text-white">add_circle</i>
                                                 Add Line
                                              </span>
                                         </button>
@@ -173,13 +173,50 @@ select,option {
                                                 <th scope="col" class="text-center">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="render-expense-retired-items">
+                                            <tbody>
+                                                  @foreach($expense_retirement as $retirement)
+                                                      <tr>
+                                                          <td scope="col" class="text-center"><input id="budget_id" disabled type="text" class="form-control budget_id" name="budget_id" value="<?php if($retirement->budget_id == 0){echo 'No Budget';}else{echo $retirement->budget;} ?>"></td>
+                                                          <td scope="col" class="text-center"><input id="item_id" disabled type="text" class="form-control item_id" name="item_id" value="<?php if($retirement->item_id == null){echo 'No Budget Line';}else{echo $retirement->item;} ?>"></td>
+                                                          <td scope="col" class="text-center"><input id="supplier_id" data-id="{{$retirement->id}}" type="text" class="form-control supplier_id" name="supplier_id" value="{{$retirement->supplier_id}}"></td>
+                                                          <td scope="col" class="text-center"><input id="ref_no" data-id="{{$retirement->id}}" type="text" class="form-control ref_no" name="ref_no" value="{{$retirement->ref_no}}"></td>
+                                                          <td scope="col" class="text-center"><input id="purchase_date" data-id="{{$retirement->id}}" type="text" class="form-control datepicker purchase_date" name="purchase_date" value="{{$retirement->purchase_date}}"></td>
+                                                          <td scope="col" class="text-center"><input id="item_namme" data-id="{{$retirement->id}}" type="text" name="item_name" class="form-control item_namme" value="{{$retirement->item_name}}"></td>
+                                                          <td scope="col" class="text-center"><input id="unit_measure" data-id="{{$retirement->id}}" type="text" class="form-control unit_measure" name="unit_measure" value="{{$retirement->unit_measure}}"></td>
+                                                          <td scope="col" class="text-center"><input id="quantity" data-id="{{$retirement->id}}" type="text" class="form-control quantity" name="quantity" value="{{$retirement->quantity}}"></td>
+                                                          <td scope="col" class="text-center"><input id="unit_price" data-id="{{$retirement->id}}" type="text" class="form-control unit_price" name="unit_price" value="{{$retirement->unit_price}}"></td>
+                                                          <td scope="col" class="text-center">
+                                                            <select data-id="{{$retirement->id}}" id="vat" class="form-control vat" name="vat">
+                                                                <option selected value="{{$retirement->vat}}">{{$retirement->vat}}</option>
+                                                                <option value="VAT Inclusive">VAT Inclusive</option>
+                                                                <option value="VAT Exclusive">VAT Exclusive</option>
+                                                                <option value="Non VAT">Non VAT</option>
+                                                            </select>
+                                                        </td>
+                                                          <td scope="col" class="text-center">
+                                                            <select data-id="{{$retirement->id}}" id="account" type="text" class="form-control account" name="account">
+                                                                <option  value="{{$retirement->id}}" selected>{{$retirement->account}}</option>
+                                                                @foreach($accounts as $account)
+                                                                    <option value="{{$account->id}}">{{$account->account_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                          </td>
+                                                          <td scope="col" class="text-center"><input id="description" data-id="{{$retirement->id}}" type="text" class="form-control description" name="description" value="{{$retirement->description}}"></td>
+                                                          <td scope="col" class="text-center">
+                                                      			<span>
+                                                      					<i style="cursor: pointer;" retirement-no="{{$ret_no}}" data-id="{{$retirement->id}}" class="material-icons delete-expense-retirement-line md-10 align-middle mb-1 text-danger">delete_forever</i>
+                                                      			 </span>
+                                                      		</td>
+                                                      </tr>
+                                                  @endforeach
+                                            </tbody>
+                                            <tbody class="render-edit-expense-retired-items">
 
-                                        </tbody>
+                                            </tbody>
                                     </table>
                                     <div class="">
                                         <div class="col-lg-2 float-right" style="margin-right: -15px">
-                                           <button type="submit" exp-retire-no="{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber()}}" class="btn permanent-retire float-right btn-twitter mt-3 ml-1">Retire</button>
+                                           <button expense-retire-no="{{$ret_no}}" user-id="{{Auth::user()->id}}" class="btn update-expense-retirement float-right btn-twitter mt-3 ml-1">Update</button>
                                         </div>
                                     </div>
                             </div>
@@ -233,23 +270,6 @@ select,option {
             }
         });
 
-      $(document).on('change', '.budget-restrict', function(e) {
-          e.preventDefault();
-          var budget_id = $(this).val();
-          var url = '/expense-retirement-budget-restrict/'+ budget_id;
-
-          $.get(url, function(data) {
-              console.log(data.result);
-              if(data.result != 'undefined'){
-                  swal("Warning!", "Make sure you do not use a different budget, otherwise your retirement will not be created.");
-              }else{
-                  swal("Opps!", "Cannot submit.", "error");
-              }
-
-              // window.location = "create-requisition";
-          });
-      });
-
     $(document).on('change', '.item', function(e) {
             var itemId = $(this).val();
             var url = '/get-item-description/'+itemId;
@@ -259,6 +279,17 @@ select,option {
 
             })
         });
+
+    // $(document).on('click', '.update-expense-retirement', function(e) {
+    //     e.preventDefault();
+    //     var user_id = $(this).attr('user-id');
+    //     var exp_retire_no = $(this).attr('expense-retire-no');
+    //     var url = '/bring-expense-retirement-to-permanent-table/' + user_id + '/' + exp_retire_no;
+    //     $.get(url, function(data) {
+    //         console.log(data.result);
+    //         window.location = '/expense_retirements/' + exp_retire_no;
+    //     });
+    // });
 
     $(document).on('click', '.submit-expense-retire', function(e) {
             e.preventDefault();
@@ -299,16 +330,6 @@ select,option {
                     if (budget_id == localStorage.getItem("budget_id")) {
                         $(this).closest('form').find('select[name=budget_id]').attr('selected', true);
                     }
-                    $(".supplier_id").val("");
-                    $(".ref_no").val("");
-                    $(".purchase_date").val("");
-                    $(".item_name").val("");
-                    $(".unit_measure").val("");
-                    $(".unit_price").val("");
-                    $(".quantity").val("");
-                    $(".vat").val("");
-                    $(".account").val("");
-                    $(".description").val("");
                 },
                 error: function(){
                     //alert('opps error occured');

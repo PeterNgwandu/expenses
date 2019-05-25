@@ -63,14 +63,21 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Create Retirement
+                                    <h4 class="card-title">Edit Retirement
 
                                         <span class="float-right">
-                                            <p class="lead" style="color: #35A45A;">{{RetirementController::getTheLatestRetirementNumber() }}
+                                            <p class="lead" style="color: #35A45A;">{{$ret_no}}
 
                                             </p>
                                         </span>
+
                                     </h4>
+                                    <a href="{{url('all-retirements/'.$ret_no)}}" user-id="{{Auth::user()->id}}" retirement-no="{{$ret_no}}" style="border-radius: 0px !important;" class="btn btn-sm discard-changes btn-twitter mt-2">
+                                        <span>
+                                            <i style="cursor: pointer;" class="material-icons  md-2 align-middle">keyboard_arrow_left</i>
+                                        </span>
+                                        Go Back
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -176,10 +183,10 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 @endif
 
                                             </table>
-                                            <hr>
+                                            <!-- <hr> -->
                                             @if(!$submitted_requisitions->isEmpty())
 
-                                <div class="form-inline">
+                                <!-- <div class="form-inline">
                                     <form class="form-inline data retire-form" id="data">
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
@@ -187,13 +194,8 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
-                                            <?php $counter = 1; ?>
                                             @foreach($submitted_requisitions as $requisition)
-                                                <option value="{{$requisition->serial_no}}">
-                                                  <?php
-
-                                                     if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
-                                                </option>
+                                                <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
                                             @endforeach
                                         </select>
                                         <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">
@@ -227,26 +229,22 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description" data-toogle="tooltip" data-placement="top" title="Description of the Item Purchased">
 
                                         <span>&nbsp;
-                                           <!-- <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i> -->
-                                           {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
                                         </span>
-                                        <button style="height:35px;" class="btn  btn-sm btn-twitter submit-retire">
+                                        <button style="height:35px;" class="btn  btn-sm btn-twitter edit-submit-retire">
                                             <span>
-                                                <i style="cursor: pointer;" class="material-icons submit-retire md-10 align-middle mb-1 text-white">add_circle</i>
+                                                <i style="cursor: pointer;" class="material-icons edit-submit-retire md-10 align-middle mb-1 text-white">add_circle</i>
                                                 Add Line
-                                                <!-- <i style="cursor: pointer;" class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove_circle</i> -->
                                              </span>
                                         </button>
-                                        <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
                                         <hr><hr>
                                     </form>
 
-                                </div>
+                                </div> -->
                                 @endif
                                 @if($submitted_requisitions->isEmpty())
 
-                                <div class="form-inline">
+                                <!-- <div class="form-inline">
                                     <form class="form-inline data retire-form" id="data">
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
@@ -289,23 +287,21 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
 
                                         <span>
-                                           <i class="material-icons submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
-                                           {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
+                                           <i class="material-icons edit-submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
                                         </span>
 
-                                        <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
                                         <hr><hr>
                                     </form>
 
-                                </div>
+                                </div> -->
                                 @endif
 
                                     <table class="table table-sm mb-0">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th scope="col" class="text-center">Budget</th>
-                                                <th scope="col" class="text-center">Budget Line</th>
+                                                <!-- <th scope="col" class="text-center">Budget</th> -->
+                                                <th scope="col" class="text-center">Activity Name</th>
                                                 <th scope="col" class="text-center">Supplier</th>
                                                 <th scope="col" class="text-center">Reference No.</th>
                                                 <th scope="col" class="text-center">Purchase Date</th>
@@ -319,13 +315,43 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 <th scope="col" class="text-center">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="render-retired-items">
+                                        @foreach($retirements_no_budget as $retirement)
+                                          <tbody>
+                                              <tr>
+                                                  <!-- <td scope="col" class="text-center"><input disabled type="text" class="form-control" value="No Budget"></td> -->
+                                                  <td scope="col" class="text-center"><input disabled type="text" class="form-control" value="{{$retirement->activity_name}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="supplier_id" type="text" class="form-control" value="{{$retirement->supplier_id}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="ref_no" type="text" class="form-control" value="{{$retirement->ref_no}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="purchase_date" type="text" class="form-control datepicker" value="{{$retirement->purchase_date}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="item_name" type="text" class="form-control" value="{{$retirement->item_name}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="unit_measure" type="text" class="form-control" value="{{$retirement->unit_measure}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="quantity" type="text" class="form-control" value="{{$retirement->quantity}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="unit_price" type="text" class="form-control" value="{{$retirement->unit_price}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="vat" type="text" class="form-control" value="{{$retirement->vat}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="account_id" type="text" class="form-control" value="{{$retirement->account_id}}"></td>
+                                                  <td scope="col" class="text-center"><input data-id="{{$retirement->id}}" id="description" type="text" class="form-control" value="{{$retirement->description}}"></td>
+                                                  <td id="delete-this-row" scope="col" class="text-center">
 
-                                        </tbody>
+                                              				<span class="delete-retirement-line" id="{{$retirement->id}}">
+                                              					 <i style="cursor: pointer;" class="material-icons md-10 align-middle mb-1 text-danger">delete_forever</i>
+                                              				</span>
+
+                                              		</td>
+
+                                              </tr>
+
+                                          </tbody>
+
+                                        @endforeach
+                                        <tr class="render-edit-retired-items">
+
+                                        </tr>
+
                                     </table>
+
                                     <div class="">
                                         <div class="col-lg-2 float-right" style="margin-right: -15px">
-                                           <button type="submit" retire-no="{{RetirementController::getTheLatestRetirementNumber()}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
+                                           <button type="submit" user-id="{{Auth::user()->id}}" retire-no="{{$ret_no}}" class="btn update-retirement float-right btn-twitter mt-2 ml-1">Update</button>
                                         </div>
                                     </div>
                             </div>
@@ -345,7 +371,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
     var data = [];
     var coun = 0 ;
 
-    $(document).on('click', '.submit-retire', function(e) {
+    $(document).on('click', '.edit-submit-retire', function(e) {
             e.preventDefault();
             var serial_no = $(this).closest('form').find('select[name=serial_no]').val();
             var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
@@ -365,12 +391,12 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
             $.ajax({
                 type: "POST",
-                url: '/submit-single-retire-row',
+                url: '/submit-single-edit-retire-row',
                 data: $('.retire-form').serialize()+"&"+$.param({'serial_no':serial_no,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description}),
                 dataType: "json",
                 success: function(data) {
                     console.log(data.result);
-                    $('.render-retired-items').html(data.result);
+                    $('.render-edit-retired-items').html(data.result);
                     document.getElementById("data").reset();
                 },
                 error: function(){

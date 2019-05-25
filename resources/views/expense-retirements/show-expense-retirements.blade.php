@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\User;
 use App\StaffLevel\StaffLevel;
@@ -19,7 +19,7 @@ $user = User::where('users.id', $uid[0]->user_id)
         ->select('users.*','departments.name as department')
         ->first();
 
-$comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','expense_retirement_comments.user_id','users.id')->select('expense_retirement_comments.*', 'users.username as username')->get();        
+$comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','expense_retirement_comments.user_id','users.id')->select('expense_retirement_comments.*', 'users.username as username')->get();
 
 ?>
 
@@ -30,7 +30,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
         bottom: 20px;
         right: 20px;
         z-index: 10;
-    } 
+    }
     .expense-retirement {
         max-width: 96% !important;
     }
@@ -61,18 +61,28 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
         <div class="container expense-retirement">
             <div class="row">
                 <div class="col-lg-12">
-                    
+
                     <div class="card card-earnings">
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Manage Expense Retirements
-                                    </h4>  
+                                    </h4>
                                     <span class="float-right">
                                         <p class="lead" style="color: #35A45A;">
-                                            
-                                        </p>                                          
-                                    </span>    
+
+                                        </p>
+                                    </span>
+                                    @if(Auth::user()->id == $expense_summary->user_id && $expense_summary->status != 'Confirmed')
+                                      @if($expense_summary->status != 'Approved By Supervisor' || $expense_summary->status != 'Approved By HOD' || $expense_summary->status != 'Approved By Finance' || $expense_summary->status != 'Confirmed' || $expense_summary->status != 'Rejected By Supervisor' || $expense_summary->status != 'Rejected By HOD' || $expense_summary->status != 'Rejected By Finance' || $expense_summary->status != 'Rejected By Supervisor' || $expense_summary->status != 'Rejected By CEO')
+                                        <a href="{{url('edit-expense-retirement-line/'.$expense_summary->ret_no)}}" ret-number="{{$expense_summary->ret_no}}" style="border-radius: 0px !important;" class="btn enable-edit-expense-retirement-line btn-sm btn-success mt-2">
+                                            <span>
+                                                <i style="cursor: pointer;" class="material-icons enable-edit-expense-retirement-line md-2 align-middle">edit</i>
+                                            </span>
+                                            Edit
+                                        </a>
+                                      @endif
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -86,7 +96,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                     <tr>
                                                         <th>Retiree Details</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     <tr>
                                                         <td>Username : {{$user->username}}</td>
@@ -116,26 +126,24 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                     <tr>
                                                         <th  scope="col" class="text-center">Expense Retirment No.</th>
                                                         <th scope="col" class="text-center">Budget</th>
-                                                        <th scope="col" class="text-center">Budget Line</th>
                                                         <th scope="col" class="text-center">Status</th>
-     
+
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
-                                                    @foreach($expense_retirements as $retirement)
+
                                                     <tr>
-                                                        <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
-                                                        <td scope="col" class="text-center">{{$retirement->budget}}</td>
-                                                        <td scope="col" class="text-center">{{$retirement->item}}</td>
-                                                        <td scope="col" class="text-center">{{$retirement->status}}</td>
-                                                        <td scope="col" class="text-center">
-                                                        
+                                                        <td scope="col" class="text-center">{{$expense_summary->ret_no}}</td>
+                                                        <td scope="col" class="text-center">{{$expense_summary->budget}}</td>
+                                                        <td scope="col" class="text-center">{{$expense_summary->status}}</td>
+
+
                                                     </tr>
-                                                   @endforeach 
+
                                                 </tbody>
                                             </table>
                                             @endif
-                                           
+
                                         </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
@@ -149,14 +157,14 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                     <tr>
                                                         <th  scope="col" class="text-center">Expense Retirment No.</th>
                                                         <th scope="col" class="text-center">Status</th>
-                                                       
+
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     <tr>
                                                         <td scope="col" class="text-center">{{$ex_retirement_no_budget[0]->ret_no}}</td>
                                                         <td scope="col" class="text-center">{{$ex_retirement_no_budget[0]->status}}</td>
-                                                        
+
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -172,6 +180,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <th>Totals Summary</th>
                                                     </tr>
                                                     <tr>
+                                                        <th scope="col" class="text-center">Budget Line</th>
                                                         <th scope="col" class="text-center">Supplier</th>
                                                         <th scope="col" class="text-center">Item Purchased</th>
                                                         <th scope="col" class="text-center">Account</th>
@@ -183,10 +192,11 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     @foreach($expense_retirements as $retirement)
                                                 <tr>
+                                                    <td scope="col" class="text-center">{{$retirement->item}}</td>
                                                     <td scope="col" class="text-center">{{$retirement->supplier_id}}</td>
                                                     <td scope="col" class="text-center">{{$retirement->item_name}}</td>
                                                     <td scope="col" class="text-center">{{$retirement->account}}</td>
@@ -197,7 +207,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                     <td scope="col" class="text-center">{{number_format($retirement->unit_price,2)}}</td>
                                                     <td scope="col" class="text-center">{{number_format($retirement->vat_amount,2)}}</td>
                                                     <td scope="col" class="text-center">{{number_format($retirement->gross_amount,2)}}</td>
-                                                    
+
                                                 </tr>
                                                @endforeach
                                                     <tr>
@@ -209,16 +219,10 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        <td></td>
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
-                                                        <td scope="col" class="text-center">                                       
-                                                            @if($expense_retirements[0]->user_id == Auth::user()->id)
-                                                                
-                                                            @else
-                                                                <a href="{{route('approve-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-primary">Approve</a>
-                                                                <a href="{{route('reject-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            @endif
-                                                        </td>
+
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -241,7 +245,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
                                                     </tr>
-                                                </thead> 
+                                                </thead>
                                                 <tbody>
                                                     @foreach($ex_retirement_no_budget as $retirement)
                                                     <tr>
@@ -255,7 +259,7 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <td scope="col" class="text-center">{{number_format($retirement->unit_price,2)}}</td>
                                                         <td scope="col" class="text-center">{{number_format($retirement->vat_amount)}}</td>
                                                         <td scope="col" class="text-center">{{number_format($retirement->gross_amount,2)}}/=</td>
-                                                    
+
                                                     </tr>
                                                 </tr>
                                                @endforeach
@@ -270,19 +274,14 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         <td></td>
                                                         <td scope="col" class="text-center">Total</td>
                                                         <td scope="col" class="text-center">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
-                                                        <td scope="col" class="text-center">                                       
-                                                            @if($ex_retirement_no_budget[0]->user_id != Auth::user()->id)
-                                                                <a href="{{route('approve-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-primary">Approve</a>
-                                                                <a href="{{route('reject-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                            @endif
-                                                        </td>
+
                                                     </tr>
                                                 </tbody>
                                             </table>
                                             @endif
                                         </div>
                                 </div>
-                                
+
                                 <div class="col-lg-12 ml-1">
                                     <div class="col-lg-6 mt-2">
                                         <small class="text-primary">Add comments</small>
@@ -294,13 +293,19 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                     <div class="col-lg-12">
                                                         <div class="form-group">
                                                             <textarea style="resize: none;" rows="2" class="form-control" name="body" placeholder="Add Comments" data-toogle="tooltip" data-placement="top" title="Add Some Comments">
-                                                                
+
                                                             </textarea>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>
-                                        </form> 
+                                                <td scope="col" class="text-center">
+                                                  @if($expense_summary->status != 'Confirmed' && Auth::user()->id != $expense_summary->user_id)
+                                                        <a href="{{route('approve-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                        <a href="{{route('reject-expense-retirement',$ret_no)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                  @endif
+                                                </td>
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
@@ -314,15 +319,15 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
                                                         {{$comment->username}}
                                                     </span>
                                                 </li>
-                                               @endforeach 
+                                               @endforeach
                                             @else
                                                 <p>No Comments</p>
-                                            @endif   
+                                            @endif
                                         </ul>
                                     </div>
                                 </div>
 
-                        
+
                 </div>
             </div>
              @if($flash = session('message'))
@@ -345,55 +350,20 @@ $comments = ExpenseRetirementComment::where('ret_no', $ret_no)->join('users','ex
        });
     });
 
+    $(document).on('click', '.enable-edit-expense-retirement-line', function(e) {
+        e.preventDefault();
+        var ex_ret_no = $(this).attr("ret-number");
+        var url = '/send-expense-retirement-line/' + ex_ret_no;
+        $.get(url, function(data) {
+            console.log(data.result);
+            window.location = '/edit-expense-retirement-line/' + ex_ret_no;
+        });
+    });
+
+
     $(document).ready(function() {
         $('.preload').fadeOut('3000', function() {
             $('.mydata').fadeIn('2000');
         });
     });
 </script>
-
-<!-- <div class="card-group">
-                            <div class="card card-body bg-light ">
-                                 <table class="table table-striped table-dark table-sm mb-0">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th scope="col" class="text-center">Budget</th>
-                                                <th scope="col" class="text-center">Budget Line</th>
-                                                <th scope="col" class="text-center">Supplier</th>
-                                                <th scope="col" class="text-center">Reference No.</th>
-                                                <th scope="col" class="text-center">Purchase Date</th>
-                                                <th scope="col" class="text-center">Item Name</th>
-                                                <th scope="col" class="text-center">Description</th>
-                                                <th scope="col" class="text-center">Unit Measure</th>
-                                                <th scope="col" class="text-center">Qty</th>
-                                                <th scope="col" class="text-center">Unit Price</th>
-                                                <th scope="col" class="text-center">Gross Amount</th>
-                                                <th scope="col" class="text-center">Account</th>
-                                                <th scope="col" class="text-center">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                               @foreach($expense_retirements as $retirement)
-                                                <tr>
-                                                    <td scope="col" class="text-center">{{$retirement->budget}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->item}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->supplier_id}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->ref_no}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->purchase_date}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->item_name}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->description}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->unit_measure}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->quantity}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->unit_price}}</td>
-                                                    <td scope="col" class="text-center">{{$retirement->gross_amount}}/=</td>
-                                                    <td scope="col" class="text-center">{{$retirement->account}}</td>
-                                                    <td scope="col" class="text-center">
-                                                        <button class="btn btn-sm btn-outline-success">{{$retirement->status}}</button>
-                                                    </td>
-                                                    
-                                                </tr>
-                                               @endforeach 
-                                        </tbody>
-                                    </table>                    
-                            </div>
-                        </div> -->
