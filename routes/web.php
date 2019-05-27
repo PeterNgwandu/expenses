@@ -31,6 +31,7 @@ Route::resource('comment', 'Comments\CommentsController');
 Route::get('submitted-requisitions', 'Requisitions\RequisitionsController@submittedRequisition')->name('submitted-requisitions');
 Route::get('submitted-requisitions/{req_no}', 'Requisitions\RequisitionsController@submittedRequisitions')->name('submitted-requisition');
 Route::get('approve-requisition/{req_no}', 'Requisitions\RequisitionsController@approveRequisition');
+Route::get('confirmation-form/{req_no}', 'Requisitions\RequisitionsController@confirmationForm');
 Route::get('reject-requisition/{req_no}', 'Requisitions\RequisitionsController@rejectRequisition');
 // Route::post('items.store/{id}', 'Item\ItemController@store');
 
@@ -99,6 +100,7 @@ Route::get('delete-retirement/{ret_id}', 'Retirements\RetirementController@delet
 Route::get('delete-requsition-by-id/{req_id}', 'Requisitions\RequisitionsController@deleteRequisitionById');
 
 Route::get('requisition/report/{req_no}', 'Requisitions\RequisitionsController@printRequisition');
+Route::get('confirmation/{req_no}', 'Requisitions\RequisitionsController@printConfirmationForm');
 
 Route::get('budget-restrict/{budget_id}', 'Requisitions\RequisitionsController@budgetRestrict');
 Route::get('/expense-retirement-budget-restrict/{budget_id}', 'ExpenseRetirements\ExpenseRetirementController@budgetRestrict');
@@ -144,7 +146,7 @@ Route::post('retirement/comment', 'Comments\CommentsController@retirementComment
 Route::post('retirements-store', 'Retirements\RetirementController@store');
 Route::post('/submit-single-retire-row', 'Retirements\RetirementController@submit_retire_row');
 Route::post('/add-retirement-row', 'Retirements\RetirementController@add_retirement_row');
-Route::post('/submit-single-edit-retire-row', 'Retirements\RetirementController@submit_edit_retire_row');
+Route::post('/submit-single-edit-retire-row/{ret_no}', 'Retirements\RetirementController@submit_edit_retire_row');
 Route::get('permanent-retire/{retire_no}', 'Retirements\RetirementController@permanentRetirementSubmission');
 
 Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@getAllPaidRequisition')->name('paid-requisition');
@@ -154,6 +156,7 @@ Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@ge
 Route::get('retire/{req_no}', 'Retirements\RetirementController@getRetirementForm')->name('retire');
 Route::get('add-retirement/{ret_no}/{req_no}', 'Retirements\RetirementController@addRetirement');
 Route::get('all-retirements/{ret_no}', 'Retirements\RetirementController@getAllRetirement')->name('view-retirements');
+Route::get('retirements-details/{req_no}', 'Retirements\RetirementController@getRetirementDetails')->name('retirements->details');
 
 Route::get('submitted-retirements', 'Retirements\RetirementController@submittedRetirements')->name('retirements.submitted');
 Route::get('confirmed-retirements', 'Retirements\RetirementController@confirmedRetirements')->name('retirements.confirmed');

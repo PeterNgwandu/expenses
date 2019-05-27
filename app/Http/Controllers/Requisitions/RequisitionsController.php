@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use App\StaffLevel\StaffLevel;
 use App\Department\Department;
 use Illuminate\Support\Carbon;
+use App\Retirement\Retirement;
 use App\Requisition\Requisition;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -1569,13 +1570,13 @@ class RequisitionsController extends Controller
 
         if(Auth::user()->stafflevel_id == $normalStaff){
 
-            $status = 'Edited';
+            $status = 'Edited Requisition';
         }elseif(Auth::user()->stafflevel_id == $supervisor){
-            $status = 'Edited';
+            $status = 'Edited Requisition';
         }elseif(Auth::user()->stafflevel_id == $hod){
-            $status = 'Edited';
+            $status = 'Edited Requisition';
         }elseif(Auth::user()->stafflevel_id == $ceo){
-            $status = 'Edited';
+            $status = 'Edited Requisition';
         }
 
         // if (Requisition::select('req_no')->latest()->first() == null)
@@ -1597,11 +1598,11 @@ class RequisitionsController extends Controller
             'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => $status , 'post_status' => 'Not Posted', 'created_at' => Carbon::now(),'updated_at' => Carbon::now()]);
 
         if ($request->budget_id != 0) {
-          $value = DB::table('edit_requisition_temporary_tables')->join('budgets','edit_requisition_temporary_tables.budget_id','budgets.id')->join('items','edit_requisition_temporary_tables.item_id','items.id')->join('accounts','edit_requisition_temporary_tables.account_id','accounts.id')->select('edit_requisition_temporary_tables.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')->where('req_no', $request->req_no)->where('edit_requisition_temporary_tables.status', '!=', 'Deleted')->latest()->first();
+          $value = DB::table('edit_requisition_temporary_tables')->join('budgets','edit_requisition_temporary_tables.budget_id','budgets.id')->join('items','edit_requisition_temporary_tables.item_id','items.id')->join('accounts','edit_requisition_temporary_tables.account_id','accounts.id')->select('edit_requisition_temporary_tables.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')->where('req_no', $request->req_no)->where('edit_requisition_temporary_tables.status', '!=', 'Deleted')->where('edit_requisition_temporary_tables.status', 'Edited Requisition')->get();
 
           $view = view('requisition.render-new-requisition', compact('budget_line','accounts'))->with('value', $value)->render();
         }elseif($request->budget_id == 0){
-          $value = DB::table('edit_requisition_temporary_tables')->join('accounts','edit_requisition_temporary_tables.account_id','accounts.id')->select('edit_requisition_temporary_tables.*','accounts.account_name as account')->where('req_no', $request->req_no)->where('edit_requisition_temporary_tables.status', '!=', 'Deleted')->latest()->first();
+          $value = DB::table('edit_requisition_temporary_tables')->join('accounts','edit_requisition_temporary_tables.account_id','accounts.id')->select('edit_requisition_temporary_tables.*','accounts.account_name as account')->where('req_no', $request->req_no)->where('edit_requisition_temporary_tables.status', '!=', 'Deleted')->where('edit_requisition_temporary_tables.status', 'Edited Requisition')->get();
 
           $view = view('requisition.render-new-requisition', compact('budget_line','accounts'))->with('value', $value)->render();
         }
@@ -1712,7 +1713,7 @@ class RequisitionsController extends Controller
         $financeDirector = $stafflevels[4]->id;
 
         Requisition::where('user_id', $user_id)->where('req_no', $data_no)->update(['status' => 'Edited']);
-        $editedLines = EditRequisitionTemporaryTable::where('user_id', $user_id)->where('req_no', $data_no)->where('status', 'Edited')->get();
+        $editedLines = EditRequisitionTemporaryTable::where('user_id', $user_id)->where('req_no', $data_no)->where('status', 'Edited')->orWhere('status', 'Edited Requisition')->get();
 
         foreach ($editedLines as $editedLine) {
             $editedData = new Requisition();
@@ -1759,6 +1760,23 @@ class RequisitionsController extends Controller
     public static function getRequisitionTotal($req_no)
     {
         return Requisition::where('req_no',$req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->sum('gross_amount');
+    }
+
+    public static function amountRetired($ret_no)
+    {
+        return Retirement::where('ret_no',$ret_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->sum('gross_amount');
+    }
+
+    public static function amountUnretired($req_no, $ret_no)
+    {
+        $result = RequisitionsController::getRequisitionTotal($req_no) - RequisitionsController::amountRetired($ret_no);
+        return number_format($result,2);
+    }
+
+    public static function amountPaid($req_no)
+    {
+        $result = FinanceSupportiveDetail::where('req_no', $req_no)->sum('amount_paid');
+        return $result;
     }
 
     public function getAllPaidRequisition($req_no)
@@ -2204,6 +2222,39 @@ class RequisitionsController extends Controller
         if ($result == null || $result != null) {
             return response()->json(['result' => $result]);
         }
+    }
+
+    public function confirmationForm($req_no)
+    {
+        $paid_to = Requisition::join('users','requisitions.user_id','users.id')
+                   ->where('req_no', $req_no)
+                   ->select('users.username')->first();
+        $payer_name = User::where('users.id', Auth::user()->id)->select('users.username')->first();
+        return view('requisitions.confirmation-form', compact('req_no','paid_to','payer_name'));
+    }
+
+    public static function generateVoucherNo()
+    {
+        $string = "VC-".str_random(3);
+        return strtoupper($string);
+    }
+
+    public function printConfirmationForm($req_no)
+    {
+        $paid_to = Requisition::join('users','requisitions.user_id','users.id')
+                   ->where('req_no', $req_no)
+                   ->select('users.username')->first();
+        $payer_name = User::where('users.id', Auth::user()->id)->select('users.username')->first();
+        
+        $options = new Options();
+        $options->set('defaultFont', 'Courier');
+        $options->set('isRemoteEnabled', TRUE);
+
+        $pdf = PDF::setOptions([
+            'logOutputFile' => storage_path('logs/log.htm'),
+            'tempDir' => storage_path('fontDir/')
+        ])->loadView('requisitions.confirmation-form-pdf', compact('req_no','paid_to','payer_name'));
+        return $pdf->stream('Confirmation Form');
     }
 
 }

@@ -420,18 +420,18 @@ class ExpenseRetirementController extends Controller
         $normalStaff = $staff_levels[3]->id;
         $financeDirector = $staff_levels[4]->id;
 
-        if(Auth::user()->stafflevel_id == $normalStaff){
-
-            $status = 'Retired';
-        }elseif(Auth::user()->stafflevel_id == $supervisor){
-            $status = 'Retired, supervisor';
-        }elseif(Auth::user()->stafflevel_id == $hod){
-            $status = 'Retired, hod';
-        }elseif(Auth::user()->stafflevel_id == $ceo){
-            $status = 'Retired, ceo';
-        }elseif(Auth::user()->stafflevel_id == $financeDirector){
-            $status = 'Retired, finance';
-        }
+        // if(Auth::user()->stafflevel_id == $normalStaff){
+        //
+        //     $status = 'Retired';
+        // }elseif(Auth::user()->stafflevel_id == $supervisor){
+        //     $status = 'Retired, supervisor';
+        // }elseif(Auth::user()->stafflevel_id == $hod){
+        //     $status = 'Retired, hod';
+        // }elseif(Auth::user()->stafflevel_id == $ceo){
+        //     $status = 'Retired, ceo';
+        // }elseif(Auth::user()->stafflevel_id == $financeDirector){
+        //     $status = 'Retired, finance';
+        // }
 
         if ($request->vat == 'VAT Inclusive')
         {
@@ -447,16 +447,8 @@ class ExpenseRetirementController extends Controller
             $gross_amount = ($request->quantity * $request->unit_price);
         }
 
-        if (ExpenseRetirement::select('ret_no')->latest()->first() == null)
-        {
-            $ret_no = 'EX-RET-1';
-        }elseif(ExpenseRetirement::select('ret_no')->latest()->first() != null) {
-            $getLatestRetNo = ExpenseRetirement::select('req_no')->latest()->distinct('ret_no')->count('ret_no');
-            $ret_no = 'EX-RET-'.($getLatestRetNo + 1);
-        }
-
         DB::table('expense_retirement_temporary_tables')->insert(['budget_id' => $request->budget_id,'item_id' => $request->item_id,'account_id' => $request->account_id, 'user_id' => $request->user_id, 'ret_no' => $ret_no, 'supplier_id' => $request->supplier_id, 'ref_no' => $request->ref_no, 'item_name' => $request->item_name2, 'purchase_date' => $request->purchase_date, 'unit_measure' => $request->unit_measure, 'quantity' => $request->quantity, 'unit_price' => $request->unit_price,
-            'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => $status, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+            'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => 'Retired', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
 
         if ($request->budget_id != 0) {
             $data = DB::table('expense_retirement_temporary_tables')
@@ -464,14 +456,18 @@ class ExpenseRetirementController extends Controller
                     ->join('items','expense_retirement_temporary_tables.item_id','items.id')
                     ->join('accounts','expense_retirement_temporary_tables.account_id','accounts.id')
                     ->select('expense_retirement_temporary_tables.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')
-                    ->where('ret_no', $request->ret_no)->get();
+                    ->where('ret_no', $ret_no)
+                    ->where('expense_retirement_temporary_tables.status', 'Retired')
+                    ->get();
 
             $view = view('expense-retirements.render-edit-expense-retired-items', compact('accounts'))->with('data', $data)->render();
         }elseif ($request->budget_id == 0) {
             $data = DB::table('expense_retirement_temporary_tables')
                     ->join('accounts','expense_retirement_temporary_tables.account_id','accounts.id')
                     ->select('expense_retirement_temporary_tables.*','accounts.account_name as account')
-                    ->where('ret_no', $request->ret_no)->get();
+                    ->where('ret_no', $ret_no)
+                    ->where('expense_retirement_temporary_tables.status', 'Retired')
+                    ->get();
 
             $view = view('expense-retirements.render-edit-expense-retired-items', compact('accounts'))->with('data', $data)->render();
         }
@@ -844,7 +840,7 @@ class ExpenseRetirementController extends Controller
         $financeDirector = $stafflevels[4]->id;
 
         $retirement = ExpenseRetirement::where('ret_no', $ret_no)->where('status', '!=', 'Edited')->update(['status' => 'Edited']);
-        $editedRetirement = ExpenseRetirementTemporaryTable::where('ret_no', $ret_no)->where('user_id', $user_id)->where('status', 'Edited')->get();
+        $editedRetirement = ExpenseRetirementTemporaryTable::where('ret_no', $ret_no)->where('user_id', $user_id)->where('status', 'Edited')->orWhere('status', 'Retired')->get();
 
         foreach($editedRetirement as $expense_retirement)
         {

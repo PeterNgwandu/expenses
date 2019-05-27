@@ -107,7 +107,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <th scope="col" class="text-center">Item Name</th>
                                                         <th scope="col" class="text-center">Unit of Measure</th>
                                                         <th scope="col" class="text-center">Quantity</th>
-                                                        <th scope="col" class="text-center">Gross Amount</th>
+                                                        <th scope="col" class="text-center">Paid Amount</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -117,16 +117,34 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                           <td scope="col" class="text-center">{{$requisition->gross_amount}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
-                                                        <td scope="col" class="text-center">Total</td>
-                                                        <td style="background: #FFF6F4;" scope="col" class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{RequisitionsController::getRequisitionTotal($requisition->req_no)}} /=
+                                                        <td scope="col" class="text-right font-weight-bold">Retired Amount</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_retired,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Unretired Amount</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_unretired, 2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">
+                                                            {{number_format($amount_paid,2)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -148,7 +166,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <th scope="col" class="text-center">Quantity</th>
                                                         <th scope="col" class="text-center">Unit Price</th>
                                                         <th scope="col" class="text-center">VAT Amount</th>
-                                                        <th scope="col" class="text-center">Gross Amount</th>
+                                                        <th scope="col" class="text-center">Paid Amount</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -159,17 +177,35 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_price}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->vat_amount}}</td>
-                                                           <td scope="col" class="text-center">{{$requisition->gross_amount}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($amount_paid, 2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Retired Amount</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_retired,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
                                                         <td></td>
-                                                        <td scope="col" class="text-center">Total</td>
-                                                        <td style="background: #FFF6F4;" scope="col" class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{RequisitionsController::getRequisitionTotal($requisition->req_no)}} /=
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Unretired Amount</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_unretired, 2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">
+                                                            {{number_format($amount_paid, 2)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -304,8 +340,6 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     <table class="table table-sm mb-0">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th scope="col" class="text-center">Budget</th>
-                                                <th scope="col" class="text-center">Budget Line</th>
                                                 <th scope="col" class="text-center">Supplier</th>
                                                 <th scope="col" class="text-center">Reference No.</th>
                                                 <th scope="col" class="text-center">Purchase Date</th>
@@ -325,7 +359,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     </table>
                                     <div class="">
                                         <div class="col-lg-2 float-right" style="margin-right: -15px">
-                                           <button type="submit" retire-no="{{$ret_no}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
+                                           <button type="submit" retire-no="{{$ret_no}}" req-no={{$req_no}} class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
                                         </div>
                                     </div>
                             </div>
@@ -382,10 +416,11 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
     $(document).on('click', '.permanent-retire', function(e) {
         var retire_no = $(this).attr('retire-no');
+        var req_no = $(this).attr('req-no');
         var url = '/permanent-retire/'+retire_no;
         $.get(url, function(data) {
             console.log(data.result);
-            url2 = '/retirements';
+            url2 = '/retirements-details/' + req_no;
             window.location = url2;
         });
     });

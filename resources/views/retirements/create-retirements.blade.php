@@ -52,6 +52,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Requester</th>
                                             <th scope="col" class="text-center">Department</th>
                                             <th scope="col" class="text-center">Requisition No.</th>
+                                            <th scope="col" class="text-center">Activity Name</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
 
@@ -63,6 +64,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">{{$requisition->username}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->department}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->req_no}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->activity_name}}</td>
                                                 <td scope="col" class="text-success text-center font-weight-bold">
                                                     {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no)) }}
                                                 </td>

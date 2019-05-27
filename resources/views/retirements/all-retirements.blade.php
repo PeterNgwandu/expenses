@@ -129,12 +129,10 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach($submitted_paid_no_budget as $retirement)
                                                         <tr>
-                                                           <td scope="col" class="text-center">{{$retirement->req_no}}</td>
-                                                           <td scope="col" class="text-center">{{$retirement->status}}</td>
+                                                           <td scope="col" class="text-center">{{$submitted_paid_no_budget[0]->req_no}}</td>
+                                                           <td scope="col" class="text-center">{{$submitted_paid_no_budget[0]->status}}</td>
                                                         </tr>
-                                                    @endforeach
                                                 </tbody>
                                             </table>
                                             @endif
@@ -167,9 +165,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                            <td scope="col" class="text-center">{{$retirement->description}}</td>
                                                            <td scope="col" class="text-center">{{$retirement->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$retirement->quantity}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->unit_price,2)}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->vat_amount,2)}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->gross_amount,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->unit_price,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->vat_amount,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
@@ -179,8 +177,8 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
-                                                        <td scope="col" class="text-center">Total</td>
-                                                        <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($retirement->req_no),2)}}</td>
+                                                        <td scope="col" class="text-center font-weight-bold">Total Paid</td>
+                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::amountPaid($retirement->req_no),2)}}</td>
                                                         <!-- <td scope="col" class="text-center">
 
                                                             @if($retirement->user_id != Auth::user()->id)
@@ -216,9 +214,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                            <td scope="col" class="text-center">{{$retirement->description}}</td>
                                                            <td scope="col" class="text-center">{{$retirement->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$retirement->quantity}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->unit_price,2)}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->vat_amount,2)}}</td>
-                                                           <td scope="col" class="text-center">{{number_format($retirement->gross_amount,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->unit_price,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->vat_amount,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
@@ -227,8 +225,8 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
-                                                        <td scope="col" class="text-center">Total</td>
-                                                        <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($retirement->req_no),2)}}</td>
+                                                        <td scope="col" class="text-center font-weight-bold">Total Paid</td>
+                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::amountPaid($retirement->req_no),2)}}</td>right
                                                         <!-- <td scope="col" class="text-center">
                                                             @if($retirement->user_id != Auth::user()->id)
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>

@@ -1,10 +1,11 @@
-<?php 
+<?php
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
 ?>
-
+<?php foreach ($value as $value): ?>
+<tr>
 @if ($value->budget_id != 0 && Auth::user()->id == $value->user_id)
     <td scope="col" class="text-center"><input data-id="{{$value->id}}" id="temp_budget_id" class="form-control" type="text" name="budget_id" value="<?php if($value->budget_id != 0) echo $value->budget; else echo 'No Budget'; ?>"></td>
     <td scope="col" class="text-center"><select data-id="{{$value->id}}" style="width:110px;" id="perm_item_id" class="form-control" name="item_id">
@@ -25,7 +26,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
         <option value="{{$value->vat}}"  selected>{{$value->vat}}</option>
         <option value="VAT Exclusive">Exclusive</option>
         <option value="VAT Inclusive">Inclusive</option>
-        <option value="Non VAT">Non VAT</option>	
+        <option value="Non VAT">Non VAT</option>
     </select></td>
     <td scope="col" class="text-center"><select data-id="{{$value->id}}" id="perm_account" class="form-control" name="account_id">
         <option value="{{$value->account}}">{{$value->account}}</option>
@@ -40,7 +41,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                 <i style="cursor: pointer;" class="material-icons deleting-requisition md-10 align-middle mb-1 text-danger">delete_forever</i>
             </span>
         </a>
-    </td> 
+    </td>
 @elseif($value->budget_id == 0 && Auth::user()->id == $value->user_id)
     <td scope="col" class="text-center"><input data-id="{{$value->id}}" id="no_budget_perm_budget_id" style="width:95px;" class="form-control" type="text" name="budget_id" disabled value="<?php echo 'No Budget'; ?>"></td>
     <td scope="col" class="text-center"><input data-id="{{$value->id}}" disabled style="width:125px;" id="no_budget_perm_item_id" class="form-control" name="item_id" value="<?php echo 'No Budget Line'; ?>"></td>
@@ -55,7 +56,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
         <option value="{{$value->vat}}"  selected>{{$value->vat}}</option>
         <option value="VAT Exclusive">Exclusive</option>
         <option value="VAT Inclusive">Inclusive</option>
-        <option value="Non VAT">Non VAT</option>	
+        <option value="Non VAT">Non VAT</option>
     </select></td>
     <td scope="col" class="text-center"><select data-id="{{$value->id}}" id="no_budget_perm_account" class="form-control" name="account_id">
         <option value="{{$value->account}}">{{$value->account}}</option>
@@ -72,5 +73,5 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
         </a>
     </td>
 @endif
-		
-		
+</tr>
+<?php endforeach ?>

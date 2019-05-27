@@ -7,6 +7,7 @@ use App\StaffLevel\StaffLevel;
 use App\Retirement\Retirement;
 use App\Requisition\Requisition;
 use App\Comments\RetirementComment;
+use App\Accounts\FinanceSupportiveDetail;
 use App\Http\Controllers\Retirements\RetirementController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
@@ -55,10 +56,10 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
 
 // Amount finance can approve after retirement has been approved by supervisor
 $amount_finance_can_approve = Limit::where('stafflevel_id',$hod)->select('max_amount')->first();
-$amount_retired = Retirement::where('ret_no', $ret_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+$amount_retired = Retirement::where('req_no', $retirement->req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
 $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
-
-
+$amount_paid = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')->where('finance_supportive_details.req_no', $requisition_no->req_no)->sum('amount_paid');
+$amount_unretired = $amount_paid - $amount_retired;
  ?>
 @extends('layout.app')
 <style type="text/css">
@@ -141,7 +142,7 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                     </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
-                                    <div class="col-lg-6 mt-2">
+                                    <div class="col-lg-10 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
                                                 <thead>
                                                     <tr>
@@ -150,49 +151,44 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                                     <tr>
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <th  scope="col" class="text-center">Status</th>
-                                                        <th  scope="col" class="text-center">Amount To Return</th>
+                                                        <th  scope="col" class="text-center">Paid Amount</th>
+                                                        <th  scope="col" class="text-center">Total Amount Retired</th>
+                                                        <th  scope="col" class="text-center">Amount Unretired</th>
                                                         <th  scope="col" class="text-center">Amount To Claim</th>
                                                         <th  scope="col" class="text-center">Full/Partial Retired</th>
-                                                        <!-- <th scope="col" class="text-center">Budget</th>
-                                                        <th scope="col" class="text-center">Budget Line</th> -->
 
                                                     </tr>
                                                 </thead>
                                                 <tbody>
 
                                                     <tr>
-                                                       <td scope="col" class="text-center">{{$retirements[0]->req_no}}</td>
+                                                       <td scope="col" class="text-center">{{$requisition_no->req_no}}</td>
                                                        <td scope="col" class="text-center">{{$retirements[0]->status}}</td>
+                                                       <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
+                                                       <td scope="col" class="text-right">{{number_format($amount_retired,2)}}</td>
+                                                       <td scope="col" class="text-center">
+                                                           @if($amount_paid <= $amount_retired)
+                                                              N/A
+                                                           @elseif($amount_paid > $amount_retired)
+                                                              {{number_format($amount_unretired,2)}}
+                                                           @endif
 
-                                                       <?php
-                                                          $result = number_format(RetirementController::getTotalRequestedAmount($retirement->req_no) - RetirementController::getRetirementTotal($retirement->ret_no),2);
-                                                       ?>
+                                                       </td>
+                                                       <td scope="col" class="text-center">
+                                                           @if($amount_paid < $amount_retired)
+                                                              {{number_format($amount_retired - $amount_paid,2)}}
+                                                           @elseif($amount_paid >= $amount_retired)
+                                                              N/A
+                                                           @endif
 
-                                                       @if((RetirementController::getTotalRequestedAmount($retirement->req_no)) > (RetirementController::getRetirementTotal($retirement->ret_no)))
-
-                                                       <td scope="col" class="text-center">{{number_format(RetirementController::getTotalRequestedAmount($retirement->req_no) - RetirementController::getRetirementTotal($retirement->ret_no),2)}}</td>
-
-
-                                                       @elseif($result == 0 || $result < 0)
-                                                          <td class="text-center">N/A</td>
-                                                       @else
-                                                       <td scope="col" class="text-center">{{number_format(RetirementController::getTotalRequestedAmount($retirement->req_no) - RetirementController::getRetirementTotal($retirement->ret_no),2)}}</td>
-
-                                                       @endif
-                                                       <?php
-                                                          $result = number_format(RetirementController::getRetirementTotal($retirement->ret_no) - RetirementController::getTotalRequestedAmount($retirement->req_no),2);
-                                                       ?>
-                                                       @if($result == 0 || $result < 0)
-                                                          <td class="text-center">N/A</td>
-                                                       @else
-                                                          <td scope="col" class="text-center">{{number_format(RetirementController::getRetirementTotal($retirement->ret_no) - RetirementController::getTotalRequestedAmount($retirement->req_no),2)}}</td>
-                                                       @endif
-
-                                                       @if($amount_retired == $amount_requested || $amount_retired > $amount_requested)
-                                                          <td class="text-center text-success">Full Retired</td>
-                                                       @else
-                                                          <td class="text-center text-danger">Partial Retired</td>
-                                                       @endif
+                                                       </td>
+                                                       <td scope="col" class="text-center">
+                                                           @if($amount_paid <= $amount_retired)
+                                                              Full Retired
+                                                           @elseif($amount_paid > $amount_retired)
+                                                              Partially Retired
+                                                           @endif
+                                                       </td>
 
                                                     </tr>
 
@@ -218,7 +214,7 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                                         <th scope="col" class="text-center">Unit Price</th>
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Retired Amount</th>
-                                                        <th scope="col" class="text-center">Paid Amount</th>
+
                                                         <!-- <th scope="col" class="text-center">Offset</th> -->
                                                     </tr>
                                                 </thead>
@@ -235,7 +231,7 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                                            <td scope="col" class="text-right">{{number_format($retirement->unit_price,2)}}</td>
                                                            <td scope="col" class="text-right">{{number_format($retirement->vat_amount,2)}}</td>
                                                            <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
-                                                           <td scope="col" class="text-right">{{number_format(RetirementController::getRequestedAmount($retirement->req_no,$retirement->serial_no),2)}}</td>
+
                                                            <!-- <td scope="col" class="text-center">{{number_format(RetirementController::getRequestedAmount($retirement->req_no,$retirement->serial_no) - $retirement->gross_amount,2)}}</td> -->
 
                                                         </tr>
@@ -251,7 +247,7 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                                         <td></td>
                                                         <td scope="col" class="text-center font-weight-bold">Total</td>
                                                         <td scope="col" class="text-right">{{number_format(RetirementController::getRetirementTotal($retirement->ret_no),2)}}</td>
-                                                        <td scope="col" class="text-right">{{number_format(RetirementController::getTotalRequestedAmount($retirement->req_no),2)}}</td>
+                                                        <!-- <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td> -->
 
                                                     </tr>
                                                 </tbody>
@@ -276,32 +272,34 @@ $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->r
                                                 </div>
                                                 <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>&nbsp;&nbsp;&nbsp;
                                                 <td style="width: 129px;" scope="col" class="text-center">
-                                                    @if($amount_retired < $amount_requested && Auth::user()->id == $retirement->user_id)
-                                                      <a href="{{url('add-retirement/'.$retirement->ret_no.'/'.$retirement->req_no)}}" class="btn btn-sm btn-twitter">Add Retirement</a>
-                                                    @endif
+                                                    <!-- @if($amount_retired < $amount_paid && Auth::user()->id == $retirement->user_id)
+                                                      <a href="{{url('add-retirement/'.RetirementController::getTheLatestRetirementNumber().'/'.$retirement->req_no)}}" class="btn btn-sm btn-twitter">Add Retirement</a>
+                                                    @endif -->
 
                                                     @if ($retirement->status == 'Confirmed')
                                                         <span class="badge badge-twitter text-twitter">Retirement Confirmed</span>
                                                     @endif
-                                                    @if($retirement->user_id != Auth::user()->id && $retirement->status == 'Retired' && Auth::user()->stafflevel_id == $supervisor)
+                                                    @if(Auth::user()->stafflevel_id != $normalStaff)
+                                                        @if($retirement->user_id != Auth::user()->id && $retirement->status == 'Retired' && Auth::user()->stafflevel_id == $supervisor)
 
-                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                            <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                            <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
 
-                                                    @elseif($retirement->status == 'Approved By Supervisor' || $retirement->status == 'Retired, supervisor' && Auth::user()->stafflevel_id == $hod)
-                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                        @elseif($retirement->status == 'Approved By Supervisor' || $retirement->status == 'Retired, supervisor' && Auth::user()->stafflevel_id == $hod)
+                                                            <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                            <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
 
-                                                    @elseif($retirement->user_id != Auth::user()->id && $retirement->status == 'Approved By Finance' || $retirement->status == 'Retired, Finance' && Auth::user()->stafflevel_id == $ceo)
-                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                    @elseif($retirement->status == 'Approved By HOD' || $retirement->status == 'Retired, hod' && Auth::user()->stafflevel_id == $financeDirector && $retirement->user_id != Auth::user()->id && $retirement->gross_amount > $amount_finance_can_approve->max_amount)
-                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                    @elseif($retirement->status == 'Approved By Supervisor' || $retirement->status == 'Retired, hod' && Auth::user()->stafflevel_id == $financeDirector && $retirement->user_id != Auth::user()->id && $retirement->gross_amount < $amount_finance_can_approve->max_amount)
-                                                        <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
-                                                        <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
-                                                    @endif
+                                                        @elseif($retirement->user_id != Auth::user()->id && $retirement->status == 'Approved By Finance' || $retirement->status == 'Retired, Finance' && Auth::user()->stafflevel_id == $ceo)
+                                                            <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                            <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                        @elseif($retirement->status == 'Approved By HOD' || $retirement->status == 'Retired, hod' && Auth::user()->stafflevel_id == $financeDirector && $retirement->user_id != Auth::user()->id && $retirement->gross_amount > $amount_finance_can_approve->max_amount)
+                                                            <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                            <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                        @elseif($retirement->status == 'Approved By Supervisor' || $retirement->status == 'Retired, hod' && Auth::user()->stafflevel_id == $financeDirector && $retirement->user_id != Auth::user()->id && $retirement->gross_amount < $amount_finance_can_approve->max_amount)
+                                                            <a href="{{url('approve-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-info">Approve</a>
+                                                            <a href="{{url('reject-retirement/'.$retirement->ret_no.'/'.Auth::user()->id)}}" class="btn btn-sm btn-outline-warning">Reject</a>
+                                                        @endif
+                                                      @endif
                                                 </td>
                                         </form>
                                         @if($flash = session('messages'))

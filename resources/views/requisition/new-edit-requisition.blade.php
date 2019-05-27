@@ -226,9 +226,9 @@ select,option {
 
 
                                             @endforeach
-                                                    <tr class="render-new-requisition">
+                                                    <tbody class="render-new-requisition">
 
-                                                    </tr>
+                                                    </tbody>
                                             @elseif(!$requisition_no_budget->isEmpty())
 
                                             @foreach ($requisition_no_budget as $requisition_no_budget)
@@ -275,9 +275,9 @@ select,option {
                                                 </tr>
 
                                             @endforeach
-                                                <tr class="render-new-requisition">
+                                                <tbody class="render-new-requisition">
 
-                                                </tr>
+                                                </tbody>
                                             @endif
                                             <tr>
                                                 <td></td>

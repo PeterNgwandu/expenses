@@ -374,7 +374,10 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                             @if($requisition->user_id != Auth::user()->id)
                                                             @if($requisition->status == 'Paid' || $requisition->status == 'Confirmed')
                                                                 @if($requisition->gross_amount != RequisitionsController::getTotalAmountPaid($requisition->req_no) && Auth::user()->stafflevel_id == $financeDirector && $requisition->gross_amount > RequisitionsController::getTotalAmountPaid($requisition->req_no))
-                                                                    <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                    <!-- <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                     Process Payment
+                                                                    </a> -->
+                                                                    <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
                                                                      Process Payment
                                                                     </a>
                                                                 @endif
@@ -433,7 +436,10 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                                         <p class="mt-2">Payments Completed</p>
 
                                                                 @elseif($requisition->status == 'Paid' || $requisition->status == 'Confirmed' && Auth::user()->stafflevel_id == $financeDirector && $requisition->gross_amount > RequisitionsController::getTotalAmountPaid($requisition->req_no))
-                                                                    <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                    <!-- <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                     Process Payment
+                                                                    </a> -->
+                                                                    <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
                                                                      Process Payment
                                                                     </a>
                                                                 @else

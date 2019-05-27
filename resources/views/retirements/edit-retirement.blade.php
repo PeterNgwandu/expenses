@@ -97,7 +97,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                       <td scope="col" class="text-center">{{$submitted_requisitions[0]->req_no}}</td>
+                                                       <td scope="col" class="text-center">{{$requsition_summary->req_no}}</td>
                                                        <td scope="col" class="text-center">{{$submitted_requisitions[0]->budget}}</td>
                                                     </tr>
                                                 </tbody>
@@ -114,7 +114,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <th scope="col" class="text-center">Item Name</th>
                                                         <th scope="col" class="text-center">Unit of Measure</th>
                                                         <th scope="col" class="text-center">Quantity</th>
-                                                        <th scope="col" class="text-center">Gross Amount</th>
+                                                        <th scope="col" class="text-center">Amount Paid</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -124,16 +124,34 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                           <td scope="col" class="text-center">{{$requisition->gross_amount}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
-                                                        <td scope="col" class="text-center">Total</td>
-                                                        <td style="background: #FFF6F4;" scope="col" class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{RequisitionsController::getRequisitionTotal($requisition->req_no)}} /=
+                                                        <td scope="col" class="text-right font-weight-bold">Amount Retired</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_retired,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Amount Unretired</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_unretired,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">
+                                                            {{number_format($amount_paid,2)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -183,15 +201,15 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 @endif
 
                                             </table>
-                                            <!-- <hr> -->
+                                            <hr>
                                             @if(!$submitted_requisitions->isEmpty())
 
-                                <!-- <div class="form-inline">
+                                <div class="form-inline">
                                     <form class="form-inline data retire-form" id="data">
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="req_no" value="{{$submitted_requisitions[0]->req_no}}">
-                                        <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}">
+                                        <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
                                             @foreach($submitted_requisitions as $requisition)
@@ -230,7 +248,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
                                         <span>&nbsp;
                                         </span>
-                                        <button style="height:35px;" class="btn  btn-sm btn-twitter edit-submit-retire">
+                                        <button ret-no="{{$ret_no}}" style="height:35px;" class="btn  btn-sm btn-twitter edit-submit-retire">
                                             <span>
                                                 <i style="cursor: pointer;" class="material-icons edit-submit-retire md-10 align-middle mb-1 text-white">add_circle</i>
                                                 Add Line
@@ -240,16 +258,16 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <hr><hr>
                                     </form>
 
-                                </div> -->
+                                </div>
                                 @endif
                                 @if($submitted_requisitions->isEmpty())
 
-                                <!-- <div class="form-inline">
+                                <div class="form-inline">
                                     <form class="form-inline data retire-form" id="data">
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
                                         <input type="hidden" name="req_no" value="{{$submitted_paid_no_budget[0]->req_no}}">
-                                        <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}">
+                                        <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
                                             @foreach($submitted_paid_no_budget as $requsition)
@@ -287,14 +305,14 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
 
                                         <span>
-                                           <i class="material-icons edit-submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
+                                           <i ret-no="{{$ret_no}}" class="material-icons edit-submit-retire md-10 align-middle mb-1 text-primary">add_circle</i>
                                         </span>
 
                                         <br>
                                         <hr><hr>
                                     </form>
 
-                                </div> -->
+                                </div>
                                 @endif
 
                                     <table class="table table-sm mb-0">
@@ -342,10 +360,10 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
                                           </tbody>
 
-                                        @endforeach
-                                        <tr class="render-edit-retired-items">
+                                          <tbody class="render-edit-retired-items">
 
-                                        </tr>
+                                          </tbody>
+                                        @endforeach
 
                                     </table>
 
@@ -373,6 +391,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
     $(document).on('click', '.edit-submit-retire', function(e) {
             e.preventDefault();
+            var ret_no = $(this).attr('ret-no');
             var serial_no = $(this).closest('form').find('select[name=serial_no]').val();
             var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
             var ref_no = $(this).closest('form').find('input[name=ref_no]').val();
@@ -391,7 +410,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
             $.ajax({
                 type: "POST",
-                url: '/submit-single-edit-retire-row',
+                url: '/submit-single-edit-retire-row/' + ret_no,
                 data: $('.retire-form').serialize()+"&"+$.param({'serial_no':serial_no,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description}),
                 dataType: "json",
                 success: function(data) {

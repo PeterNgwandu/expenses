@@ -82,6 +82,14 @@ $(document).on('click', '.print-requisition', function() {
     });
 });
 
+$(document).on('click', '.print-confirmation-form', function() {
+    var req_no = $(this).attr('data-value');
+    var url = '/approve-requisition/' + req_no;
+    $.get(url, function(data) {
+        window.location = url;
+    });
+});
+
 $(document).on('click', '.delete', function(e) {
     e.preventDefault();
     var id = $(this).attr('data-id');
