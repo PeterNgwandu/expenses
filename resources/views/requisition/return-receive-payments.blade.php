@@ -54,7 +54,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h2 class="card-title">Adding Additional Finance Supportive Details</h2>
+                                    <h2 class="card-title">Receiving Receipts and Pay Balances Form</h2>
                                 </div>
                             </div>
                         </div>
@@ -102,7 +102,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                             </tr>
                                         </thead>
                                         <tbody>
-                                                <?php $req = Requisition::where('req_no', $requisition_no)->where('budget_id',0)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->get(); ?>
+                                                <?php $req = Requisition::where('req_no', $req_no)->where('budget_id',0)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->get(); ?>
                                                 @if($req[0]->budget_id == 0)
                                                     <tr>
                                                    <td scope="col" class="text-center">{{$req[0]->req_no}}</td>
@@ -187,13 +187,33 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td scope="col" class="text-left">Balance Remained</td>
+                                                <td scope="col" class="text-left">Amount Retired</td>
+                                                <td scope="col" class="text-right">{{number_format(($amount_retired + $amount_received),2)}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Amount Unretired</td>
                                                 <td scope="col" class="text-right">
-                                                  @if(number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no,2) - $paid_amount) < 0)
-                                                      N/A
-                                                  @else
-                                                      {{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no,2) - $paid_amount)}}
-                                                  @endif
+                                                  <?php if($amount_unretired < 0){echo 'N/A';}else{echo number_format($amount_unretired,2);} ?>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Claimed</td>
+                                                <td scope="col" class="text-right">
+                                                  <?php if($amount_claimed < 0){echo 'N/A';}else{echo number_format($amount_claimed,2);} ?>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -211,12 +231,10 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <th scope="col" class="text-center">Unit Price</th>
                                                 <th scope="col" class="text-center">VAT Amount</th>
                                                 <th scope="col" class="text-center">Gross Amount</th>
-                                                <th scope="col" class="text-center">Amount Paid</th>
-                                                <th scope="col" class="text-center">Amount Remained</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $req = Requisition::where('req_no', $requisition_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->where('budget_id',0)->get(); ?>
+                                            <?php $req = Requisition::where('req_no', $req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->where('budget_id',0)->get(); ?>
                                             @foreach($req as $req)
                                                 <tr>
                                                    <td scope="col" class="text-center">{{$req->item_name}}</td>
@@ -226,13 +244,9 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                    <td scope="col" class="text-right">{{number_format($req->unit_price,2)}}</td>
                                                    <td scope="col" class="text-right">{{number_format($req->vat_amount,2)}}</td>
                                                    <td scope="col" class="text-right">{{number_format($req->gross_amount,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getTotalPerSerialNo($req->req_no,$req->serial_no) - RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
                                                 </tr>
                                             @endforeach
                                             <tr>
-                                                <td></td>
-                                                <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
@@ -248,10 +262,8 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td></td>
-                                                <td></td>
                                                 <td scope="col" class="text-left">Amount Paid</td>
-                                                <td scope="col" class="text-right">{{number_format(FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                                <td scope="col" class="text-right">{{number_format($paid_amount,2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td></td>
@@ -259,10 +271,30 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
+                                                <td scope="col" class="text-left">Amount Retired</td>
+                                                <td scope="col" class="text-right">{{number_format($retired_amount,2)}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td></td>
                                                 <td></td>
-                                                <td scope="col" class="text-left">Balance Remained</td>
-                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no) - FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Amount Unretired</td>
+                                                <td scope="col" class="text-right">
+                                                  <?php if($amount_unretired < 0){echo 'N/A';}else{echo number_format($amount_unretired,2);} ?>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Claimed</td>
+                                                <td scope="col" class="text-right">
+                                                  <?php if($amount_claimed < 0){echo 'N/A';}else{echo number_format($amount_claimed,2);} ?>
+                                                </td>
                                             </tr>
                                         </tbody>
                                         @endif
@@ -272,7 +304,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
 
                         </div>
                         <div class="card-body">
-                            <form class="form-inline" action="{{ route('finance-supportive-detail.store') }}" method="POST">
+                            <form class="form-inline" action="{{ route('return-receive-payments.store') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="payment_date" value="{{ now() }}">
                                 <input type="hidden" name="req_id" value="{{ $requisitionID->id }}">

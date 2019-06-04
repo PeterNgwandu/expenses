@@ -4,6 +4,7 @@ use App\User;
 use App\Comments\Comment;
 use App\Retirement\Retirement;
 use App\Requisition\Requisition;
+use App\Accounts\FinanceSupportiveDetail;
 use App\Http\Controllers\Retirements\RetirementController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
@@ -16,7 +17,16 @@ $user = User::where('users.id', Requisition::where('req_no', $req_no)->distinct(
 
 $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','users.id')->select('comments.*', 'users.username as username')->get();
 
-
+$amount_retired = Retirement::where('req_no', $req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+$amount_requested = Requisition::where('requisitions.req_no', $req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
+$amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+$amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Receive')->sum('amount_paid');
+$amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+$amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+$paid_amount = $amount_paid + $amount_returned;
+$retired_amount = $amount_retired + $amount_received;
+$amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
+$amount_unretired = $paid_amount- $retired_amount;
 
  ?>
 @extends('layout.app')
@@ -94,7 +104,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                     <div class="float-right mr-4 mt-4">
 
                                     </div>
-                                    <div class="col-lg-6 mt-2">
+                                    <div class="col-lg-8 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
                                                 @if(!$submitted_requisitions->isEmpty())
                                                 <thead>
@@ -105,6 +115,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <th scope="col" class="text-center">Budget</th>
                                                         <th scope="col" class="text-center">Status</th>
+                                                        <th scope="col" class="text-center">Amount Paid</th>
+                                                        <th scope="col" class="text-center">Total Retired</th>
+                                                        <th scope="col" class="text-center">Total Unretired</th>
 
                                                     </tr>
                                                 </thead>
@@ -113,6 +126,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                            <td scope="col" class="text-center">{{$submitted_requisitions[0]->req_no}}</td>
                                                            <td scope="col" class="text-center">{{$submitted_requisitions[0]->budget}}</td>
                                                            <td scope="col" class="text-center">{{$submitted_requisitions[0]->status}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($paid_amount, 2)}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($retired_amount, 2)}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($amount_unretired, 2)}}</td>
                                                         </tr>
                                                 </tbody>
                                             </table>
@@ -125,13 +141,18 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                     <tr>
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <th  scope="col" class="text-center">Status</th>
-
+                                                        <th scope="col" class="text-center">Amount Paid</th>
+                                                        <th scope="col" class="text-center">Total Retired</th>
+                                                        <th scope="col" class="text-center">Total Unretired</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                         <tr>
                                                            <td scope="col" class="text-center">{{$submitted_paid_no_budget[0]->req_no}}</td>
                                                            <td scope="col" class="text-center">{{$submitted_paid_no_budget[0]->status}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($paid_amount, 2)}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($retired_amount, 2)}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($amount_unretired, 2)}}</td>
                                                         </tr>
                                                 </tbody>
                                             </table>
@@ -178,7 +199,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td></td>
                                                         <td scope="col" class="text-center font-weight-bold">Total Paid</td>
-                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::amountPaid($retirement->req_no),2)}}</td>
+                                                        <td scope="col" class="text-right">{{number_format($paid_amount,2)}}</td>
                                                         <!-- <td scope="col" class="text-center">
 
                                                             @if($retirement->user_id != Auth::user()->id)
@@ -226,7 +247,7 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                         <td></td>
                                                         <td></td>
                                                         <td scope="col" class="text-center font-weight-bold">Total Paid</td>
-                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::amountPaid($retirement->req_no),2)}}</td>right
+                                                        <td scope="col" class="text-right">{{number_format($paid_amount,2)}}</td>right
                                                         <!-- <td scope="col" class="text-center">
                                                             @if($retirement->user_id != Auth::user()->id)
                                                                 <a href="{{url('approve-retirement/'.$retirement->ret_no)}}" class="btn btn-sm btn-outline-info">Approve</a>
@@ -249,7 +270,9 @@ $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','
                                                 </tbody>
                                                 @endif
                                             </table>
-                                            <a href="{{route('retire',$req_no)}}" class="btn btn-twitter float-left">Retire</a>
+                                            @if($amount_unretired > 0)
+                                                <a href="{{route('retire',$req_no)}}" class="btn btn-twitter float-left">Retire</a>
+                                            @endif    
                                         </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">

@@ -12,6 +12,7 @@ use App\Item\Item;
 use App\Limits\Limit;
 use App\Budget\Budget;
 use App\Accounts\Account;
+use App\Accounts\SubAccountType;
 use App\Comments\Comment;
 use Illuminate\Http\Request;
 use App\StaffLevel\StaffLevel;
@@ -27,6 +28,7 @@ use App\Accounts\FinanceSupportiveDetail;
 use App\Temporary\RequisitionTemporaryTable;
 use App\Http\Controllers\Item\ItemController;
 use App\Http\Controllers\Budgets\BudgetsController;
+use App\Http\Controllers\Accounts\FinanceSupportiveDetailsController;
 
 class RequisitionsController extends Controller
 {
@@ -73,6 +75,7 @@ class RequisitionsController extends Controller
 
                                                ->where('requisitions.user_id', Auth::user()->id)
                                                ->where('requisitions.status', 'Rejected')
+                                               ->where('departments.status', 'Active')
                                                ->whereIn('users.stafflevel_id', [$normalStaff])
                                                ->whereNotIn('users.stafflevel_id', [$supervisor,$hod,$ceo,$financeDirector])
 
@@ -81,7 +84,6 @@ class RequisitionsController extends Controller
                                                ->orWhere('requisitions.status', 'Rejected By Supervisor')
                                                ->orWhere('requisitions.status', 'Rejected By HOD')
                                                ->orWhere('requisitions.status', 'Rejected By CEO')
-
                                                // ->orWhere('requisitions.status', 'Rejected')
 
                                                ->groupBy('requisitions.req_no')
@@ -96,6 +98,7 @@ class RequisitionsController extends Controller
                                             ->join('departments','users.department_id','departments.id')
                                             ->select('requisitions.req_no','users.username as username','departments.name as department')
                                             // ->whereBetween('requisitions.gross_amount',  [0, $limitSupervisor->max_amount])
+                                            ->where('departments.status', 'Active')
                                             ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
                                             ->whereNotIn('users.stafflevel_id', [$hod,$ceo,$financeDirector])
                                             // ->where('requisitions.gross_amount', '<=', $limitHOD->max_amount)
@@ -129,6 +132,7 @@ class RequisitionsController extends Controller
                                             ->where('requisitions.status', 'Approved By Supervisor')
                                             // ->whereBetween('requisitions.gross_amount', [$limitSupervisor->max_amount, $limitHOD->max_amount])
 
+                                            ->where('departments.status', 'Active')
                                             ->orWhere('requisitions.status', 'onprocess supervisor')
                                             // ->orWhere('requisitions.status', 'Rejected By Supervisor')
                                             // ->orWhere('requisitions.status', 'Rejected By HOD')
@@ -152,6 +156,7 @@ class RequisitionsController extends Controller
                                             //    ->where('requisitions.status', 'onprocess')
                                             //    ->where('requisitions.gross_amount', '>=', $ceoLimit)
                                                ->where('requisitions.status', 'onprocess hod')
+                                               ->where('departments.status', 'Active')
                                                ->orWhere('requisitions.status', 'onprocess finance')
                                                // ->orWhere('requisitions.status', 'Rejected By Supervisor')
                                                // ->orWhere('requisitions.status', 'Rejected By HOD')
@@ -175,6 +180,7 @@ class RequisitionsController extends Controller
                                                // ->orWhere('requisitions.status', 'Rejected By Supervisor')
                                                // ->orWhere('requisitions.status', 'Rejected By HOD')
                                                ->where('requisitions.status', 'Approved By Supervisor')
+                                               ->where('departments.status', 'Active')
                                                ->orWhere('requisitions.status', 'onprocess hod')
                                                ->orWhere('requisitions.status', 'onprocess ceo')
                                                ->orWhere('requisitions.status', 'Rejected By CEO')
@@ -205,6 +211,7 @@ class RequisitionsController extends Controller
         $activity_name = RequisitionTemporaryTable::where('user_id', Auth::user()->id)->select('activity_name')->first();
 
         return view('requisitions.create-requisition', compact('activity_name'))->withBudgets($budgets)->withItems($items)->withData($data)->withAccounts($accounts);
+
     }
 
     /**
@@ -617,6 +624,7 @@ class RequisitionsController extends Controller
                                       ->where('users.id', Auth::user()->id)
                                       ->where('departments.id',$user_dept->dept_id)
                                       ->where('requisitions.status', 'onprocess')
+                                      ->where('departments.status', 'Active')
                                       ->distinct('req_no')
                                       ->get();
 
@@ -674,7 +682,15 @@ class RequisitionsController extends Controller
                                   ->distinct('req_no')
                                   ->get();
 
-        return view('requisitions.all-requisitions', compact('submitted_requisitions','req_no'));
+        $amount_retired = Retirement::where('req_no', $req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+        $amount_requested = Requisition::where('requisitions.status','!=','Edited')->where('status','!=','Deleted')->where('req_no', $req_no)->sum('gross_amount');
+        $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+        $amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Receive')->sum('amount_paid');
+        $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+        $amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+        $amount_claimed = ($amount_retired + $amount_received) - $amount_paid;
+
+        return view('requisitions.all-requisitions', compact('amount_paid','amount_retired','amount_unretired','submitted_requisitions','req_no'));
     }
 
     public static function getAmountPaid($req_no)
@@ -736,6 +752,11 @@ class RequisitionsController extends Controller
                                   ->where('requisitions.status', '!=', 'Edited')
                                   ->distinct('user_id')
                                   ->get();
+
+        $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition_no)->where('status', 'Pay')->sum('amount_paid');
+        $amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition_no)->where('status', 'Receive')->sum('amount_paid');
+        $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition_no)->where('status', 'Return')->sum('amount_paid');
+        $paid_amount = $amount_paid + $amount_returned;
 
         $budgetTotal = Budget::join('items','items.budget_id','budgets.id')
                              ->join('requisitions','requisitions.budget_id','budgets.id')
@@ -850,7 +871,7 @@ class RequisitionsController extends Controller
               }
 
               if ($requisitionID->status == 'Paid' || $requisitionID->status == 'Confirmed') {
-                  return view('requisition.finance-supportive-details', compact('requisitionID','financeStaffs','accounts','requisition_no'));
+                  return view('requisition.finance-supportive-details', compact('paid_amount','requisitionID','financeStaffs','accounts','requisition_no'));
               }
 
               if($requisition_total_amount >= $ceoLimit->max_amount && $user_staff_level->stafflevel_id != $ceo || $user_staff_level->stafflevel_id == $hod){
@@ -895,6 +916,29 @@ class RequisitionsController extends Controller
         $accounts = Account::all();
         $requisitions = Requisition::all();
         return view('requisition.finance-supportive-details', compact('requisitionID','financeStaffs','accounts','req_no','requisitions'));
+    }
+
+    public function processReceptsAndBalance($req_no)
+    {
+        $requisitionID = Requisition::where('req_no',$req_no)->first();
+        $financeStaffs = User::join('departments','departments.id','users.department_id')
+                             ->where('departments.name','Finance')
+                             ->where('users.username', '!=', 'CEO')
+                             ->get();
+        $account_sub_type = SubAccountType::where('account_subtype_name', 'Bank Accounts')->pluck('id')->first();
+        $accounts = Account::where('sub_account_type', $account_sub_type)->get();
+        $requisitions = Requisition::all();
+        $amount_retired = Retirement::where('req_no', $req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+        $amount_requested = Requisition::where('requisitions.req_no', $req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
+        $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+        $amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Receive')->sum('amount_paid');
+        $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+        // $amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+        $paid_amount = $amount_paid + $amount_returned;
+        $amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
+        $retired_amount = $amount_retired + $amount_received;
+        $amount_unretired = $paid_amount - $retired_amount;
+        return view('requisition.return-receive-payments', compact('retired_amount','amount_returned','amount_received','amount_claimed','amount_unretired','amount_retired','amount_requested','paid_amount','requisitionID','financeStaffs','accounts','req_no','requisitions'));
     }
 
     public function rejectRequisition($requisition_no)
@@ -1050,10 +1094,12 @@ class RequisitionsController extends Controller
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
-                                 // ->whereIn('users.stafflevel_id', [$normalStaff])
-                                 // ->where('users.department_id', $user_dept->dept_id)
+                                 ->whereIn('users.stafflevel_id', [$normalStaff])
+                                 ->where('users.department_id', $user_dept->dept_id)
+                                 ->where('departments.status', 'Active')
                                  ->where('requisitions.status', 'Confirmed')
                                  ->where('users.id', Auth::user()->id)
+                                 // ->where('users.department_id', 'departments.id')
                                  // ->orWhere('requisitions.status', 'Approved By Supervisor')
                                  // ->orWhere('requisitions.status', 'Approved By HOD')
                                  // ->orWhere('requisitions.status', 'Approved By Finance')
@@ -1064,10 +1110,12 @@ class RequisitionsController extends Controller
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
-                                 // ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
-                                 // ->where('users.department_id', $user_dept->dept_id)
+                                 // ->where('users.department_id', 'departments.id')
+                                 ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
+                                 ->where('users.department_id', $user_dept->dept_id)
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->where('requisitions.status', 'Confirmed')
                                  // ->orWhere('requisitions.status', 'Approved By Supervisor')
                                  // ->orWhere('requisitions.status', 'Approved By HOD')
@@ -1083,6 +1131,7 @@ class RequisitionsController extends Controller
                                  ->where('users.department_id', $user_dept->dept_id)
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->where('requisitions.status', 'Confirmed')
                                  // ->orWhere('requisitions.status', 'Approved By HOD')
                                  // ->orWhere('requisitions.status', 'Approved By Finance')
@@ -1097,6 +1146,7 @@ class RequisitionsController extends Controller
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
                                  ->where('requisitions.status', 'Confirmed')
+                                 ->where('departments.status', 'Active')
                                  ->distinct('requisitions.req_no')
                                  ->get();
             return view('requisition.approved-requisitions', compact('approved_requisitions'));
@@ -1118,6 +1168,12 @@ class RequisitionsController extends Controller
         $normalStaff = $staff_levels[3]->id;
         $financeDirector = $staff_levels[4]->id;
 
+        $user_dept = User::join('departments','users.department_id','departments.id')
+                          ->where('departments.id', Auth::user()->department_id)
+                          ->select('users.department_id as dept_id')
+                          ->distinct('dept_id')
+                          ->first();
+
         if(Auth::user()->stafflevel_id == $normalStaff){
             $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
@@ -1127,6 +1183,7 @@ class RequisitionsController extends Controller
                                  ->where('users.id', Auth::user()->id)
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->distinct('requisitions.req_no')
                                  ->get();
             return view('requisition.paid-requisitions', compact('paid_requisitions'));
@@ -1136,8 +1193,10 @@ class RequisitionsController extends Controller
                                  ->join('departments','users.department_id','departments.id')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
+                                 ->where('users.department_id', $user_dept->dept_id)
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->distinct('requisitions.req_no')
                                  ->get();
             return view('requisition.paid-requisitions', compact('paid_requisitions'));
@@ -1147,8 +1206,10 @@ class RequisitionsController extends Controller
                                  ->join('departments','users.department_id','departments.id')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod])
+                                 ->where('users.department_id', $user_dept->dept_id)
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->distinct('requisitions.req_no')
                                  ->get();
             return view('requisition.paid-requisitions', compact('paid_requisitions'));
@@ -1160,11 +1221,20 @@ class RequisitionsController extends Controller
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo, $financeDirector])
                                  ->where('requisitions.status', '!=', 'Deleted')
                                  ->where('requisitions.status', '!=', 'Edited')
+                                 ->where('departments.status', 'Active')
                                  ->distinct('requisitions.req_no')
                                  ->get();
             return view('requisition.paid-requisitions', compact('paid_requisitions'));
         }
 
+    }
+
+    public static function getPaidAmount($req_no)
+    {
+        $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+        $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+        $paid_amount = $amount_paid + $amount_returned;
+        return $paid_amount;
     }
 
     public function retiredRequisitions()
@@ -1241,6 +1311,18 @@ class RequisitionsController extends Controller
 
     public function createRequisitionForm()
     {
+
+        $status = Department::select('status')->get();
+        foreach($status as $status)
+        {
+            if($status->status == 'Disabled')
+            {
+                alert()->error('You cannot create a requisition', 'Department Disabled')->persistent('close');
+                return redirect(url('/'));
+            }else{
+            }
+        }
+
         $user_id = Auth::user()->id;
         $items = Item::all();
         $budgets = Budget::where('budgets.status', 'Confirmed')->get();
@@ -2230,7 +2312,126 @@ class RequisitionsController extends Controller
                    ->where('req_no', $req_no)
                    ->select('users.username')->first();
         $payer_name = User::where('users.id', Auth::user()->id)->select('users.username')->first();
-        return view('requisitions.confirmation-form', compact('req_no','paid_to','payer_name'));
+        $payment_details = FinanceSupportiveDetail::join('accounts','finance_supportive_details.account_id','accounts.id')
+                            ->select('finance_supportive_details.*','accounts.account_name as account')
+                            ->where('accounts.sub_account_type',3)
+                            ->where('req_no', $req_no)
+                            ->latest()
+                            ->first();
+
+        return view('requisitions.confirmation-form', compact('payment_details','req_no','paid_to','payer_name'));
+    }
+
+    public static function convert_number_to_words($number) {
+
+        $hyphen      = '-';
+        $conjunction = ' and ';
+        $separator   = ', ';
+        $negative    = 'negative ';
+        $decimal     = ' point ';
+        $dictionary  = array(
+            0                   => 'Zero',
+            1                   => 'One',
+            2                   => 'Two',
+            3                   => 'Three',
+            4                   => 'Four',
+            5                   => 'Five',
+            6                   => 'Six',
+            7                   => 'Seven',
+            8                   => 'Eight',
+            9                   => 'Nine',
+            10                  => 'Ten',
+            11                  => 'Eleven',
+            12                  => 'Twelve',
+            13                  => 'Thirteen',
+            14                  => 'Fourteen',
+            15                  => 'Fifteen',
+            16                  => 'Sixteen',
+            17                  => 'Seventeen',
+            18                  => 'Eighteen',
+            19                  => 'Nineteen',
+            20                  => 'Twenty',
+            30                  => 'Thirty',
+            40                  => 'Fourty',
+            50                  => 'Fifty',
+            60                  => 'Sixty',
+            70                  => 'Seventy',
+            80                  => 'Eighty',
+            90                  => 'Ninety',
+            100                 => 'Hundred',
+            1000                => 'Thousand',
+            1000000             => 'Million',
+            1000000000          => 'Billion',
+            1000000000000       => 'Trillion',
+            1000000000000000    => 'Quadrillion',
+            1000000000000000000 => 'Quintillion'
+        );
+
+        if (!is_numeric($number)) {
+            return false;
+        }
+
+        if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
+            // overflow
+            trigger_error(
+                'convert_number_to_words only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX,
+                E_USER_WARNING
+            );
+            return false;
+        }
+
+        if ($number < 0) {
+            return $negative . Self::convert_number_to_words(abs($number));
+        }
+
+        $string = $fraction = null;
+
+        if (strpos($number, '.') !== false) {
+            list($number, $fraction) = explode('.', $number);
+        }
+
+        switch (true) {
+            case $number < 21:
+                $string = $dictionary[$number];
+                break;
+            case $number < 100:
+                $tens   = ((int) ($number / 10)) * 10;
+                $units  = $number % 10;
+                $string = $dictionary[$tens];
+                if ($units) {
+                    $string .= $hyphen . $dictionary[$units];
+                }
+                break;
+            case $number < 1000:
+                $hundreds  = $number / 100;
+                $remainder = $number % 100;
+                $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
+                if ($remainder) {
+                    $string .= $conjunction . Self::convert_number_to_words($remainder);
+                }
+                break;
+            default:
+                $baseUnit = pow(1000, floor(log($number, 1000)));
+                $numBaseUnits = (int) ($number / $baseUnit);
+                $remainder = $number % $baseUnit;
+                $string = Self::convert_number_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+                if ($remainder) {
+                    $string .= $remainder < 100 ? $conjunction : $separator;
+                    $string .= Self::convert_number_to_words($remainder);
+                }
+                break;
+        }
+
+        if (null !== $fraction && is_numeric($fraction)) {
+            $string .= $decimal;
+            $words = array();
+            foreach (str_split((string) $fraction) as $number) {
+                $words[] = $dictionary[$number];
+            }
+            $string .= implode(' ', $words);
+        }
+
+        return $string;
     }
 
     public static function generateVoucherNo()
@@ -2245,7 +2446,13 @@ class RequisitionsController extends Controller
                    ->where('req_no', $req_no)
                    ->select('users.username')->first();
         $payer_name = User::where('users.id', Auth::user()->id)->select('users.username')->first();
-        
+        $payment_details = FinanceSupportiveDetail::join('accounts','finance_supportive_details.account_id','accounts.id')
+                            ->select('finance_supportive_details.*','accounts.account_name as account')
+                            ->where('accounts.sub_account_type',3)
+                            ->where('req_no', 'Req-7')
+                            ->latest()
+                            ->first();
+
         $options = new Options();
         $options->set('defaultFont', 'Courier');
         $options->set('isRemoteEnabled', TRUE);
@@ -2253,7 +2460,7 @@ class RequisitionsController extends Controller
         $pdf = PDF::setOptions([
             'logOutputFile' => storage_path('logs/log.htm'),
             'tempDir' => storage_path('fontDir/')
-        ])->loadView('requisitions.confirmation-form-pdf', compact('req_no','paid_to','payer_name'));
+        ])->loadView('requisitions.confirmation-form-pdf', compact('payment_details','req_no','paid_to','payer_name'));
         return $pdf->stream('Confirmation Form');
     }
 

@@ -5,6 +5,7 @@ use App\Comments\Comment;
 use App\StaffLevel\StaffLevel;
 use Illuminate\Support\Carbon;
 use App\Requisition\Requisition;
+use App\Accounts\FinanceSupportiveDetail;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
 $stafflevels = StaffLevel::all();
@@ -43,6 +44,15 @@ $requisitions = Requisition::where('req_no', $req_no)
 $comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','users.id')->select('comments.*', 'users.username as username')->get();
 
 $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Deleted')->where('requisitions.status', '!=', 'Edited')->first();
+
+$amount_requested = Requisition::where('requisitions.req_no', $req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
+$amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+$amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Receive')->sum('amount_paid');
+$amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+$amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+$paid_amount = $amount_paid + $amount_returned;
+$retired_amount = $amount_retired + $amount_received;
+$amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
 
 ?>
 @extends('layout.app')
@@ -132,7 +142,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                     </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
-                                    <div class="col-lg-6 mt-2">
+                                    <div class="col-lg-10 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
                                                 @if(!$requisitions->isEmpty())
                                                 <thead>
@@ -145,6 +155,9 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th scope="col" class="text-center">Budget</th>
                                                         <th scope="col" class="text-center">Status</th>
                                                         <th scope="col" class="text-center">Approver Name</th>
+                                                        <th scope="col" class="text-center">Amount Paid</th>
+                                                        <th scope="col" class="text-center">Amount Retired</th>
+                                                        <th scope="col" class="text-center">Full/Partial Retired</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -159,6 +172,15 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                        <td scope="col" style="color:#088958" class="text-center">{{$requisitions[0]->status}}</td>
                                                        @endif
                                                        <td scope="col" class="text-center"><?php if($approver == null) { echo 'Not Yet Approved'; } else echo $approver->approver_name; ?></td>
+                                                       <td scope="col" class="text-right">{{number_format($paid_amount, 2)}}</td>
+                                                       <td scope="col" class="text-right">{{number_format($retired_amount, 2)}}</td>
+                                                       @if(($paid_amount > $retired_amount || $paid_amount < $retired_amount) && $retired_amount > 0.00)
+                                                          <td scope="col" class="text-left">Partially Retired</td>
+                                                       @elseif($retired_amount == 0.00)
+                                                          <td scope="col" class="text-left">Not Yet Retired</td>
+                                                       @elseif($paid_amount == $retired_amount)
+                                                          <td scope="col" class="text-left">Full Retired</td>
+                                                       @endif
                                                     </tr>
                                                     @endif
                                                 </tbody>
@@ -174,6 +196,9 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th scope="col" class="text-center">Budget</th>
                                                         <th scope="col" class="text-center">Status</th>
                                                         <th scope="col" class="text-center">Approver Name</th>
+                                                        <th scope="col" class="text-center">Amount Paid</th>
+                                                        <th scope="col" class="text-center">Amount Retired</th>
+                                                        <th scope="col" class="text-center">Full/Partial Retired</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -193,6 +218,15 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                                 <td scope="col" style="color:#088958" class="text-center">{{$req[0]->status}}</td>
                                                             @endif
                                                             <td scope="col" class="text-center"><?php if($approver == null) { echo 'Not Yet Approved'; } else echo $approver->approver_name; ?></td>
+                                                            <td scope="col" class="text-right">{{number_format($paid_amount, 2)}}</td>
+                                                            <td scope="col" class="text-right">{{number_format($retired_amount, 2)}}</td>
+                                                            @if($paid_amount > $retired_amount || $paid_amount < $retired_amount)
+                                                               <td scope="col" class="text-left">Partially Retired</td>
+                                                            @elseif($retired_amount == 0.00)
+                                                               <td scope="col" class="text-left">Not Yet Retired</td>
+                                                            @elseif($paid_amount == $retired_amount)
+                                                               <td scope="col" class="text-left">Full Retired</td>
+                                                            @endif
                                                         </tr>
                                                         @endif
                                                 </tbody>
@@ -209,7 +243,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th>Totals Summary</th>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="col" class="text-center">Serial No.</th>
+                                                        <!-- <th scope="col" class="text-center">Serial No.</th> -->
                                                         <th scope="col" class="text-center">Budget Line</th>
                                                         <th scope="col" class="text-center">Item Name</th>
                                                         <th scope="col" class="text-center">Desciption</th>
@@ -219,8 +253,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th scope="col" class="text-center">Unit Price</th>
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
-                                                        <th scope="col" class="text-center">Amount Paid</th>
-                                                        <th scope="col" class="text-center">Amount Remained</th>
+                                                        <!-- <th scope="col" class="text-center">Amount Paid</th> -->
 
                                                         <!-- <th scope="col" class="text-center">Action</th> -->
                                                         <!-- @if($requisitions[0]->status = 'Retired') -->
@@ -231,7 +264,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                 <tbody>
                                                     @foreach($submitted_requisitions as $requisition)
                                                         <tr>
-                                                            <td scope="col" class="text-center">{{$requisition->serial_no}}</td>
+                                                            <!-- <td scope="col" class="text-center">{{$requisition->serial_no}}</td> -->
                                                             <td scope="col" class="text-center">{{$requisition->item}}</td>
                                                             <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                             <td scope="col" class="text-center">{{$requisition->description}}</td>
@@ -241,9 +274,8 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                             <td scope="col" class="text-right">{{number_format($requisition->unit_price,2)}}</td>
                                                             <td scope="col" class="text-right">{{number_format($requisition->vat_amount,2)}}</td>
                                                             <td scope="col" class="text-right">{{number_format($requisition->gross_amount,2)}}</td>
-                                                            <td scope="col" class="text-center"></td>
+                                                            <!-- <td scope="col" class="text-center"></td> -->
 
-                                                            <td scope="col" class="text-center"></td>
 
 
                                                            <!-- @if(Auth::user()->id != $requisition->user_id)
@@ -270,7 +302,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         </tr>
                                                     @endforeach
                                                     <tr>
-                                                        <td></td>
+                                                        <!-- <td></td> -->
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
@@ -279,9 +311,8 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <td></td>
                                                         <td></td>
                                                         <td scope="col" class="text-center font-weight-bold">Total</td>
-                                                        <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td>
-                                                        <td scope="col" class="text-center">{{number_format(RequisitionsController::getTotalAmountPaid($req_no),2)}}</td>
-                                                        <td scope="col" class="text-center">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no) - RequisitionsController::getAmountPaid($req_no),2) }}</td>
+                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td>
+                                                        <!-- <td scope="col" class="text-center">{{number_format(RequisitionsController::getTotalAmountPaid($req_no),2)}}</td> -->
 
 
                                                     </tr>
@@ -293,7 +324,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th>Totals Summary</th>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="col" class="text-center">Serial No.</th>
+                                                        <!-- <th scope="col" class="text-center">Serial No.</th> -->
                                                         <th scope="col" class="text-center">Item Name</th>
                                                         <th scope="col" class="text-center">Desciption</th>
                                                         <th scope="col" class="text-center">Unit of Measure</th>
@@ -301,8 +332,8 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <th scope="col" class="text-center">Unit Price</th>
                                                         <th scope="col" class="text-center">VAT Amount</th>
                                                         <th scope="col" class="text-center">Gross Amount</th>
-                                                        <th scope="col" class="text-center">Amount Paid</th>
-                                                        <th scope="col" class="text-center">Amount Remained</th>
+                                                        <!-- <th scope="col" class="text-center">Amount Paid</th>
+                                                        <th scope="col" class="text-center">Amount Remained</th> -->
                                                         <!-- <th scope="col" class="text-center">Action</th> -->
                                                     </tr>
                                                 </thead>
@@ -310,7 +341,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                     <?php $req = Requisition::where('req_no', $req_no)->where('status','!=','Deleted')->where('status', '!=', 'Edited')->where('budget_id',0)->get(); ?>
                                                     @foreach($req as $req)
                                                         <tr>
-                                                           <td scope="col" class="text-center">{{$req->serial_no}}</td>
+                                                           <!-- <td scope="col" class="text-center">{{$req->serial_no}}</td> -->
                                                            <td scope="col" class="text-center">{{$req->item_name}}</td>
                                                            <td scope="col" class="text-center">{{$req->description}}</td>
                                                            <td scope="col" class="text-center">{{$req->unit_measure}}</td>
@@ -318,8 +349,8 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                            <td scope="col" class="text-right">{{number_format($req->unit_price,2)}}</td>
                                                            <td scope="col" class="text-right">{{number_format($req->vat_amount,2)}}</td>
                                                            <td scope="col" class="text-right">{{number_format($req->gross_amount,2)}}</td>
-                                                           <td scope="col" class="text-center"></td>
-                                                           <td scope="col" class="text-center"></td>
+                                                           <!-- <td scope="col" class="text-center"></td>
+                                                           <td scope="col" class="text-center"></td> -->
                                                            <!-- <td scope="col" class="text-center">
                                                                 {{-- @if(Auth::user()->id != $req->user_id)
                                                                     <span class="badge badge-sm badge-danger">Cannot Edit</span>
@@ -335,7 +366,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         </tr>
                                                     @endforeach
                                                     <tr>
-                                                        <td></td>
+                                                        <!-- <td></td> -->
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
@@ -343,8 +374,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                         <td></td>
                                                         <td scope="col" class="text-center font-weight-bold">Total</td>
                                                         <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2)}}</td>
-                                                        <td scope="col" class="text-right">{{number_format(RequisitionsController::getAmountPaid($req->req_no),2)}}</td>
-                                                           <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisition->req_no) - RequisitionsController::getAmountPaid($req->req_no),2)}}</td>
+                                                        <!-- <td scope="col" class="text-right">{{number_format(RequisitionsController::getAmountPaid($req->req_no),2)}}</td> -->
                                                         <!-- <td></td> -->
                                                     </tr>
                                                 </tbody>
@@ -374,12 +404,14 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                             @if($requisition->user_id != Auth::user()->id)
                                                             @if($requisition->status == 'Paid' || $requisition->status == 'Confirmed')
                                                                 @if($requisition->gross_amount != RequisitionsController::getTotalAmountPaid($requisition->req_no) && Auth::user()->stafflevel_id == $financeDirector && $requisition->gross_amount > RequisitionsController::getTotalAmountPaid($requisition->req_no))
-                                                                    <!-- <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
-                                                                     Process Payment
-                                                                    </a> -->
-                                                                    <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                  @if($paid_amount < $amount_requested)
+                                                                    <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
                                                                      Process Payment
                                                                     </a>
+                                                                    <!-- <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-twitter">
+                                                                     Process Payment
+                                                                    </a> -->
+                                                                  @endif
                                                                 @endif
 
                                                             @elseif($requisition->status == 'onprocess' || $requisition->status == 'Rejected' && Auth::user()->stafflevel_id == $supervisor)
@@ -436,12 +468,14 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                                                         <p class="mt-2">Payments Completed</p>
 
                                                                 @elseif($requisition->status == 'Paid' || $requisition->status == 'Confirmed' && Auth::user()->stafflevel_id == $financeDirector && $requisition->gross_amount > RequisitionsController::getTotalAmountPaid($requisition->req_no))
-                                                                    <!-- <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
-                                                                     Process Payment
-                                                                    </a> -->
-                                                                    <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
+                                                                  @if($paid_amount < $amount_requested )
+                                                                    <a id="approveBtn" href="{{url('approve-requisition/'.$requisition->req_no)}}" class="btn btn-sm btn-info">
                                                                      Process Payment
                                                                     </a>
+                                                                    <!-- <a id="approveBtn" href="{{url('confirmation-form/'.$requisition->req_no)}}" class="btn btn-sm btn-twitter">
+                                                                     Process Payment
+                                                                    </a> -->
+                                                                  @endif
                                                                 @else
 
 

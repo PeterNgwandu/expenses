@@ -83,7 +83,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">{{$retirement->username}}</td>
                                                 <td scope="col" class="text-center">{{$retirement->department}}</td>
                                                 <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
-                                                <td scope="col" class="text-center">
+                                                <td scope="col" class="text-right">
                                                     {{number_format(RetirementController::getRetirementTotal($retirement->ret_no),2)}}
                                                 </td>
                                                 <td scope="col" class="text-center" style="width: 200px;">

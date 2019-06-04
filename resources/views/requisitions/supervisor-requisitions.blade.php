@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\Limits\Limit;
 use App\StaffLevel\StaffLevel;
@@ -66,32 +66,32 @@ $limitSupervisor = Limit::where('stafflevel_id',$supervisor)
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($submitted_requisitions as $requisition)
                                         @if($requisition->gross_amount < $limitSupervisor->max_amount)
                                             <tr>
-                                                <td scope="col" class="text-center">{{$requisition->username}}</td>
-                                                <td scope="col" class="text-center">{{$requisition->department}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->username}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->department}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->req_no}}</td>
-                                                <td scope="col" class="text-success text-center font-weight-bold">
-                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }} /=
+                                                <td scope="col" class="text-right">
+                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }}
                                                 </td>
                                                 <td scope="col" class="text-center">
                                                     <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>
-                                                
+
                                             </tr>
-                                        @endif    
+                                        @endif
                                         @endforeach
                                     </tbody>
                             </table>
                             @endif
                                 </div>
                             </div>
-                            
+
                         </div>
                 </div>
             </div>

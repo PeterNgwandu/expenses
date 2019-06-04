@@ -117,7 +117,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                           <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($requisition->gross_amount,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
@@ -126,7 +126,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Retired Amount</td>
                                                         <td scope="col" class="text-right">
-                                                            {{number_format($amount_retired,2)}}
+                                                            {{number_format($retired_amount,2)}}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -144,7 +144,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Total Paid</td>
                                                         <td style="background: #FFF6F4;" scope="col" class="text-right">
-                                                            {{number_format($amount_paid,2)}}
+                                                            {{number_format($paid_amount,2)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -177,19 +177,21 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_price}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->vat_amount}}</td>
-                                                           <td scope="col" class="text-right">{{number_format($amount_paid, 2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($requisition->gross_amount, 2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Retired Amount</td>
                                                         <td scope="col" class="text-right">
-                                                            {{number_format($amount_retired,2)}}
+                                                            {{number_format($retired_amount,2)}}
                                                         </td>
                                                     </tr>
                                                     <tr>
+                                                        <td></td>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
@@ -205,7 +207,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Total</td>
                                                         <td style="background: #FFF6F4;" scope="col" class="text-right">
-                                                            {{number_format($amount_paid, 2)}}
+                                                            {{number_format($paid_amount, 2)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -226,9 +228,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                             <?php $counter = 1; ?>
                                             @foreach($submitted_requisitions as $requisition)
                                                 <option value="{{$requisition->serial_no}}">
-                                                  <?php
-
-                                                     if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
+                                                  <?php if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
                                                 </option>
                                             @endforeach
                                         </select>
@@ -290,8 +290,11 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="ret_no" value="{{RetirementController::getTheLatestRetirementNumber() }}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
+                                            <?php $counter = 1; ?>
                                             @foreach($submitted_paid_no_budget as $requsition)
-                                                <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
+                                                <option value="{{$requisition->serial_no}}">
+                                                    <?php if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
+                                                </option>
                                             @endforeach
                                         </select>
                                         <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" />
@@ -322,13 +325,12 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                             @endforeach
                                         </select>
 
-                                        <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">
-
-                                        <span>
-                                           <i class="material-icons add-retirement md-10 align-middle mb-1 text-primary">add_circle</i>
-                                           {{-- <i class="material-icons delete-row md-10 align-middle mb-1 text-primary">remove</i>  --}}
-                                        </span>
-
+                                        <input required style="width: 280px;" type="text" name="description" class="form-control description" placeholder="Description">&nbsp;&nbsp;
+                                        <button style="height:35px;" class="btn  btn-sm btn-twitter add-retirement">
+                                          <span>
+                                             <i class="material-icons add-retirement md-10 align-middle mb-1 text-white">add_circle</i>Add Line
+                                          </span>
+                                        </button>
                                         <!-- <button type="submit" class="btn float-right btn-outline-primary mt-3 ml-1">Retire</button> -->
                                         <br>
                                         <hr><hr>

@@ -90,16 +90,18 @@ select,option {
                                     <form style="margin-top: 10px;" class="form-inline data retire-form" id="data">
                                         @csrf
                                         <input type="hidden" name="user_id" id="user_id" value="{{Auth::user()->id}}">
+                                        <input type="hidden" name="budget_id" id="mybudget_id" value="{{$budget}}">
                                         <input type="hidden" name="ret_no" value="{{ExpenseRetirementController::getTheLatestExpenseRetirementNumber() }}">
-                                        <select style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" name="budget_id" class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
-                                             <option value="Select Budget" selected disabled>
+                                        <input style="width: 140px;background: #ffffff;border: 1px solid #E5E8E8" id="budget" value="<?php if(!empty($budget_title)){echo $budget_title;}else{echo 'No Budget';} ?>" disabled class="form-control" data-toogle="tooltip" data-placement="top" title="Select Budget">
+                                             <!-- <option value="Select Budget" selected disabled>
                                                  Budget
                                              </option>
-                                             <option value="0">No Budget</option>
-                                             @foreach($budgets as $budget)
+                                             <option value="0">No Budget</option> -->
+                                             <!-- @foreach($budgets as $budget)
                                                  <option value="{{ $budget->id }}" @if (old('budget_id') == $budget->id) selected="selected" @endif>{{ $budget->title }}</option>
-                                             @endforeach
-                                        </select>
+                                             @endforeach -->
+
+                                        </input>
                                         <select style="width: 140px; margin-left: -140px;background: #ffffff;border: 1px solid #566573" id="item" name="item_id" class="form-control item" data-toogle="tooltip" data-placement="top" title="Select Budget Line">
                                              <option value="Select Budget" selected disabled>
                                                  Budget Line
@@ -174,6 +176,7 @@ select,option {
                                             </tr>
                                         </thead>
                                             <tbody>
+                                                @if(!$expense_retirement->isEmpty())
                                                   @foreach($expense_retirement as $retirement)
                                                       <tr>
                                                           <td scope="col" class="text-center"><input id="budget_id" disabled type="text" class="form-control budget_id" name="budget_id" value="<?php if($retirement->budget_id == 0){echo 'No Budget';}else{echo $retirement->budget;} ?>"></td>
@@ -209,6 +212,43 @@ select,option {
                                                       		</td>
                                                       </tr>
                                                   @endforeach
+                                                @else
+                                                  @foreach($expense_retirement_no_budget as $retirement)
+                                                      <tr>
+                                                          <td scope="col" class="text-center"><input id="budget_id" disabled type="text" class="form-control budget_id" name="budget_id" value="<?php if($retirement->budget_id == 0){echo 'No Budget';}else{echo $retirement->budget;} ?>"></td>
+                                                          <td scope="col" class="text-center"><input id="item_id" disabled type="text" class="form-control item_id" name="item_id" value="<?php if($retirement->item_id == null){echo 'No Budget Line';}else{echo $retirement->item;} ?>"></td>
+                                                          <td scope="col" class="text-center"><input id="supplier_id" data-id="{{$retirement->id}}" type="text" class="form-control supplier_id" name="supplier_id" value="{{$retirement->supplier_id}}"></td>
+                                                          <td scope="col" class="text-center"><input id="ref_no" data-id="{{$retirement->id}}" type="text" class="form-control ref_no" name="ref_no" value="{{$retirement->ref_no}}"></td>
+                                                          <td scope="col" class="text-center"><input id="purchase_date" data-id="{{$retirement->id}}" type="text" class="form-control datepicker purchase_date" name="purchase_date" value="{{$retirement->purchase_date}}"></td>
+                                                          <td scope="col" class="text-center"><input id="item_namme" data-id="{{$retirement->id}}" type="text" name="item_name" class="form-control item_namme" value="{{$retirement->item_name}}"></td>
+                                                          <td scope="col" class="text-center"><input id="unit_measure" data-id="{{$retirement->id}}" type="text" class="form-control unit_measure" name="unit_measure" value="{{$retirement->unit_measure}}"></td>
+                                                          <td scope="col" class="text-center"><input id="quantity" data-id="{{$retirement->id}}" type="text" class="form-control quantity" name="quantity" value="{{$retirement->quantity}}"></td>
+                                                          <td scope="col" class="text-center"><input id="unit_price" data-id="{{$retirement->id}}" type="text" class="form-control unit_price" name="unit_price" value="{{$retirement->unit_price}}"></td>
+                                                          <td scope="col" class="text-center">
+                                                            <select data-id="{{$retirement->id}}" id="vat" class="form-control vat" name="vat">
+                                                                <option selected value="{{$retirement->vat}}">{{$retirement->vat}}</option>
+                                                                <option value="VAT Inclusive">VAT Inclusive</option>
+                                                                <option value="VAT Exclusive">VAT Exclusive</option>
+                                                                <option value="Non VAT">Non VAT</option>
+                                                            </select>
+                                                        </td>
+                                                          <td scope="col" class="text-center">
+                                                            <select data-id="{{$retirement->id}}" id="account" type="text" class="form-control account" name="account">
+                                                                <option  value="{{$retirement->id}}" selected>{{$retirement->account}}</option>
+                                                                @foreach($accounts as $account)
+                                                                    <option value="{{$account->id}}">{{$account->account_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                          </td>
+                                                          <td scope="col" class="text-center"><input id="description" data-id="{{$retirement->id}}" type="text" class="form-control description" name="description" value="{{$retirement->description}}"></td>
+                                                          <td scope="col" class="text-center">
+                                                            <span>
+                                                                <i style="cursor: pointer;" retirement-no="{{$ret_no}}" data-id="{{$retirement->id}}" class="material-icons delete-expense-retirement-line md-10 align-middle mb-1 text-danger">delete_forever</i>
+                                                             </span>
+                                                          </td>
+                                                      </tr>
+                                                  @endforeach
+                                                @endif
                                             </tbody>
                                             <tbody class="render-edit-expense-retired-items">
 

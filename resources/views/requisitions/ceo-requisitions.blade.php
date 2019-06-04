@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
@@ -53,22 +53,22 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($submitted_requisitions as $requisition)
                                             <tr>
-                                                <td scope="col" class="text-center">{{$requisition->username}}</td>
-                                                <td scope="col" class="text-center">{{$requisition->department}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->username}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->department}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->req_no}}</td>
-                                                <td scope="col" class="text-success text-center font-weight-bold">
-                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }} /=
+                                                <td scope="col" class="text-right">
+                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }}
                                                 </td>
                                                 <td scope="col" class="text-center">
                                                     <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>
-                                                
+
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -76,7 +76,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                             @endif
                                 </div>
                             </div>
-                            
+
                         </div>
                 </div>
             </div>

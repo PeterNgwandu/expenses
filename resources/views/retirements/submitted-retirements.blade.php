@@ -89,6 +89,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Retiree</th>
                                             <th scope="col" class="text-center">Department</th>
                                             <th scope="col" class="text-center">Requisition No.</th>
+                                            <th scope="col" class="text-center">Activity Name</th>
                                             <th scope="col" class="text-center">Amount Retired</th>
                                             <th scope="col" class="text-center">Action</th>
                                         </tr>
@@ -100,14 +101,15 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">{{$retirement->username}}</td>
                                                 <td scope="col" class="text-center">{{$retirement->department}}</td>
                                                 <td scope="col" class="text-center">{{$retirement->req_no}}</td>
-                                                <td scope="col" class="text-center">
+                                                <td scope="col" class="text-left">{{$retirement->activity_name}}</td>
+                                                <td scope="col" class="text-right">
                                                     {{number_format(RetirementController::getTotalOfRetiredLines($retirement->req_no),2)}}
                                                 </td>
-                                                <td scope="col" class="text-center" style="width: 200px;">
+                                                <td scope="col" class="text-center">
 
 
 
-                                                        <a href="{{route('retirements->details',$retirement->req_no)}}" class="btn btn-sm btn-outline-info">View</a>
+                                                        <a href="{{route('retirements->details',$retirement->req_no)}}" class="btn btn-sm btn-twitter">View</a>
 
                                                 </td>
                                             </tr>

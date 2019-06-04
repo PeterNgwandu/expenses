@@ -7,43 +7,6 @@ use Illuminate\Support\Carbon;
 use App\Requisition\Requisition;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
-$stafflevels = StaffLevel::all();
-
-$hod = $stafflevels[0]->id;
-$ceo = $stafflevels[1]->id;
-$supervisor = $stafflevels[2]->id;
-$normalStaff = $stafflevels[3]->id;
-$financeDirector = $stafflevels[4]->id;
-
-
-$requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Deleted')->where('requisitions.status', '!=', 'Edited')->get();
-
-$approver = StaffLevel::join('requisitions','staff_levels.id', 'requisitions.approver_id')
-                           ->join('users','staff_levels.id','users.stafflevel_id')
-                           ->select('users.username as approver_name')
-                           ->where('requisitions.req_no', $req_no)
-                           ->where('users.username', '!=', 'Admin')
-                           ->first();
-
-$req = Requisition::where('req_no', $req_no)->where('status', '!=', 'Deleted')->where('requisitions.status', '!=', 'Edited')->where('budget_id',0)->get();
-
-$user = User::where('users.id', Requisition::where('req_no', $req_no)->distinct()->pluck('user_id'))
-        ->join('departments','users.department_id','departments.id')
-        ->select('users.*','departments.name as department')
-        ->first();
-
-$requisitions = Requisition::where('req_no', $req_no)
-                          ->join('budgets','requisitions.budget_id','budgets.id')
-                          ->join('items','requisitions.item_id','items.id')
-                          ->select('requisitions.*','budgets.title as budget','items.item_name as item')
-                          ->where('requisitions.status', '!=', 'Deleted')
-                          ->where('requisitions.status', '!=', 'Edited')
-                          ->get();
-
-$comments = Comment::where('req_no', $req_no)->join('users','comments.user_id','users.id')->select('comments.*', 'users.username as username')->get();
-
-$requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Deleted')->where('requisitions.status', '!=', 'Edited')->first();
-
 ?>
 @extends('layout.app')
 
@@ -65,7 +28,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Payment Confirmation Form</h4>
 
-                                    <a data-value="{{$req_no}}" href="{{url('confirmation/'.$requisition->req_no)}}" target="__blank" style="border-radius: 0px !important;" class="btn btn-sm  btn-secondary mt-2">
+                                    <a data-value="{{$lastRow->ret_no}}" href="{{url('expense-retirement-confirmation/'.$lastRow->ret_no)}}" target="__blank" style="border-radius: 0px !important;" class="btn btn-sm  btn-secondary mt-2">
                                         <span>
                                             <i style="cursor: pointer;" class="material-icons  md-2 align-middle">print</i>
                                         </span>
@@ -80,34 +43,41 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                   <div class="col col-lg-8 mt-4 mr-5 ml-5">
                                       <div class="">
                                         <span>
-                                            <span class="font-weight-bold">PAYMENT VOUCHER No. {{$payment_details->ref_no}} </span>
+
+                                          @if($lastRow->status == 'Paid')
+                                            <span class="font-weight-bold">PAYMENT VOUCHER No. {{$lastRow->ref_no}} </span>
+                                          @endif
                                             <span class="float-right font-weight-bold">DATE. {{Carbon::now()->toFormattedDateString()}} </span>
                                         </span>
                                       </div>
                                       <div class="mt-2 font-weight-bold">
-                                            <span>PAID TO: {{$paid_to->username}}</span>
+
+                                          @if($lastRow->status == 'Paid')
+                                            <span>PAID TO: {{$lastRow->username}}</span>
+                                          @endif
                                       </div>
                                       <div class="mt-4">
-                                            <span>Paid via: {{$payment_details->account}}</span>
+                                            <span>Paid via: {{$lastRow->account}}</span>
                                       </div>
                                       <div class="mt-1">
-                                            <span>AMOUNT IN Tsh: {{number_format($payment_details->amount_paid,2)}}</span>
+                                            <span>AMOUNT IN Tsh: {{number_format($lastRow->amount_paid,2)}}</span>
                                       </div>
                                       <div class="mt-1">
                                             <?php
                                                 $string = 'point Zero Zero';
-                                                $amount_in_words = RequisitionsController::convert_number_to_words($payment_details->amount_paid)
+                                                $amount_in_words = RequisitionsController::convert_number_to_words($lastRow->amount_paid)
                                             ?>
                                             <span>Amount in words: {{str_replace($string, 'Tsh', $amount_in_words)}}</span>
                                       </div>
+
                                       <div class="mt-4 font-weight-bold">
-                                            <span>DETAILS OF REQISITION: </span>
+                                            <span>DETAILS OF EXPENSE RETIREMEMT </span>
                                       </div>
                                       <div class="mt-1">
-                                            <span>Requisition No: <span class="font-weight-bold">{{$req_no}}</span></span>
+                                            <span>Expense Retirement No: <span class="font-weight-bold">{{$lastRow->ret_no}}</span></span>
                                       </div>
                                       <div class="mt-1">
-                                            <span>Comments: {{$payment_details->comment}}</span>
+                                            <span>Comments: {{$lastRow->comment}}</span>
                                       </div>
                                       <table class="table table-bordered mt-3">
                                           <thead style="display:none;">
@@ -116,11 +86,11 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                           </thead>
                                           <body>
                                               <td>
-                                                <p>Received By: {{$payment_details->cash_collector}}</p>
+                                                <p>Received By: {{$lastRow->username}}</p>
                                                 <p class="mt-2">Sign: ......................................................</p>
                                               </td>
                                               <td>
-                                                <p>Paid By: {{$payer_name->username}}</p>
+                                                <p>Paid By: {{$lastRow->cash_collector}}</p>
                                                 <p class="mt-2">Sign: ...........................................................</p>
                                               </td>
                                           </body>

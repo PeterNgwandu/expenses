@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Carbon;
+use App\Retirement\Retirement;
+use App\Requisition\Requisition;
+use App\Accounts\FinanceSupportiveDetail;
 use App\Http\Controllers\Retirements\RetirementController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
@@ -40,7 +43,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-6">
-                                    <h4 class="card-title">Submitted Requisitions</h4>
+                                    <h4 class="card-title">Paid Requisitions (<small>Ready to Retire</small>)</h4>
                                 </div>
                             </div>
                         </div>
@@ -60,21 +63,41 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                     </thead>
                                     <tbody>
                                         @foreach($paid_requisitions as $requisition)
-                                            <tr>
-                                                <td scope="col" class="text-center">{{$requisition->username}}</td>
-                                                <td scope="col" class="text-center">{{$requisition->department}}</td>
-                                                <td scope="col" class="text-center">{{$requisition->req_no}}</td>
-                                                <td scope="col" class="text-left">{{$requisition->activity_name}}</td>
-                                                <td scope="col" class="text-success text-center font-weight-bold">
-                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no)) }}
-                                                </td>
-                                                <td scope="col" class="text-center">
-                                                    <a href="{{route('paid-requisition',$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
-                                                </td>
+                                            <?php
+                                                $amount_retired = Retirement::where('req_no', $requisition->req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+                                                $amount_requested = Requisition::where('requisitions.req_no', $requisition->req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
+                                                $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition->req_no)->where('status', 'Pay')->sum('amount_paid');
+                                                $amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition->req_no)->where('status', 'Receive')->sum('amount_paid');
+                                                $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition->req_no)->where('status', 'Return')->sum('amount_paid');
+                                                $amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+                                                $paid_amount = $amount_paid + $amount_returned;
+                                                $retired_amount = $amount_retired + $amount_received;
+                                                $amount_unretired = $paid_amount - $retired_amount;
+                                                $amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
+                                            ?>
+                                                @if($amount_unretired > 0)
+                                                  <tr>
+                                                      <td scope="col" class="text-center">{{$requisition->username}}</td>
+                                                      <td scope="col" class="text-center">{{$requisition->department}}</td>
+                                                      <td scope="col" class="text-center">{{$requisition->req_no}}</td>
+                                                      <td scope="col" class="text-left">{{$requisition->activity_name}}</td>
+                                                      <td scope="col" class="text-right">
+                                                          {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }}
+                                                      </td>
+                                                      <td scope="col" class="text-center">
+                                                          <a href="{{route('paid-requisition',$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
+                                                      </td>
 
-                                            </tr>
+                                                  </tr>
+                                                @endif
                                         @endforeach
                                     </tbody>
+                                    @else
+                                    <div class="col-lg-2">
+                                        <button type="button" class="btn btn-sm btn-outline-twitter">
+                                          Nothing To Retire
+                                        </button>
+                                    </div>
                                     @endif
                                     {{-- @if($paid_requisitions->isEmpty())
                                     <thead>

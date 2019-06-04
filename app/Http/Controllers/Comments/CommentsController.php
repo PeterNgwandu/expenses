@@ -138,6 +138,6 @@ class CommentsController extends Controller
 
         alert()->success('Comments added successfuly', '');
         session()->flash('message', 'Comment has being added');
-        return redirect(url('/expense_retirements/'.$request->ret_no));
+        return redirect(url('/expense_retirements/pending'));
     }
 }

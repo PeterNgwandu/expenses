@@ -49,7 +49,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Confirmed Retirements
+                                    <h4 class="card-title">Submitted Retirements
                                         <span class="float-right">
                                             <p class="lead" style="color: #35A45A;">Retired Requisitions
                                                 <span>
@@ -88,8 +88,9 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                         <tr>
                                             <th scope="col" class="text-center">Retiree</th>
                                             <th scope="col" class="text-center">Department</th>
-                                            <th scope="col" class="text-center">Retirement No.</th>
-                                            <th scope="col" class="text-center">Gross Amount</th>
+                                            <th scope="col" class="text-center">Requisition No.</th>
+                                            <th scope="col" class="text-center">Activity Name</th>
+                                            <th scope="col" class="text-center">Amount Retired</th>
                                             <th scope="col" class="text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -99,16 +100,13 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <tr>
                                                 <td scope="col" class="text-center">{{$retirement->username}}</td>
                                                 <td scope="col" class="text-center">{{$retirement->department}}</td>
-                                                <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
+                                                <td scope="col" class="text-center">{{$retirement->req_no}}</td>
+                                                <td scope="col" class="text-left">{{$retirement->activity_name}}</td>
                                                 <td scope="col" class="text-right">
-                                                    {{number_format(RetirementController::getRetirementTotal($retirement->ret_no),2)}}
+                                                    {{number_format(RetirementController::getTotalOfRetiredLines($retirement->req_no),2)}}
                                                 </td>
                                                 <td scope="col" class="text-center">
-
-
-
-                                                        <a href="{{route('view-retirements',$retirement->ret_no)}}" class="btn btn-sm btn-twitter">View</a>
-
+                                                    <a href="{{route('requisition.retirements',$retirement->req_no)}}" class="btn btn-sm btn-twitter">View</a>
                                                 </td>
                                             </tr>
                                         @endforeach

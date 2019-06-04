@@ -79,7 +79,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                 <tr>
                                                     <td scope="col" class="text-center">{{$retirement->username}}</td>
                                                     <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
-                                                    <td scope="col" class="text-center">{{ number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no))}}/=</td>
+                                                    <td scope="col" class="text-right">{{ number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
                                                     <td scope="col" class="text-center">
                                                         <a class="btn btn-sm btn-outline-success" href="{{route('expense_retirements.show',$retirement->ret_no)}}">View</a>
                                                     </td>

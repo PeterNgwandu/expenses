@@ -68,7 +68,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                               <div class="col col-lg-8 mt-4">
                                   <div class="">
                                     <span>
-                                        <span class="font-weight-bold">PAYMENT VOUCHER No. {{RequisitionsController::generateVoucherNo()}} </span>
+                                        <span class="font-weight-bold">PAYMENT VOUCHER No. {{$payment_details->ref_no}} </span>
                                         <!-- <span class="float-right font-weight-bold">DATE. {{Carbon::now()->toFormattedDateString()}} </span> -->
                                     </span>
                                   </div>
@@ -76,25 +76,26 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                         <span>PAID TO: {{$paid_to->username}}</span>
                                   </div>
                                   <div class="mt-4">
-                                        <span>Paid via: </span>
+                                        <span>Paid via: {{$payment_details->account}}</span>
                                   </div>
                                   <div class="mt-1">
-                                        <span>AMOUNT IN Tsh: </span>
+                                        <span>AMOUNT IN Tsh: {{number_format($payment_details->amount_paid,2)}}</span>
                                   </div>
                                   <div class="mt-1">
-                                        <span>Amount in words: </span>
+                                        <?php
+                                            $string = 'point Zero Zero';
+                                            $amount_in_words = RequisitionsController::convert_number_to_words($payment_details->amount_paid)
+                                        ?>
+                                        <span>Amount in words: {{str_replace($string, 'Tsh', $amount_in_words)}}</span>
                                   </div>
                                   <div class="mt-4 font-weight-bold">
-                                        <span>DETAILS OF REQISITION / EXPENSE RETIREMENT: </span>
+                                        <span>DETAILS OF REQISITION: </span>
                                   </div>
                                   <div class="mt-1">
                                         <span>Requisition No: <span class="font-weight-bold">{{$req_no}}</span></span>
                                   </div>
                                   <div class="mt-1">
-                                        <span>Expense Retirement No: </span>
-                                  </div>
-                                  <div class="mt-1">
-                                        <span>Comments: </span>
+                                        <span>Comments: {{$payment_details->comment}}</span>
                                   </div>
                                   <table class="table table-bordered mt-3">
                                       <thead style="display:none;">
@@ -103,7 +104,7 @@ $requisition = Requisition::where('req_no', $req_no)->where('status', '!=', 'Del
                                       </thead>
                                       <body>
                                           <td>
-                                            <p>Received By: {{$paid_to->username}}</p>
+                                            <p>Received By: {{$payment_details->cash_collector}}</p>
                                             <p class="mt-2">Sign: ......................................................</p>
                                           </td>
                                           <td>

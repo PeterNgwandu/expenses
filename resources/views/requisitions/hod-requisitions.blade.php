@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\Limits\Limit;
 use App\StaffLevel\StaffLevel;
@@ -37,7 +37,7 @@ $limitHOD = Limit::where('stafflevel_id',$hod)
                                     <h4 class="card-title">Submitted Requisitions</h4>
                                 </div>
                             </div>
-                        </div> 
+                        </div>
                             <div class="py-4">
                                     <p class="text-twitter ml-4">Filter by Date</p>
                                     <form action="{{ route('submitted_filter_by_date') }}" method="POST" class="form-inline ml-4">
@@ -66,23 +66,23 @@ $limitHOD = Limit::where('stafflevel_id',$hod)
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Totals</th>
                                             <th scope="col" class="text-center">Action</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($submitted_requisitions as $requisition)
                                         @if($requisition->gross_amount < $limitHOD->max_amount)
                                             <tr>
-                                                <td scope="col" class="text-center">{{$requisition->username}}</td>
-                                                <td scope="col" class="text-center">{{$requisition->department}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->username}}</td>
+                                                <td scope="col" class="text-left">{{$requisition->department}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->req_no}}</td>
-                                                <td scope="col" class="text-success text-center font-weight-bold">
-                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }} /=
+                                                <td scope="col" class="text-right">
+                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no),2) }}
                                                 </td>
                                                 <td scope="col" class="text-center">
                                                     <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>
-                                                
+
                                             </tr>
                                         @endif
                                         @endforeach
@@ -91,7 +91,7 @@ $limitHOD = Limit::where('stafflevel_id',$hod)
                             @endif
                                 </div>
                             </div>
-                            
+
                         </div>
                 </div>
             </div>

@@ -115,23 +115,23 @@ $(document).on('click', '.delete', function(e) {
         });
 });
 
-$(document).on('change', '#budget', function() {
-    var budget_id = $(this).val();
-    var url = 'get_next_item_no_by_budget_id/' + budget_id;
-    $.get(url, function(data) {
+// $(document).on('change', '#budget', function() {
+//     var budget_id = $(this).val();
+//     var url = 'get_next_item_no_by_budget_id/' + budget_id;
+//     $.get(url, function(data) {
         // console.log(data.result);
-        $('#item_no').val(data.result);
-    });
-});
+//         $('#item_no').val(data.result);
+//     });
+// });
 
-$(document).on('change', '#budget2', function() {
-    var budget_id = $(this).val();
-    var url = 'get_next_item_no_by_budget_id_two/' + budget_id;
-    $.get(url, function(data) {
+// $(document).on('change', '#budget2', function() {
+//     var budget_id = $(this).val();
+//     var url = 'get_next_item_no_by_budget_id_two/' + budget_id;
+//     $.get(url, function(data) {
         // console.log(data.result);
-        $('#item_no2').val(data.result);
-    });
-});
+//         $('#item_no2').val(data.result);
+//     });
+// });
 
 $(document).on('click', '.delete-user', function() {
     var currentRow = $(this);
@@ -820,7 +820,7 @@ $(document).on('click', '.submit-edit-expense-retire', function(e) {
       console.log(localStorage.getItem("budget_id"));
     }
     var ret_no = $(this).attr("ret-no");
-    var budget_id = $(this).closest('form').find('select[name=budget_id]').val();
+    var budget_id = $(this).closest('form').find('input[name=budget_id]').val();
     var item_id = $(this).closest('form').find('select[name=item_id]').val();
     var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
     var ref_no = $(this).closest('form').find('input[name=ref_no]').val();

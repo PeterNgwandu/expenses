@@ -290,7 +290,7 @@ select,option {
               // swal('Alert', 'Please use only one activity name for one requisition', 'warning');
             }
           });
-        })
+        });
 
 
 
@@ -353,6 +353,7 @@ select,option {
                           }
                         });
                     }
+
                     $("#data").find("#item_name2").val('');
                     $("#data").find("#unit_measure").val('');
                     $("#data").find("#quantity").val('');

@@ -124,9 +124,27 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->item_name}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                           <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format($requisition->gross_amount,2)}}</td>
                                                         </tr>
                                                     @endforeach
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Amount Requested</td>
+                                                        <td scope="col" class="text-right">
+                                                            {{number_format($amount_requested,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">
+                                                            {{number_format($paid_amount,2)}}
+                                                        </td>
+                                                    </tr>
                                                     <tr>
                                                         <td></td>
                                                         <td></td>
@@ -142,18 +160,17 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Amount Unretired</td>
                                                         <td scope="col" class="text-right">
-                                                            {{number_format($amount_unretired,2)}}
+                                                            <?php
+                                                              if($amount_unretired < 0)
+                                                              {
+                                                                  echo 'N/A';
+                                                              }else{
+                                                                  echo number_format($amount_unretired,2);
+                                                              }
+                                                            ?>
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
-                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">
-                                                            {{number_format($amount_paid,2)}}
-                                                        </td>
-                                                    </tr>
+
                                                 </tbody>
                                                 @endif
                                                 @if($submitted_requisitions->isEmpty())
@@ -184,7 +201,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                            <td scope="col" class="text-center">{{$requisition->quantity}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->unit_price}}</td>
                                                            <td scope="col" class="text-center">{{$requisition->vat_amount}}</td>
-                                                           <td scope="col" class="text-center">{{$requisition->gross_amount}}</td>
+                                                           <td scope="col" class="text-center">{{number_format($requisition->gross_amount,2)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     <tr>
@@ -212,8 +229,11 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no" data-toogle="tooltip" data-placement="top" title="Select Requisition Serial Number">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
+                                            <?php $counter = 1; ?>
                                             @foreach($submitted_requisitions as $requisition)
-                                                <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
+                                                <option value="{{$requisition->serial_no}}">
+                                                    <?php if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
+                                                </option>
                                             @endforeach
                                         </select>
                                         <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">
@@ -270,8 +290,11 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                         <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                         <select required style="width: 140px;background: #ffffff;border: 1px solid #566573" name="serial_no" class="form-control serial_no">
                                             <option value="Serial_No" selected disabled="">Serial No.</option>
+                                            <?php $counter = 1; ?>
                                             @foreach($submitted_paid_no_budget as $requsition)
-                                                <option value="{{$requisition->serial_no}}">{{$requisition->serial_no}}</option>
+                                                <option value="{{$requisition->serial_no}}">
+                                                    <?php if($requisition->count() != 0) {echo '<ol><li>'.$counter++.'</li></ol>';}?>
+                                                </option>
                                             @endforeach
                                         </select>
                                         <input required type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" />
@@ -360,10 +383,10 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
                                           </tbody>
 
-                                          <tbody class="render-edit-retired-items">
-
-                                          </tbody>
                                         @endforeach
+                                        <tbody class="render-edit-retired-items">
+
+                                        </tbody>
 
                                     </table>
 

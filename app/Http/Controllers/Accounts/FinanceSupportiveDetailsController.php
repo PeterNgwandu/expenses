@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Accounts;
 use DB;
 use Alert;
 use Illuminate\Http\Request;
+use App\Retirement\Retirement;
 use App\Requisition\Requisition;
 use App\Http\Controllers\Controller;
 use App\Accounts\FinanceSupportiveDetail;
@@ -80,6 +81,7 @@ class FinanceSupportiveDetailsController extends Controller
         }else{
             alert()->error('You have successfuly paid ' . number_format($request->amount_paid) , 'Good Job')->persistent('Close');
             $financeSupportiveDetails->save();
+
         }
 
 
@@ -90,7 +92,7 @@ class FinanceSupportiveDetailsController extends Controller
                     'status' => "Paid"
                 ]);
                 session()->flash('message', 'Finance Supportive Details added');
-                return redirect(url('/paid-requisitions'));
+                return redirect(url('confirmation-form/'.$request->req_no));
             }
         }
 
@@ -100,7 +102,51 @@ class FinanceSupportiveDetailsController extends Controller
             return redirect(url('/paid-requisitions'));
         }
 
-        return redirect(url('/paid-requisitions'));
+        return redirect(url('confirmation-form/'.$request->req_no));
+    }
+
+    public function receiveReturnPayments(Request $request)
+    {
+        $req_no = $request->req_no;
+
+        $amount_retired = Retirement::where('req_no', $req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
+        $amount_requested = Requisition::where('requisitions.req_no', $req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
+        $amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+        $amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Receive')->sum('amount_paid');
+        $amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Return')->sum('amount_paid');
+        // $amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+        $paid_amount = $amount_paid + $amount_returned;
+        $amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
+        $retired_amount = $amount_retired + $amount_received;
+        $amount_unretired = $paid_amount - $retired_amount;
+
+        if($amount_claimed > 0)
+        {
+            $status = 'Return';
+        }elseif($amount_unretired > 0)
+        {
+            $status = 'Receive';
+        }
+
+        $financeSupportiveDetails = new FinanceSupportiveDetail();
+        $financeSupportiveDetails->req_no = $request->req_no;
+        $financeSupportiveDetails->cash_collector = $request->cash_collector;
+        $financeSupportiveDetails->amount_paid = $request->amount_paid;
+        $financeSupportiveDetails->account_id = $request->account_id;
+        $financeSupportiveDetails->ref_no = $request->ref_no;
+        $financeSupportiveDetails->comment = $request->comment;
+        $financeSupportiveDetails->payment_date = $request->payment_date;
+        $financeSupportiveDetails->status = $status;
+        $financeSupportiveDetails->save();
+
+        $lastRow = FinanceSupportiveDetail::join('users','requisitions.user_id','users.id')
+                                          ->join('accounts','finance_supportive_details.account_id','accounts.id')
+                                          ->select('finance_supportive_details.status','finance_supportive_details.req_no','finance_supportive_details.comment', 'cash_collector', 'amount_paid', 'finance_supportive_details.ref_no','accounts.account_name as account','users.username as username')
+                                          ->orderBy('finance_supportive_details.created_at', 'desc')
+                                          ->first();
+
+        return view('retirements.payments-confirmation-form', compact('lastRow'));
+
     }
 
     public static function generateReferenceNo()

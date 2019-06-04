@@ -7,19 +7,9 @@ use App\Http\Controllers\Item\ItemController;
 use App\Http\Controllers\Budgets\BudgetsController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 use App\Http\Controllers\Accounts\FinanceSupportiveDetailsController;
-
+use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
 // foreach ($data as $data) :
-
-$requisitions = Requisition::where('req_no',$requisitionID->req_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->distinct()->get();
-
-$requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_no)
-                          ->join('budgets','requisitions.budget_id','budgets.id')
-                          ->join('items','requisitions.item_id','items.id')
-                          ->select('requisitions.*','budgets.title as budget','items.item_name as item')
-                          ->where('requisitions.status', '!=', 'Deleted')
-                          ->where('requisitions.status', '!=', 'Edited')
-                          ->get();
 
 ?>
 
@@ -54,7 +44,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h2 class="card-title">Adding Additional Finance Supportive Details</h2>
+                                    <h2 class="card-title">Pay Expense Retirement</h2>
                                 </div>
                             </div>
                         </div>
@@ -66,53 +56,40 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                         <div class="col-lg-12">
                             <div class="col-lg-6 mt-2">
                                     <table class="table table-sm table-striped table-bordered">
-                                        @if(!$requisitions2->isEmpty())
+
+                                        @if(!$expense_retirement->isEmpty())
                                         <thead>
                                             <tr>
-                                                <th>Requisition Details</th>
+                                                <th>Expense Retirement Details</th>
                                             </tr>
                                             <tr>
-                                                <th  scope="col" class="text-center">Requisition No.</th>
+                                                <th scope="col" class="text-center">Expense Retirement No.</th>
                                                 <th scope="col" class="text-center">Budget</th>
                                                 <th scope="col" class="text-center">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-
-                                            <tr>
-                                               <td scope="col" class="text-center">{{$requisitions2[0]->req_no}}</td>
-                                               <td scope="col" class="text-center">{{$requisitions2[0]->budget}}</td>
-                                               @if($requisitions2[0]->status == 'onprocess')
-                                                <td scope="col" class="text-center text-danger">{{$requisitions2[0]->status}}</td>
-                                               @else
-                                               <td scope="col" style="color:#088958" class="text-center">{{$requisitions2[0]->status}}</td>
-                                               @endif
-                                            </tr>
-
+                                              <tr>
+                                                  <td scope="col" class="text-center">{{$expense_retirement[0]->ret_no}}</td>
+                                                  <td scope="col" class="text-center">{{$expense_retirement[0]->budget}}</td>
+                                                  <td scope="col" class="text-center">{{$expense_retirement[0]->status}}</td>
+                                              </tr>
                                         </tbody>
-                                        @endif
-                                        @if($requisitions2->isEmpty())
+                                        @elseif($expense_retirement->isEmpty())
                                         <thead>
                                             <tr>
-                                                <th>Requisition Details</th>
+                                                <th>Expense Retirement Details</th>
                                             </tr>
                                             <tr>
-                                                <th scope="col" class="text-center">Requisition No.</th>
+                                                <th scope="col" class="text-center">Expense Retirement No.</th>
                                                 <th scope="col" class="text-center">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                                <?php $req = Requisition::where('req_no', $requisition_no)->where('budget_id',0)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->get(); ?>
-                                                @if($req[0]->budget_id == 0)
-                                                    <tr>
-                                                   <td scope="col" class="text-center">{{$req[0]->req_no}}</td>
-                                                   @if($req[0]->status == 'onprocess')
-                                                    <td scope="col" class="text-center text-danger">{{$req[0]->status}}</td>
-                                                   @endif
-                                                   <td scope="col" style="color:#088958" class="text-center">{{$req[0]->status}}</td>
-
-                                                </tr>
-                                                @endif
+                                              <tr>
+                                                  <td scope="col" class="text-center">{{$ex_retirement_no_budget[0]->ret_no}}</td>
+                                                  <td scope="col" class="text-center">{{$ex_retirement_no_budget[0]->status}}</td>
+                                              </tr>
                                         </tbody>
                                         @endif
                                     </table>
@@ -121,7 +98,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                         <div  class="col-lg-12">
                             <div class="col-lg-12 mt-2">
                                     <table class="table table-sm table-striped table-bordered">
-                                        @if(!$requisitions2->isEmpty())
+                                        @if(!$expense_retirement->isEmpty())
                                         <thead>
                                             <tr>
                                                 <th>Totals Summary</th>
@@ -141,17 +118,17 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($requisitions2 as $requisition)
+                                            @foreach($expense_retirement as $retirement)
                                                 <tr>
-                                                   <td scope="col" class="text-center">{{$requisition->item}}</td>
-                                                   <td scope="col" class="text-center">{{$requisition->item_name}}</td>
-                                                   <td scope="col" class="text-center">{{$requisition->description}}</td>
-                                                   <td scope="col" class="text-center">{{$requisition->created_at->toFormattedDateString()}}</td>
-                                                   <td scope="col" class="text-center">{{$requisition->unit_measure}}</td>
-                                                   <td scope="col" class="text-center">{{$requisition->quantity}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($requisition->unit_price,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($requisition->vat_amount,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($requisition->gross_amount,2)}}</td>
+                                                   <td scope="col" class="text-left">{{$retirement->item}}</td>
+                                                   <td scope="col" class="text-left">{{$retirement->item_name}}</td>
+                                                   <td scope="col" class="text-left">{{$retirement->description}}</td>
+                                                   <td scope="col" class="text-center">{{$retirement->created_at->toFormattedDateString()}}</td>
+                                                   <td scope="col" class="text-center">{{$retirement->unit_measure}}</td>
+                                                   <td scope="col" class="text-center">{{$retirement->quantity}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->unit_price,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->vat_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
 
                                                 </tr>
                                             @endforeach
@@ -164,9 +141,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td scope="col" class="text-left">Total</td>
-                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
-
-
+                                                <td scope="col" class="text-right">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td></td>
@@ -177,7 +152,7 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td scope="col" class="text-left">Amount Paid</td>
-                                                <td scope="col" class="text-right">{{number_format($paid_amount,2)}}</td>
+                                                <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td></td>
@@ -187,18 +162,23 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td scope="col" class="text-left">Balance Remained</td>
-                                                <td scope="col" class="text-right">
-                                                  @if(number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no,2) - $paid_amount) < 0)
-                                                      N/A
-                                                  @else
-                                                      {{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no,2) - $paid_amount)}}
-                                                  @endif
-                                                </td>
+                                                <td scope="col" class="text-left">Amount Retired</td>
+                                                <td scope="col" class="text-right">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Claimed</td>
+                                                <td scope="col" class="text-right">{{number_format($balance,2)}}</td>
                                             </tr>
                                         </tbody>
                                         @endif
-                                        @if($requisitions2->isEmpty())
+                                        @if($expense_retirement->isEmpty())
                                         <thead>
                                             <tr>
                                                 <th>Totals Summary</th>
@@ -211,23 +191,19 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <th scope="col" class="text-center">Unit Price</th>
                                                 <th scope="col" class="text-center">VAT Amount</th>
                                                 <th scope="col" class="text-center">Gross Amount</th>
-                                                <th scope="col" class="text-center">Amount Paid</th>
-                                                <th scope="col" class="text-center">Amount Remained</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $req = Requisition::where('req_no', $requisition_no)->where('status', '!=', 'Deleted')->where('status', '!=', 'Edited')->where('budget_id',0)->get(); ?>
-                                            @foreach($req as $req)
+
+                                            @foreach($ex_retirement_no_budget as $retirement)
                                                 <tr>
-                                                   <td scope="col" class="text-center">{{$req->item_name}}</td>
-                                                   <td scope="col" class="text-center">{{$req->description}}</td>
-                                                   <td scope="col" class="text-center">{{$req->unit_measure}}</td>
-                                                   <td scope="col" class="text-center">{{$req->quantity}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($req->unit_price,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($req->vat_amount,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format($req->gross_amount,2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
-                                                   <td scope="col" class="text-right">{{number_format(RequisitionsController::getTotalPerSerialNo($req->req_no,$req->serial_no) - RequisitionsController::getAmountPaid($req->req_no,$req->serial_no),2)}}</td>
+                                                   <td scope="col" class="text-left">{{$retirement->item_name}}</td>
+                                                   <td scope="col" class="text-left">{{$retirement->description}}</td>
+                                                   <td scope="col" class="text-center">{{$retirement->unit_measure}}</td>
+                                                   <td scope="col" class="text-center">{{$retirement->quantity}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->unit_price,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->vat_amount,2)}}</td>
+                                                   <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
                                                 </tr>
                                             @endforeach
                                             <tr>
@@ -236,22 +212,17 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td></td>
-                                                <td></td>
                                                 <td scope="col" class="text-left">Total</td>
-                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no),2)}}</td>
-
+                                                <td scope="col" class="text-right">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
                                             </tr>
                                             <tr>
-                                                <td></td>
-                                                <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td scope="col" class="text-left">Amount Paid</td>
-                                                <td scope="col" class="text-right">{{number_format(FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                                <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td></td>
@@ -259,10 +230,17 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
+                                                <td scope="col" class="text-left">Amount Retired</td>
+                                                <td scope="col" class="text-right">{{number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td></td>
                                                 <td></td>
-                                                <td scope="col" class="text-left">Balance Remained</td>
-                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getRequisitionTotal($requisitionID->req_no) - FinanceSupportiveDetailsController::amountPaid($requisitionID->req_no),2)}}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td scope="col" class="text-left">Balance Claimed</td>
+                                                <td scope="col" class="text-right">{{number_format($balance,2)}}</td>
                                             </tr>
                                         </tbody>
                                         @endif
@@ -272,16 +250,13 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
 
                         </div>
                         <div class="card-body">
-                            <form class="form-inline" action="{{ route('finance-supportive-detail.store') }}" method="POST">
+                            <form class="form-inline" action="{{ route('expense-retirement-payments.store') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="payment_date" value="{{ now() }}">
-                                <input type="hidden" name="req_id" value="{{ $requisitionID->id }}">
-                                <input type="hidden" name="req_no" value="{{$requisitionID->req_no}}">
+                                <input type="hidden" name="ret_no" value="{{$ret_no}}">
                                 <!--  -->
 
                                         <div class="form-group">
-                                            <input type="hidden" name="req_no" value="{{$requisitionID->req_no}}">
-                                            <input style="width: 140px;" type="text" name="ref_no" class="form-control" placeholder="Enter Reference No." value="{{FinanceSupportiveDetailsController::generateReferenceNo()}}" data-toogle="tooltip" data-placement="top" title="Receipt Number (Automatic Generated)">
+                                            <input disabled style="width: 140px;" type="text" name="ref_no" class="form-control" placeholder="Enter Reference No." value="{{ExpenseRetirementController::generateReferenceNo()}}" data-toogle="tooltip" data-placement="top" title="Receipt Number (Automatic Generated)">
                                         </div>
 
 
@@ -306,13 +281,11 @@ $requisitions2 = Requisition::where('requisitions.req_no', $requisitionID->req_n
                                         </div>
                                         <hr>
                                         <div class="form-group">
-                                            <input style="width: 340px;" type="text" class="form-control" name="comment" placeholder="Comment" data-toogle="tooltip" data-placement="top" title="Add Comment"/>
+                                            <input style="width: 362px;" type="text" class="form-control" name="comment" placeholder="Comment" data-toogle="tooltip" data-placement="top" title="Add Comment"/>
                                         </div>
 
-                                <button type="submit" class="btn btn-outline-primary">Add</button>
-                                <!-- <a id="approveBtn" href="{{url('confirmation-form/'.$requisitionID->req_no)}}" class="btn btn-sm btn-twitter">
-                                 Process Payment
-                                </a> -->
+                                <button type="submit" class="btn btn-twitter">Pay</button>
+
                             </form>
                             @if($flash = session('message'))
                                 <div id="flash" class="alert alert-info">

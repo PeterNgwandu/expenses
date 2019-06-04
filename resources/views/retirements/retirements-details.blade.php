@@ -58,9 +58,17 @@ $comments = RetirementComment::where('retirement_comments.ret_no', $retirement->
 $amount_finance_can_approve = Limit::where('stafflevel_id',$hod)->select('max_amount')->first();
 $amount_retired = Retirement::where('req_no', $req_no)->where('status', '!=', 'Edited')->sum('gross_amount');
 $amount_requested = Requisition::where('requisitions.req_no', $requisition_no->req_no)->where('status','!=','Deleted')->where('status','!=','Edited')->sum('requisitions.gross_amount');
-$amount_paid = FinanceSupportiveDetail::join('requisitions','finance_supportive_details.req_no','requisitions.req_no')->where('finance_supportive_details.req_no', $req_no)->sum('amount_paid');
-$amount_unretired = $amount_paid - $amount_retired;
- ?>
+$amount_paid = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $req_no)->where('status', 'Pay')->sum('amount_paid');
+$amount_received = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition_no->req_no)->where('status', 'Receive')->sum('amount_paid');
+$amount_returned = FinanceSupportiveDetail::where('finance_supportive_details.req_no', $requisition_no->req_no)->where('status', 'Return')->sum('amount_paid');
+$amount_unretired = $amount_paid - ($amount_retired + $amount_received + $amount_returned);
+$paid_amount = $amount_paid + $amount_returned;
+$retired_amount = $amount_retired + $amount_received;
+$amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
+
+
+
+?>
 @extends('layout.app')
 <style type="text/css">
     .mydata {
@@ -104,7 +112,7 @@ $amount_unretired = $amount_paid - $amount_retired;
                             </div>
                         </div>
                             <div class="row">
-                                <div class="col-4 ml-3">
+                                <div class="col-6 ml-3">
                                     <div class="row align-items-center">
                                         <div class="col-lg-8 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
@@ -132,7 +140,7 @@ $amount_unretired = $amount_paid - $amount_retired;
                                     </div>
                                 </div>
                                 <div class="col-lg-12 ml-1">
-                                    <div class="col-lg-6 mt-2">
+                                    <div class="col-lg-8 mt-2">
                                             <table class="table table-sm table-striped table-bordered">
                                                 <thead>
                                                     <tr>
@@ -142,6 +150,7 @@ $amount_unretired = $amount_paid - $amount_retired;
                                                         <th  scope="col" class="text-center">Requisition No.</th>
                                                         <!-- <th  scope="col" class="text-center">Status</th> -->
                                                         <th  scope="col" class="text-center">Full/Partially Retired</th>
+                                                        <th  scope="col" class="text-center">Amount Paid</th>
                                                         <th  scope="col" class="text-center">Amount Unretired</th>
                                                         <th  scope="col" class="text-center">Amount To Claim</th>
 
@@ -152,26 +161,20 @@ $amount_unretired = $amount_paid - $amount_retired;
                                                     <tr>
                                                        <td scope="col" class="text-center">{{$requisition_no->req_no}}</td>
                                                        <!-- <td scope="col" class="text-center">{{$requisition_no->status}}</td> -->
+                                                       <td scope="col" class="text-center">Partially Retired</td>
+                                                       <td scope="col" class="text-right">{{number_format($paid_amount,2)}}</td>
                                                        <td scope="col" class="text-center">
-                                                          @if($amount_paid > $amount_retired)
-                                                              Partially Retired
-                                                          @elseif($amount_paid <= $amount_retired)
-                                                              Full Retired
-                                                          @endif
-                                                       </td>
-
-                                                       <td scope="col" class="text-center">
-                                                           @if($amount_paid <= $amount_retired)
+                                                           @if($paid_amount <= $retired_amount)
                                                               N/A
-                                                           @elseif($amount_paid > $amount_retired)
+                                                           @elseif($paid_amount > $retired_amount)
                                                               {{number_format($amount_unretired,2)}}
                                                            @endif
 
                                                        </td>
                                                        <td scope="col" class="text-center">
-                                                           @if($amount_paid < $amount_retired)
-                                                              {{number_format($amount_retired - $amount_paid,2)}}
-                                                           @elseif($amount_paid >= $amount_retired)
+                                                           @if($paid_amount < $retired_amount)
+                                                              {{number_format($amount_claimed,2)}}
+                                                           @elseif($paid_amount >= $retired_amount)
                                                               N/A
                                                            @endif
 
@@ -193,7 +196,7 @@ $amount_unretired = $amount_paid - $amount_retired;
                                                     <tr>
                                                         <th scope="col" class="text-center">Retirement No.</th>
                                                         <th scope="col" class="text-center">Retired Amount</th>
-                                                        <th scope="col" class="text-center">Paid Amount</th>
+                                                        <!-- <th scope="col" class="text-center">Paid Amount</th> -->
                                                         <th scope="col" class="text-center">Action</th>
                                                     </tr>
                                                 </thead>
@@ -201,8 +204,8 @@ $amount_unretired = $amount_paid - $amount_retired;
                                                     @foreach($retirements as $retirement)
                                                         <tr>
                                                            <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
-                                                           <td scope="col" class="text-right">{{number_format($retirement->gross_amount,2)}}</td>
-                                                           <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
+                                                           <td scope="col" class="text-right">{{number_format(RetirementController::amountRetired($retirement->ret_no),2)}}</td>
+                                                           <!-- <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td> -->
                                                            <td scope="col" class="text-center">
                                                               <a href="{{route('view-retirements',$retirement->ret_no)}}" class="btn btn-sm btn-twitter">View Retirement</a>
                                                            </td>
@@ -212,15 +215,15 @@ $amount_unretired = $amount_paid - $amount_retired;
 
                                                         <td scope="col" class="text-center font-weight-bold">Total</td>
                                                         <td scope="col" class="text-right">{{number_format(RetirementController::getTotalOfRetiredLines($retirement->req_no),2)}}</td>
-                                                        <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td>
+                                                        <!-- <td scope="col" class="text-right">{{number_format($amount_paid,2)}}</td> -->
                                                         <td scope="col" class="text-right"></td>
 
                                                     </tr>
                                                 </tbody>
                                             </table>
                                             <div class="mb-2">
-                                                @if($amount_retired < $amount_paid && Auth::user()->id == $retirement->user_id)
-                                                <a href="{{url('add-retirement/'.'RET-'.($getLatestRetNo + 1).'/'.$retirement->req_no)}}" class="btn btn-sm btn-twitter">Add Retirement</a>
+                                                @if($retired_amount < $paid_amount && Auth::user()->id == $retirement->user_id)
+                                                  <a href="{{url('add-retirement/'.'RET-'.($getLatestRetNo + 1).'/'.$retirement->req_no)}}" class="btn btn-sm btn-twitter">Add Retirement</a>
                                                 @endif
                                             </div>
                                         </div>

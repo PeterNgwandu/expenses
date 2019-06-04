@@ -1,5 +1,6 @@
 <?php
 
+use App\Department\Department;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Requisitions\RequisitionsController;

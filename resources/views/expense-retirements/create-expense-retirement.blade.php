@@ -36,6 +36,12 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
         margin-bottom: 10px;
         background: #E5E8E8;
 }
+    #activity_name {
+        margin-right: 2px;
+        margin-top: -140px;
+        margin-bottom: 10px;
+        background: #E5E8E8;
+}
     #item_name {
         margin-left: -140px;
 }
@@ -100,7 +106,8 @@ select,option {
                                                  <option value="{{ $budget->id }}" @if (old('budget_id') == $budget->id) selected="selected" @endif>{{ $budget->title }}</option>
                                              @endforeach
                                         </select>
-                                        <select style="width: 140px; margin-left: -140px;background: #ffffff;border: 1px solid #566573" id="item" name="item_id" class="form-control item" data-toogle="tooltip" data-placement="top" title="Select Budget Line">
+                                        <input id="activity_name" style=" margin-right: 2px;" type="text" name="activity_name" class="form-control activity_name" placeholder="Activity Name" data-toogle="tooltip" data-placement="top" title="Activity Name" value="<?php isset($activity) ? $activity->activity_name : ''; ?>">
+                                        <select style="width: 140px; margin-left: -345px;background: #ffffff;border: 1px solid #566573" id="item" name="item_id" class="form-control item" data-toogle="tooltip" data-placement="top" title="Select Budget Line">
                                              <option value="Select Budget" selected disabled>
                                                  Budget Line
                                              </option>
@@ -108,6 +115,7 @@ select,option {
                                                 <option value="{{$item->id}}">{{$item->item_name}}</option>
                                              @endforeach
                                         </select>
+
                                         <input id="line_description" type="text" style="width: 280px;" value="" class="form-control" placeholder="Budget Line Description" data-toogle="tooltip" data-placement="top" title="Budget Line Description">
                                         <input type="text" style="width: 140px;background: #ffffff;border: 1px solid #566573" id="supplier" name="supplier_id" class="form-control" placeholder="Supplier" / data-toogle="tooltip" data-placement="top" title="Enter Supplier Name">
 
@@ -195,7 +203,7 @@ select,option {
 @endsection
 
 <script type="text/javascript" src="{{url('assets/js/jquery.js')}}"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
   <script>
 
   </script>
@@ -245,10 +253,9 @@ select,option {
               }else{
                   swal("Opps!", "Cannot submit.", "error");
               }
-
-              // window.location = "create-requisition";
           });
       });
+
 
     $(document).on('change', '.item', function(e) {
             var itemId = $(this).val();
@@ -257,7 +264,7 @@ select,option {
                 console.log(data.result.description);
                 $('#line_description').val(data.result.description);
 
-            })
+            });
         });
 
     $(document).on('click', '.submit-expense-retire', function(e) {
@@ -272,6 +279,7 @@ select,option {
 
             var budget_id = $(this).closest('form').find('select[name=budget_id]').val();
             var item_id = $(this).closest('form').find('select[name=item_id]').val();
+            var activity_name = $(this).closest('form').find('input[name=activity_name]').val();
             var supplier_id = $(this).closest('form').find('input[name=supplier_id]').val();
             var ref_no = $(this).closest('form').find('input[name=ref_no]').val();
             var purchase_date = $(this).closest('form').find('input[name=purchase_date]').val();
@@ -291,13 +299,30 @@ select,option {
             $.ajax({
                 type: "POST",
                 url: '/submit-single-expense-retire-row',
-                data: $('.retire-form').serialize()+"&"+$.param({'budget_id':budget_id,'item_id':item_id,'supplier_id':supplier_id,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description,'account_id':account_id}),
+                data: $('.retire-form').serialize()+"&"+$.param({'budget_id':budget_id,'item_id':item_id,'supplier_id':supplier_id,'activity_name':activity_name,'ref_no':ref_no, 'item_name2':item_name2, 'purchase_date':purchase_date,'unit_measure':unit_measure,'unit_price':unit_price,'quantity':quantity,'vat':vat,'description':description,'account_id':account_id}),
                 dataType: "json",
                 success: function(data) {
                     console.log(data.result);
                     $('.render-expense-retired-items').html(data.result);
                     if (budget_id == localStorage.getItem("budget_id")) {
                         $(this).closest('form').find('select[name=budget_id]').attr('selected', true);
+                    }
+                    if($("#data").find("#activity_name").val() != null){
+                        var activity_name = $("#activity_name");
+                        activity_name.on('mouseover',function(){
+                          if($("#data").find("#activity_name").val() != null){
+                            // swal('Alert', 'Please do not change activity name', 'warning');
+                            alert('Please do not change activity name', 'warning');
+                          }
+                        });
+                    }
+                    if($("#data").find("#budget").val() != null){
+                        var budget_id = $("#budget");
+                        budget_id.on('mouseover',function(){
+                          if($("#data").find("#budget").val() != null){
+                            alert('Please do not change budget', 'warning');
+                          }
+                        });
                     }
                     $(".supplier_id").val("");
                     $(".ref_no").val("");

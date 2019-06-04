@@ -48,7 +48,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Pending Expense Retirements
+                                    <h4 class="card-title">Paid Expense Retirements
                                     </h4>
                                 </div>
                             </div>
@@ -75,19 +75,17 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @if($user_id != null)
                                                @foreach($expense_retirements as $retirement)
                                                 <tr>
                                                     <td scope="col" class="text-center">{{$retirement->username}}</td>
                                                     <td scope="col" class="text-center">{{$retirement->ret_no}}</td>
-                                                    <td scope="col" class="text-center">{{ number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no))}}/=</td>
+                                                    <td scope="col" class="text-right">{{ number_format(ExpenseRetirementController::getExpenseRetirementTotal($retirement->ret_no),2)}}</td>
                                                     <td scope="col" class="text-center">
                                                         <a class="btn btn-sm btn-outline-success" href="{{route('expense_retirements.show',$retirement->ret_no)}}">View</a>
                                                     </td>
                                                 </tr>
 
                                                @endforeach
-                                            @endif
                                         </tbody>
                                     </table>
                                      </div>

@@ -3,16 +3,23 @@
 namespace App\Http\Controllers\ExpenseRetirements;
 
 use DB;
+use PDF;
+use App\User;
+use Dompdf\Dompdf;
 use App\Item\Item;
+use Dompdf\Options;
 use App\Limits\Limit;
 use App\Budget\Budget;
 use App\Accounts\Account;
 use Illuminate\Http\Request;
+use App\Department\Department;
 use App\StaffLevel\StaffLevel;
 use Illuminate\Support\Carbon;
+use App\Accounts\SubAccountType;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\ExpenseRetirement\ExpenseRetirement;
+use App\ExpenseRetirement\ExpenseRetirementPayment;
 use App\Temporary\ExpenseRetirementTemporaryTable;
 
 class ExpenseRetirementController extends Controller
@@ -34,54 +41,68 @@ class ExpenseRetirementController extends Controller
         if (Auth::user()->stafflevel_id == $normalStaff) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->where('users.stafflevel_id',$normalStaff)
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$normalStaff])
                                ->where('expense_retirements.status', 'Retired')
+                               ->where('departments.status', 'Active')
+                               ->where('expense_retirements.user_id', Auth::user()->id)
                                ->distinct('ret_no')
 
                                ->get();
             $ex_retirement_no_budget = DB::table('expense_retirements')
                                        ->join('users','expense_retirements.user_id','users.id')
-                                       ->where('users.stafflevel_id',$normalStaff)
+                                       ->join('departments','users.department_id','departments.id')
+                                       ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
+                                       ->whereIn('users.stafflevel_id',[$normalStaff])
                                        ->where('expense_retirements.budget_id',0)
-                                       ->select('expense_retirements.ret_no','users.username as username')
+                                       ->where('departments.status', 'Active')
+                                       ->where('expense_retirements.user_id', Auth::user()->id)
                                        ->distinct('ret_no')
                                        ->get();
 
         }elseif (Auth::user()->stafflevel_id == $supervisor) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->whereIn('users.stafflevel_id',[$supervisor])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                // ->where('expense_retirements.gross_amount','>',5000)
                                // ->where('expense_retirements.gross_amount','<',500000)
-                               ->where('expense_retirements.status', 'Retired')
+                               ->where('expense_retirements.status', 'Retired, supervisor')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $hod) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->whereIn('users.stafflevel_id',[$hod])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                // ->whereBetween('expense_retirements.gross_amount', ['5000','5000000'])
                                ->where('expense_retirements.status', 'Retired')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $ceo) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->whereIn('users.stafflevel_id',[$ceo])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                // ->whereBetween('expense_retirements.gross_amount', ['500000','5000000'])
                                ->where('expense_retirements.status', 'Retired')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }else{
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->where('users.stafflevel_id',[$financeDirector])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                ->where('expense_retirements.status', 'Retired')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
 
                                ->get();
@@ -105,62 +126,83 @@ class ExpenseRetirementController extends Controller
         $ceoLimit = Limit::where('stafflevel_id',$ceo)->select('max_amount')->first();
         $limitSupervisor = Limit::where('stafflevel_id',$supervisor)->select('max_amount')->first();
 
+        $user_dept = User::join('departments','users.department_id','departments.id')
+                          ->select('users.department_id as dept_id')
+                          ->where('users.id', Auth::user()->id)
+                          ->distinct('dept_id')
+                          ->first();
+
         if (Auth::user()->stafflevel_id == $normalStaff) {
-            $expense_retirements = DB::table('expense_retirements')
-                               ->join('users','expense_retirements.user_id','users.id')
-                               ->where('users.stafflevel_id',$normalStaff)
-                               ->select('expense_retirements.ret_no','users.username as username')
+
+
+            $expense_retirements = ExpenseRetirement::join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$normalStaff])
                                ->where('expense_retirements.status', 'Rejected')
-                               ->orWhere('expense_retirements.status', 'Rejected By Supervisor')
-                               ->orWhere('expense_retirements.status', 'Rejected By HOD')
+                               ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Rejected By CEO')
                                ->orWhere('expense_retirements.status', 'Rejected By Finance')
+                               ->orWhere('expense_retirements.status', 'Rejected By Supervisor')
+                               ->orWhere('expense_retirements.status', 'Rejected By HOD')
+                               ->where('expense_retirements.user_id', Auth::user()->id)
                                ->distinct('ret_no')
-
                                ->get();
+
             $ex_retirement_no_budget = DB::table('expense_retirements')
                                        ->join('users','expense_retirements.user_id','users.id')
-                                       ->where('users.stafflevel_id',$normalStaff)
+                                       ->join('departments','users.department_id','departments.id')
+                                       ->whereIn('users.stafflevel_id',[$normalStaff])
                                        ->where('expense_retirements.budget_id',0)
-                                       ->select('expense_retirements.ret_no','users.username as username')
+                                       ->where('departments.status', 'Active')
+                                       ->where('users.department_id', $user_dept->dept_id)
+                                       ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                        ->where('expense_retirements.status', 'Rejected')
-                                       ->orWhere('expense_retirements.status', 'Rejected By Supervisor')
-                                       ->orWhere('expense_retirements.status', 'Rejected By HOD')
                                        ->orWhere('expense_retirements.status', 'Rejected By CEO')
                                        ->orWhere('expense_retirements.status', 'Rejected By Finance')
+                                       ->orWhere('expense_retirements.status', 'Rejected By Supervisor')
+                                       ->orWhere('expense_retirements.status', 'Rejected By HOD')
                                        ->distinct('ret_no')
                                        ->get();
 
         }elseif (Auth::user()->stafflevel_id == $supervisor) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->whereIn('users.stafflevel_id',[$normalStaff,$supervisor])
-                               ->select('expense_retirements.ret_no','users.username as username')
-                               ->where('expense_retirements.status', 'Retired')
-                               ->orWhere('expense_retirements.status', 'Rejected By HOD')
-                               ->orWhere('expense_retirements.status', 'Rejected By CEO')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
+                               ->where('expense_retirements.status', 'Rejected By CEO')
+                               ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Rejected By Finance')
+                               ->orWhere('expense_retirements.status', 'Rejected By HOD')
+                               ->orWhere('expense_retirements.status', 'Retired')
+                               ->where('users.department_id', $user_dept->dept_id)
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $hod) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                ->whereIn('users.stafflevel_id',[$normalStaff, $supervisor, $hod])
-                               ->where('expense_retirements.gross_amount', '>=', $limitSupervisor->max_amount)
                                ->where('expense_retirements.status', 'Retired, supervisor')
-                               ->orWhere('expense_retirements.status', 'Approved By Supervisor')
+                               ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Rejected By CEO')
                                ->orWhere('expense_retirements.status', 'Rejected By Finance')
+                               ->orWhere('expense_retirements.status', 'Approved By Supervisor')
+                               ->where('users.department_id', $user_dept->dept_id)
+                               ->where('expense_retirements.gross_amount', '>', $limitSupervisor->max_amount)
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $ceo) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->where('expense_retirements.gross_amount', '>=', $limitHOD->max_amount)
                                ->whereIn('users.stafflevel_id',[$normalStaff, $supervisor, $hod, $ceo,$financeDirector])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                ->where('expense_retirements.status', 'Retired, hod')
+                               ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Approved By Finance')
                                ->orWhere('expense_retirements.status', 'Rejected By Finance')
                                ->distinct('ret_no')
@@ -168,19 +210,21 @@ class ExpenseRetirementController extends Controller
         }else{
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
                                ->where('users.stafflevel_id',[$financeDirector])
-                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                ->where('expense_retirements.status', 'Retired,ceo')
-                               ->orWhere('expense_retirements.status', 'Approved By Supervisor')
+                               ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Approved By HOD')
                                ->orWhere('expense_retirements.status', 'Rejected By CEO')
+                               ->orWhere('expense_retirements.status', 'Approved By Supervisor')
                                ->distinct('ret_no')
 
                                ->get();
 
         }
 
-        return view('expense-retirements.manage-expense-retirements', compact('expense_retirements'));
+        return view('expense-retirements.manage-expense-retirements', compact('user_dept','expense_retirements'));
     }
 
     public function confirmedExpenseRetirement()
@@ -192,60 +236,169 @@ class ExpenseRetirementController extends Controller
         $normalStaff = $stafflevels[3]->id;
         $financeDirector = $stafflevels[4]->id;
 
+        $user_dept = User::join('departments','users.department_id','departments.id')
+                          ->where('departments.id', Auth::user()->department_id)
+                          ->select('users.department_id as dept_id')
+                          ->distinct('dept_id')
+                          ->first();
+
         if (Auth::user()->stafflevel_id == $normalStaff) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->where('users.stafflevel_id',$normalStaff)
+                               ->join('departments','users.department_id','departments.id')
                                ->select('expense_retirements.ret_no','users.username as username')
+                               ->where('users.stafflevel_id',$normalStaff)
+                               ->where('departments.status', 'Active')
+                               ->where('users.department_id', $user_dept->dept_id)
                                ->where('expense_retirements.status', 'Confirmed')
                                ->distinct('ret_no')
 
                                ->get();
             $ex_retirement_no_budget = DB::table('expense_retirements')
                                        ->join('users','expense_retirements.user_id','users.id')
+                                       ->join('departments','users.department_id','departments.id')
                                        ->where('users.stafflevel_id',$normalStaff)
+                                       ->where('users.department_id', $user_dept->dept_id)
                                        ->where('expense_retirements.budget_id',0)
                                        ->select('expense_retirements.ret_no','users.username as username')
                                        ->where('expense_retirements.status', 'Confirmed')
+                                       ->where('departments.status', 'Active')
                                        ->distinct('ret_no')
                                        ->get();
 
         }elseif (Auth::user()->stafflevel_id == $supervisor) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->whereIn('users.stafflevel_id',[$normalStaff,$supervisor])
+                               ->join('departments','users.department_id','departments.id')
                                ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$normalStaff,$supervisor])
+                               ->where('users.department_id', $user_dept->dept_id)
                                ->where('expense_retirements.status', 'Confirmed')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $hod) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->whereIn('users.stafflevel_id',[$hod,$supervisor,$normalStaff])
+                               ->join('departments','users.department_id','departments.id')
                                ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$hod,$supervisor,$normalStaff])
                                ->where('expense_retirements.status', 'Confirmed')
+                               ->where('users.department_id', $user_dept->dept_id)
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }elseif (Auth::user()->stafflevel_id == $ceo) {
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->whereIn('users.stafflevel_id',[$ceo,$hod,$supervisor,$normalStaff,$financeDirector])
+                               ->join('departments','users.department_id','departments.id')
                                ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$ceo,$hod,$supervisor,$normalStaff,$financeDirector])
                                ->where('expense_retirements.status', 'Confirmed')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
         }else{
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
-                               ->whereIn('users.stafflevel_id',[$financeDirector,$supervisor,$hod,$normalStaff,$ceo])
+                               ->join('departments','users.department_id','departments.id')
                                ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$financeDirector,$supervisor,$hod,$normalStaff,$ceo])
                                ->where('expense_retirements.status', 'Confirmed')
+                               ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
 
         }
 
         return view('expense-retirements.confirmed-expense-retirements', compact('expense_retirements'));
+    }
+
+    public function paidExpenseRetirement()
+    {
+        $stafflevels = StaffLevel::all();
+        $hod = $stafflevels[0]->id;
+        $ceo = $stafflevels[1]->id;
+        $supervisor = $stafflevels[2]->id;
+        $normalStaff = $stafflevels[3]->id;
+        $financeDirector = $stafflevels[4]->id;
+
+        $user_dept = User::join('departments','users.department_id','departments.id')
+                          ->where('departments.id', Auth::user()->department_id)
+                          ->select('users.department_id as dept_id')
+                          ->distinct('dept_id')
+                          ->first();
+
+        if (Auth::user()->stafflevel_id == $normalStaff) {
+            $expense_retirements = DB::table('expense_retirements')
+                               ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->where('users.stafflevel_id',$normalStaff)
+                               ->where('users.department_id', $user_dept->dept_id)
+                               ->where('departments.status', 'Active')
+                               ->where('expense_retirements.status', 'Paid')
+                               ->distinct('ret_no')
+
+                               ->get();
+            $ex_retirement_no_budget = DB::table('expense_retirements')
+                                       ->join('users','expense_retirements.user_id','users.id')
+                                       ->join('departments','users.department_id','departments.id')
+                                       ->where('users.stafflevel_id',$normalStaff)
+                                       ->where('users.department_id', $user_dept->dept_id)
+                                       ->where('expense_retirements.budget_id',0)
+                                       ->select('expense_retirements.ret_no','users.username as username')
+                                       ->where('expense_retirements.status', 'Paid')
+                                       ->where('departments.status', 'Active')
+                                       ->distinct('ret_no')
+                                       ->get();
+
+        }elseif (Auth::user()->stafflevel_id == $supervisor) {
+            $expense_retirements = DB::table('expense_retirements')
+                               ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$normalStaff,$supervisor])
+                               ->where('users.department_id', $user_dept->dept_id)
+                               ->where('expense_retirements.status', 'Paid')
+                               ->where('departments.status', 'Active')
+                               ->distinct('ret_no')
+                               ->get();
+        }elseif (Auth::user()->stafflevel_id == $hod) {
+            $expense_retirements = DB::table('expense_retirements')
+                               ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$hod,$supervisor,$normalStaff])
+                               ->where('expense_retirements.status', 'Paid')
+                               ->where('users.department_id', $user_dept->dept_id)
+                               ->where('departments.status', 'Active')
+                               ->distinct('ret_no')
+                               ->get();
+        }elseif (Auth::user()->stafflevel_id == $ceo) {
+            $expense_retirements = DB::table('expense_retirements')
+                               ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$ceo,$hod,$supervisor,$normalStaff,$financeDirector])
+                               ->where('expense_retirements.status', 'Paid')
+                               ->where('departments.status', 'Active')
+                               ->distinct('ret_no')
+                               ->get();
+        }else{
+            $expense_retirements = DB::table('expense_retirements')
+                               ->join('users','expense_retirements.user_id','users.id')
+                               ->join('departments','users.department_id','departments.id')
+                               ->select('expense_retirements.ret_no','users.username as username')
+                               ->whereIn('users.stafflevel_id',[$financeDirector,$supervisor,$hod,$normalStaff,$ceo])
+                               ->where('expense_retirements.status', 'Paid')
+                               ->where('departments.status', 'Active')
+                               ->distinct('ret_no')
+                               ->get();
+
+        }
+
+        return view('expense-retirements.paid-expense-retirements', compact('expense_retirements'));
     }
 
     public function editExpenseRetirement($ret_no)
@@ -260,7 +413,20 @@ class ExpenseRetirementController extends Controller
                               ->where('ret_no', $ret_no)
                               ->where('expense_retirement_temporary_tables.status', '!=', 'Deleted')
                               ->get();
-        return view('expense-retirements.edit-expense-retirement', compact('ret_no','expense_retirement'))->withItems($items)->withBudgets($budgets)->withAccounts($accounts);
+
+        $expense_retirement_no_budget = ExpenseRetirementTemporaryTable::join('accounts', 'expense_retirement_temporary_tables.account_id', 'accounts.id')
+                              ->select('expense_retirement_temporary_tables.*','accounts.account_name as account')
+                              ->where('ret_no', $ret_no)
+                              ->where('expense_retirement_temporary_tables.status', '!=', 'Deleted')
+                              ->get();
+
+        $budget_title = ExpenseRetirement::join('budgets','expense_retirements.budget_id','budgets.id')
+                                         ->select('budgets.title as budget')
+                                         ->where('ret_no', $ret_no)
+                                         ->first();
+        $budget = ExpenseRetirement::where('ret_no', $ret_no)->select('budget_id')->pluck('budget_id')->first();
+        $items = Item::join('budgets','items.budget_id','budgets.id')->select('item_name')->where('budgets.id', $budget)->get();
+        return view('expense-retirements.edit-expense-retirement', compact('expense_retirement_no_budget','budget_title','budget','ret_no','expense_retirement'))->withItems($items)->withBudgets($budgets)->withAccounts($accounts);
     }
 
     public function sendExpenseRetirement($ret_no)
@@ -322,6 +488,18 @@ class ExpenseRetirementController extends Controller
      */
     public function create()
     {
+
+        $status = Department::select('status')->get();
+        foreach($status as $status)
+        {
+            if($status->status == 'Disabled')
+            {
+                alert()->error('You cannot create a expense retirement', 'Department Disabled')->persistent('close');
+                return redirect(url('/'));
+            }else{
+            }
+        }
+
         $items = Item::all();
         $budgets = Budget::all();
         $accounts = Account::all();
@@ -361,7 +539,29 @@ class ExpenseRetirementController extends Controller
 
     public function submit_expense_retire_row(Request $request)
     {
-        $request->status = 'Retired';
+
+        $staff_levels = StaffLevel::all();
+        $accounts = Account::all();
+
+        $hod = $staff_levels[0]->id;
+        $ceo = $staff_levels[1]->id;
+        $supervisor = $staff_levels[2]->id;
+        $normalStaff = $staff_levels[3]->id;
+        $financeDirector = $staff_levels[4]->id;
+
+        if(Auth::user()->stafflevel_id == $normalStaff){
+
+            $status = 'Retired';
+        }elseif(Auth::user()->stafflevel_id == $supervisor){
+            $status = 'Retired, supervisor';
+        }elseif(Auth::user()->stafflevel_id == $hod){
+            $status = 'Retired, hod';
+        }elseif(Auth::user()->stafflevel_id == $ceo){
+            $status = 'Retired, ceo';
+        }elseif(Auth::user()->stafflevel_id == $financeDirector){
+            $status = 'Retired, finance';
+        }
+
         if ($request->vat == 'VAT Inclusive')
         {
             $vat_amount = (($request->quantity * $request->unit_price / 1.18) * 0.18);
@@ -384,8 +584,8 @@ class ExpenseRetirementController extends Controller
             $ret_no = 'EX-RET-'.($getLatestRetNo + 1);
         }
 
-        DB::table('expense_retirement_temporary_tables')->insert(['budget_id' => $request->budget_id,'item_id' => $request->item_id,'account_id' => $request->account_id, 'user_id' => $request->user_id, 'ret_no' => $request->ret_no, 'supplier_id' => $request->supplier_id, 'ref_no' => $request->ref_no, 'item_name' => $request->item_name2, 'purchase_date' => $request->purchase_date, 'unit_measure' => $request->unit_measure, 'quantity' => $request->quantity, 'unit_price' => $request->unit_price,
-            'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => $request->status, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('expense_retirement_temporary_tables')->insert(['budget_id' => $request->budget_id,'item_id' => $request->item_id,'account_id' => $request->account_id, 'user_id' => $request->user_id, 'ret_no' => $request->ret_no, 'supplier_id' => $request->supplier_id, 'activity_name' => $request->activity_name, 'ref_no' => $request->ref_no, 'item_name' => $request->item_name2, 'purchase_date' => $request->purchase_date, 'unit_measure' => $request->unit_measure, 'quantity' => $request->quantity, 'unit_price' => $request->unit_price,
+            'vat' => $request->vat, 'description' => $request->description, 'vat_amount' => $vat_amount, 'gross_amount' => $gross_amount, 'status' => $status, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
 
         if ($request->budget_id != 0) {
             $data = DB::table('expense_retirement_temporary_tables')
@@ -481,16 +681,25 @@ class ExpenseRetirementController extends Controller
         $retirements = ExpenseRetirementTemporaryTable::where('ret_no', $exp_retire_no)
                        ->where('user_id', Auth::user()->id)->get();
 
+         if (ExpenseRetirement::select('ret_no')->latest()->first() == null)
+         {
+             $ret_no = 'EX-RET-1';
+         }elseif(ExpenseRetirement::select('ret_no')->latest()->first() != null) {
+             $getLatestRetNo = ExpenseRetirement::select('req_no')->latest()->distinct('ret_no')->count('ret_no');
+             $ret_no = 'EX-RET-'.($getLatestRetNo + 1);
+         }
+
         foreach ($retirements as $retirement) {
             DB::table('expense_retirements')->insert([
                 'budget_id' => $retirement->budget_id,
                 'item_id' => $retirement->item_id,
                 'account_id' => $retirement->account_id,
                 'user_id' => $retirement->user_id,
-                'ret_no' => $retirement->ret_no,
+                'ret_no' => $ret_no,
                 'supplier_id' => $retirement->supplier_id,
                 'purchase_date' => $retirement->purchase_date,
                 'ref_no' => $retirement->ref_no,
+                'activity_name' => $retirement->activity_name,
                 'item_name' => $retirement->item_name,
                 'unit_measure' => $retirement->unit_measure,
                 'quantity' => $retirement->quantity,
@@ -567,8 +776,13 @@ class ExpenseRetirementController extends Controller
                                        ->where('expense_retirements.status', '!=', 'Edited')
                                        ->distinct('ret_no')
                                        ->get();
-
-        return view('expense-retirements.show-expense-retirements', compact('expense_retirements','ret_no','ex_retirement_no_budget', 'expense_summary'));
+        $user_id = ExpenseRetirement::where('ret_no', $ret_no)->pluck('user_id')->first();
+        $expense_retirement = ExpenseRetirement::where('ret_no', $ret_no)->where('status', '!=', 'Edited')->first();
+        $retirement_status = ExpenseRetirement::where('ret_no', $ret_no)->select('status')->where('status','!=','Edited')->get();
+        $amount_retired = ExpenseRetirementController::getExpenseRetirementTotal($ret_no);
+        $amount_paid = ExpenseRetirementPayment::where('ret_no', $ret_no)->where('status', 'Paid')->sum('amount_paid');
+        $balance = $amount_retired - $amount_paid;
+        return view('expense-retirements.show-expense-retirements', compact('amount_paid','balance','retirement_status','expense_retirement','user_id','expense_retirements','ret_no','ex_retirement_no_budget', 'expense_summary'));
     }
 
     public static function getExpenseRetirementTotal($ret_no)
@@ -654,6 +868,113 @@ class ExpenseRetirementController extends Controller
             ]);
             return view('expense-retirements.expense-retirement-comments', compact('ret_no'));
         }
+    }
+
+    public function paymentForm($ret_no)
+    {
+        $account_sub_type = SubAccountType::where('account_subtype_name', 'Bank Accounts')->pluck('id')->first();
+        $accounts = Account::where('sub_account_type', $account_sub_type)->get();
+        $expense_retirement = ExpenseRetirement::where('ret_no', $ret_no)
+                               ->join('budgets','expense_retirements.budget_id','budgets.id')
+                               ->join('items','expense_retirements.item_id','items.id')
+                               ->join('accounts','expense_retirements.account_id','accounts.id')
+                               ->select('expense_retirements.*','budgets.title as budget','items.item_name as item','accounts.account_name as account')
+                               ->where('expense_retirements.status', '!=', 'Edited')
+                               ->get();
+
+        $ex_retirement_no_budget = DB::table('expense_retirements')
+                                      ->join('users','expense_retirements.user_id','users.id')
+                                      ->join('accounts','expense_retirements.account_id','accounts.id')
+                                      ->where('expense_retirements.budget_id',0)
+                                      ->where('expense_retirements.ret_no',$ret_no)
+                                      ->select('expense_retirements.*','users.username as username','accounts.account_name as account')
+                                      ->where('expense_retirements.status', '!=', 'Edited')
+                                      ->distinct('ret_no')
+                                      ->get();
+        $amount_retired = ExpenseRetirementController::getExpenseRetirementTotal($ret_no);
+        $amount_paid = ExpenseRetirementPayment::where('ret_no', $ret_no)->where('status', 'Paid')->sum('amount_paid');
+        $balance = $amount_retired - $amount_paid;
+        return view('expense-retirements.expense-retirement-payments', compact('balance','amount_paid','accounts','user_id','expense_retirement','ret_no','ex_retirement_no_budget'));
+    }
+
+    public function pay(Request $request)
+    {
+        $amount_retired = ExpenseRetirementController::getExpenseRetirementTotal($request->ret_no);
+        if($request->amount_paid > $amount_retired)
+        {
+            alert()->error('You cannot pay more than retired amount', 'Ooops! Error')->persistent('Close');
+            return redirect()->back();
+        }
+
+        $expense_retirement = new ExpenseRetirementPayment();
+        $expense_retirement->ret_no = $request->ret_no;
+        $expense_retirement->cash_collector = $request->cash_collector;
+        $expense_retirement->amount_paid = $request->amount_paid;
+        $expense_retirement->account_id = $request->account_id;
+        $expense_retirement->ref_no = ExpenseRetirementController::generateReferenceNo();
+        $expense_retirement->comment = $request->comment;
+        $expense_retirement->status = 'Paid';
+        $expense_retirement->save();
+
+        ExpenseRetirement::where('ret_no', $request->ret_no)->where('status', '!=', 'Edited')->update([
+            'status' => 'Paid',
+        ]);
+
+        $lastRow = ExpenseRetirementPayment::join('expense_retirements','expense_retirement_payments.ret_no','expense_retirements.ret_no')
+                                           ->join('users','expense_retirements.user_id','users.id')
+                                           ->join('accounts','expense_retirements.account_id','accounts.id')
+                                           ->select('expense_retirement_payments.*','users.username as username','accounts.account_name as account')
+                                           ->latest()
+                                           ->first();
+
+        return view('expense-retirements.expense-retirement-payments-confirmation-form', compact('lastRow'));
+    }
+
+    public function printExpenseRetirementConfirmationForm($ret_no)
+    {
+          $lastRow = ExpenseRetirementPayment::join('expense_retirements','expense_retirement_payments.ret_no','expense_retirements.ret_no')
+                                             ->join('users','expense_retirements.user_id','users.id')
+                                             ->join('accounts','expense_retirements.account_id','accounts.id')
+                                             ->select('expense_retirement_payments.*','users.username as username','accounts.account_name as account')
+                                             ->latest()
+                                             ->first();
+
+         $options = new Options();
+         $options->set('defaultFont', 'Times Roman');
+         $options->set('isRemoteEnabled', TRUE);
+
+         $pdf = new Dompdf();
+         $pdf->set_paper(array(0,0,420,595), 'landscape');
+
+         $pdf = PDF::setOptions([
+             'logOutputFile' => storage_path('logs/log.htm'),
+             'tempDir' => storage_path('fontDir/')
+         ])->loadView('expense-retirements.expense-retirement-payments-confirmation-form-pdf', compact('lastRow'));
+         return $pdf->stream('Expense Retirement Payment Confirmation Form');
+    }
+
+    public static function generateReferenceNo()
+    {
+        $ref_no = null;
+        if(ExpenseRetirementController::getLatestRefNo() == null)
+        {
+            $ref_no = 'EXP01';
+        }elseif (ExpenseRetirementController::getLatestRefNo() != null) {
+            $ref_no_count = ExpenseRetirementController::getLatestRefNoCount();
+            $ref_no = 'EXP0'.($ref_no_count + 1);
+        }
+        return $ref_no;
+    }
+
+    public static function getLatestRefNo()
+    {
+        return ExpenseRetirementPayment::select('ref_no')->latest()->first();
+
+    }
+
+    public static function getLatestRefNoCount()
+    {
+        return ExpenseRetirementPayment::select('ref_no')->distinct()->count();
     }
 
     /**

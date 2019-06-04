@@ -91,6 +91,9 @@ Route::get('pending-requisitions', 'Requisitions\RequisitionsController@pendingR
 Route::get('delete-record', 'Requisitions\RequisitionsController@deleteRecord');
 
 Route::get('process-payment/{req_no}', 'Requisitions\RequisitionsController@processPayment');
+Route::get('receive-receipt/{req_no}', 'Requisitions\RequisitionsController@processReceptsAndBalance');
+Route::get('return-balance/{req_no}', 'Requisitions\RequisitionsController@processReceptsAndBalance');
+Route::post('return-receive-payments', 'Accounts\FinanceSupportiveDetailsController@receiveReturnPayments')->name('return-receive-payments.store');
 
 Route::get('delete-requisition/{req_id}', 'Requisitions\RequisitionsController@deleteRequsitionLine');
 Route::get('/deleting-requisition/{req_no}/{id}', 'Requisitions\RequisitionsController@deletingRequisition'); // Delete requisition when Editing i.e on Edit Page of the requisition
@@ -101,9 +104,10 @@ Route::get('delete-requsition-by-id/{req_id}', 'Requisitions\RequisitionsControl
 
 Route::get('requisition/report/{req_no}', 'Requisitions\RequisitionsController@printRequisition');
 Route::get('confirmation/{req_no}', 'Requisitions\RequisitionsController@printConfirmationForm');
+Route::get('confirmation/{req_no}', 'Retirements\RetirementController@printConfirmationForm');
 
 Route::get('budget-restrict/{budget_id}', 'Requisitions\RequisitionsController@budgetRestrict');
-Route::get('/expense-retirement-budget-restrict/{budget_id}', 'ExpenseRetirements\ExpenseRetirementController@budgetRestrict');
+Route::get('expense-retirement-budget-restrict/{budget_id}', 'ExpenseRetirements\ExpenseRetirementController@budgetRestrict');
 
 Route::get('/get-total-on-edit/{req_no}', 'Requisitions\RequisitionsController@getTotalOnEdit');
 
@@ -124,6 +128,7 @@ Route::get('expense_retirements/create', 'ExpenseRetirements\ExpenseRetirementCo
 Route::get('expense_retirements/manage', 'ExpenseRetirements\ExpenseRetirementController@index')->name('expense-retirements.index');
 Route::get('expense_retirements/pending', 'ExpenseRetirements\ExpenseRetirementController@pendingExpenseRetirement')->name('expense-retirements.pending');
 Route::get('expense_retirements/confirmed', 'ExpenseRetirements\ExpenseRetirementController@confirmedExpenseRetirement')->name('expense-retirements.confirmed');
+Route::get('expense_retirements/paid', 'ExpenseRetirements\ExpenseRetirementController@paidExpenseRetirement')->name('expense-retirements.paid');
 Route::get('expense_retirements/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@show')->name('expense_retirements.show');
 Route::get('get-items-list/{id}', 'ExpenseRetirements\ExpenseRetirementController@getItemsList');
 Route::post('/submit-single-expense-retire-row', 'ExpenseRetirements\ExpenseRetirementController@submit_expense_retire_row');
@@ -132,7 +137,9 @@ Route::get('expense-permanent-retire/{exp_retire_no}', 'ExpenseRetirements\Expen
 Route::get('approve-expense-retirement/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@approveExpenseRetirement')->name('approve-expense-retirement');
 Route::get('reject-expense-retirement/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@rejectExpenseRetirement')->name('reject-expense-retirement');
 Route::post('expense_retirement/comment', 'Comments\CommentsController@expenseRetirementComment')->name('expense-retirements.comments');
-
+Route::get('expense-retirement-payments/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@paymentForm');
+Route::post('expense-retirement-payments', 'ExpenseRetirements\ExpenseRetirementController@pay')->name('expense-retirement-payments.store');
+Route::get('expense-retirement-confirmation/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@printExpenseRetirementConfirmationForm');
 
 /*
 	Retirements
@@ -150,6 +157,8 @@ Route::post('/submit-single-edit-retire-row/{ret_no}', 'Retirements\RetirementCo
 Route::get('permanent-retire/{retire_no}', 'Retirements\RetirementController@permanentRetirementSubmission');
 
 Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@getAllPaidRequisition')->name('paid-requisition');
+Route::get('manage-all-retirements', 'Retirements\RetirementController@manageAllRetirements')->name('retirements.manage-all');
+Route::get('retirements-associated-with-requisition/{req_no}', 'Retirements\RetirementController@retirementsAssociatedWithRequisition')->name('requisition.retirements');
 
 // Route::get('paid-requisitions/{req_no}', 'Requisitions\RequisitionsController@getAllPaidRequisition')->name('paid-requisition');
 

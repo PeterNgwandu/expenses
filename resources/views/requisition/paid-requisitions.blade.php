@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\FinanceSupportiveDetail;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
  ?>
@@ -51,7 +52,8 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                             <th scope="col" class="text-center">Department</th>
                                             <th scope="col" class="text-center">Requisition No.</th>
                                             <th scope="col" class="text-center">Status</th>
-                                            <th scope="col" class="text-center">Requisitions Gross Totals</th>
+                                            <th scope="col" class="text-right">Total Requested</th>
+                                            <th scope="col" class="text-right">Amount Paid</th>
                                             <th scope="col" class="text-center">Action</th>
 
                                         </tr>
@@ -63,9 +65,10 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                                 <td scope="col" class="text-center">{{$requisition->department}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->req_no}}</td>
                                                 <td scope="col" class="text-center">{{$requisition->status}}</td>
-                                                <td scope="col" class="text-success text-center font-weight-bold">
+                                                <td scope="col" class="text-right">
                                                    {{ number_format(RequisitionsController::getRequisitionTotal($requisition->req_no)) }}
                                                 </td>
+                                                <td scope="col" class="text-right">{{number_format(RequisitionsController::getPaidAmount($requisition->req_no),2)}}</td>
                                                 <td scope="col" class="text-center">
                                                     <a href="{{url('/submitted-requisitions/'.$requisition->req_no)}}" class="btn btn-sm btn-outline-success">View All Requisitions</a>
                                                 </td>

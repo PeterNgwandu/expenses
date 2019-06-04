@@ -124,6 +124,24 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total Requested</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            {{number_format($amount_requested,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            {{number_format($amount_paid,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Amount Retired</td>
                                                         <td scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
                                                             {{number_format($amount_retired,2)}}
@@ -138,15 +156,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                             {{number_format($amount_unretired,2)}}
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td scope="col" class="text-right font-weight-bold">Total Paid</td>
-                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{number_format($amount_paid,2)}}
-                                                        </td>
-                                                    </tr>
+
                                                 </tbody>
                                                 @endif
                                                 @if($submitted_requisitions->isEmpty())
@@ -184,18 +194,10 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
-                                                        <td scope="col" class="text-right font-weight-bold">Amount Retired</td>
-                                                        <td scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{number_format($amount_retired,2)}}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
                                                         <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td scope="col" class="text-right font-weight-bold">Amount Unretired</td>
-                                                        <td scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{number_format($amount_unretired,2)}}
+                                                        <td scope="col" class="text-right font-weight-bold">Total Requested</td>
+                                                        <td style="background: #FFF6F4;" scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            {{number_format($amount_requested,2)}}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -205,9 +207,30 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                                         <td></td>
                                                         <td scope="col" class="text-right font-weight-bold">Total Paid</td>
                                                         <td style="background: #FFF6F4;" scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            {{number_format(RequisitionsController::amountPaid($requisition->req_no),2)}}
+                                                            {{number_format($amount_paid,2)}}
                                                         </td>
                                                     </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Amount Retired</td>
+                                                        <td scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            {{number_format($amount_retired,2)}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td scope="col" class="text-right font-weight-bold">Amount Unretired</td>
+                                                        <td scope="col" class="text-right">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            {{number_format($amount_unretired,2)}}
+                                                        </td>
+                                                    </tr>
+
                                                 </tbody>
                                                 @endif
 
@@ -365,7 +388,7 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
                                     </table>
                                     <div class="">
                                         <div class="col-lg-2 float-right" style="margin-right: -15px">
-                                           <button type="submit" retire-no="{{RetirementController::getTheLatestRetirementNumber()}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
+                                           <button type="submit" req-no="{{$req_no}}" retire-no="{{RetirementController::getTheLatestRetirementNumber()}}" class="btn permanent-retire float-right btn-outline-primary mt-3 ml-1">Retire</button>
                                         </div>
                                     </div>
                             </div>
@@ -423,10 +446,11 @@ use App\Http\Controllers\ExpenseRetirements\ExpenseRetirementController;
 
     $(document).on('click', '.permanent-retire', function(e) {
         var retire_no = $(this).attr('retire-no');
+        var req_no = $(this).attr('req-no');
         var url = '/permanent-retire/'+retire_no;
         $.get(url, function(data) {
             console.log(data.result);
-            url2 = '/retirements';
+            url2 = '/retirements-details/' + req_no;
             window.location = url2;
         });
     });

@@ -1,4 +1,4 @@
-<?php foreach ($data as $value): ?>
+<?php foreach ($data_no_budget as $value): ?>
 
 	<tr>
 
@@ -12,7 +12,7 @@
 		<td scope="col" class="text-center">{{$value->unit_price}}</td>
 		<td scope="col" class="text-center">{{$value->vat}}</td>
 		<td scope="col" class="text-center">{{$value->account}}</td>
-		<td scope="col" class="text-center">{{$value->description}}</td>
+		<td scope="col" class="text-left">{{$value->description}}</td>
 		<td id="delete-this-row" scope="col" class="text-center">
 
 				<span class="delete-retirement-line" id="{{$value->id}}">
