@@ -1,9 +1,12 @@
 <?php
 
+use App\User;
 use App\Department\Department;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Requisitions\RequisitionsController;
+
 
 ?>
 @extends('layout.app')
@@ -93,15 +96,6 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
             ?>
 
         </div>
-        {{-- <div style="margin-left: 78px;" class="mt-4">
-            <p>Download Database Backup Below: </p>
-            <ul class="list-unstyled">
-                <li>
-                    <a href="">{{Storage::disk('local')->url('mysql-expenses.sql')}}</a>
-                </li>
-            </ul>
-
-        </div> --}}
     </div>
 </div>
 @endsection
