@@ -335,8 +335,8 @@ $financeDirector = $stafflevels[4]->id;
 
                 <div class="dropdown-menu dropdown-menu-right">
                     <a href="account.html" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">lock</i> <span class="align-middle">Account</span></a>
-                    <a href="profile.html" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">account_circle</i> <span class="align-middle">Profile</span></a>
-                    <a href="#" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">settings</i> <span class="align-middle">Settings</span></a>
+                    <a href="{{route('user-profile',Auth::user()->id)}}" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">account_circle</i> <span class="align-middle">Profile</span></a>
+                    <a href="{{route('change-password')}}" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">settings</i> <span class="align-middle">Settings</span></a>
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">exit_to_app</i> <span class="align-middle">Logout</span></a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         {{ csrf_field() }}

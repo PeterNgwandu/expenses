@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Department;
 
 use Alert;
+use App\User;
 use App\Company\Company;
 use Illuminate\Http\Request;
 use App\Department\Department;
@@ -132,4 +133,33 @@ class DepartmentController extends Controller
         alert()->success('Department Deleted', 'Success');
         return redirect()->back();
     }
+
+    public static function checkIfDeptHasUser()
+    {
+        $users_with_depts = User::select('users.department_id')->get();
+        $departments = Department::select('id')->get();
+        foreach ($departments as $department) {
+            if ($users_with_depts->contains($department->id)) {
+                return true;
+            }
+        }
+    }
+
+    public static function checkDepatmentExistance()
+    {
+        $dept = Department::select('id')->get(); 
+        foreach($dept as $d){                                                                                                                                               
+          $user_dept = Department::join('users','departments.id','users.department_id')
+                        ->whereIn('users.department_id', [$d])
+                        ->select('users.username','users.department_id')
+                        ->get();
+
+          if(!$user_dept->isEmpty()){
+              return true;
+          }else{
+              return false;
+          }           
+        }
+    }
+
 }

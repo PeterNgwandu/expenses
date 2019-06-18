@@ -1,5 +1,6 @@
 <?php
-$staff = User::findOrFail($id);
+use App\User;
+
 ?>
 @extends('layout.app')
 
@@ -24,22 +25,23 @@ $staff = User::findOrFail($id);
                         <div class="card-group">
                             <div class="card card-body bg-light ">
                               <div class="col-lg-10 offset-1">
-                                <form method="POST" action="">
+                                <form method="POST" action="{{route('staffs.update',$id)}}">
+                                    @method('PUT')
                                     @csrf
                                     <div class="row">
                                       <div class="col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="username" placeholder="Username" value="">
+                                            <input type="text" class="form-control" name="username" placeholder="Username" value="{{$staff->username}}">
                                         </div>
                                       </div>
                                       <div class="col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="email" placeholder="Email" value="">
+                                            <input type="text" class="form-control" name="email" placeholder="Email" value="{{$staff->email}}">
                                         </div>
                                       </div>
                                       <div class="col-lg-4">
                                         <div class="form-group">
-                                            <input type="number" class="form-control" name="phone" placeholder="Phone" value="">
+                                            <input type="number" class="form-control" name="phone" placeholder="Phone" value="{{$staff->phone}}">
                                         </div>
                                       </div>
                                     </div>
@@ -48,10 +50,10 @@ $staff = User::findOrFail($id);
 
                                       <div class="col-lg-4">
                                         <div class="form-group">
-                                            <input type="number" class="form-control" name="phone_alternative" placeholder="Phone Alternative" value="">
+                                            <input type="number" class="form-control" name="phone_alternative" placeholder="Phone Alternative" value="{{$staff->phone_alternative}}">
                                         </div>
                                       </div>
-                                      <div class="col-lg-4">
+                                      <!-- <div class="col-lg-4">
                                         <div class="form-group">
                                             <input type="password" class="form-control" name="password" placeholder="Password" value="">
                                         </div>
@@ -60,37 +62,43 @@ $staff = User::findOrFail($id);
                                         <div class="form-group">
                                             <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm Password" value="">
                                         </div>
-                                      </div>
-                                    </div>
-
-                                    <div class="row">
-                                      <div class="col-lg-6">
+                                      </div> -->
+                                      <div class="col-lg-4">
                                         <input type="hidden" name="company_id" value="5">
                                         <select class="form-control" name="department_id">
-                                          <option value="Select Department">Select Department</option>
-
+                                          <option value="{{$staff_dept->department_id}}">{{$staff_dept->dept_name}}</option>
+                                          @foreach($departments as $department)
+                                            <option value="{{$department->id}}">{{$department->name}}</option>
+                                          @endforeach
                                         </select>
                                       </div>
-                                      <div class="col-lg-6">
+                                      <div class="col-lg-4">
                                         <input type="hidden" name="company_id" value="1">
                                         <select class="form-control" name="stafflevel_id">
-                                          <option value="Select Staff Level">Select Staff Level</option>
-
+                                          <option value="{{$staff_level->stafflevel_id}}">{{$staff_level->stafflevelname}}</option>
+                                          @foreach($staff_levels as $staff_level)
+                                            <option value="{{$staff_level->id}}">{{$staff_level->name}}</option>
+                                          @endforeach
                                         </select>
                                       </div>
+                                    </div>
+
+                                    <div class="row">
+                                      
                                     </div>
                                     <br>
                                     <div class="row">
                                       <div class="col-lg-6">
-                                        <input class="form-control" type="text" value="{{$accounts->id}} - {{ $accounts->account_subtype_name}}" name="sub_acc_type_id" disabled="true">
+                                        <input type="hidden" value="{{$accounts->id}}" name="sub_acc_type_id">
+                                        <input class="form-control" type="text" value="{{$accounts->account_subtype_name}}" name="sub_acc_type_id" disabled="true">
                                       </div>
                                       <div class="col-lg-6">
-                                        <input type="text" class="form-control" name="account_no" placeholder="Enter Account No." value="">
+                                        <input type="text" class="form-control" name="account_no" placeholder="Enter Account No." value="{{$staff->account_no}}">
                                       </div>
                                     </div>
                                     <br>
 
-                                      <button style="margin-right: -10px;" type="submit" class="btn btn-primary" name="button">Add</button>
+                                      <button style="margin-right: -10px;" type="submit" class="btn btn-primary" name="button">Update</button>
 
                                 </form>
                               </div>

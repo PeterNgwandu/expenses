@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\StaffLevel\StaffLevel;
 use App\Department\Department;
 use App\Accounts\SubAccountType;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 
@@ -95,8 +96,12 @@ class StaffController extends Controller
     public function edit($id)
     {
         $staff = User::findOrFail($id);
-
-        return view('staffs.edit-staff')->withStaff($staff);
+        $staff_levels = StaffLevel::all();
+        $staff_level = User::join('staff_levels','users.stafflevel_id','staff_levels.id')->select('users.stafflevel_id','staff_levels.name as stafflevelname')->where('users.id', $id)->first();
+        $staff_dept = User::join('departments','users.department_id','departments.id')->select('users.department_id','departments.name as dept_name')->where('users.id', $id)->first();
+        $departments = Department::where('status', 'Active')->get();
+        $accounts = SubAccountType::where('account_subtype_name', 'Staff Advance Accounts')->first();
+        return view('staffs.edit-staff', compact('staff_dept','staff_level','staff_levels','id'))->withStaff($staff)->withAccounts($accounts)->withDepartments($departments);
     }
 
     public function deleteUser($user_id)
@@ -115,7 +120,20 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $user = User::where('id', $id)->update([
+            'username' => $request->username,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'phone_alternative' => $request->phone_alternative,
+            'department_id' => $request->department_id,
+            'sub_acc_type_id' => $request->sub_acc_type_id,
+            'account_no' => $request->account_no,
+            'stafflevel_id' => $request->stafflevel_id,
+        ]);
+
+        alert()->success('Staff Updated Successfuly', 'Congratulation');
+        return redirect(url('/registered-staffs'));
     }
 
     /**
@@ -127,5 +145,34 @@ class StaffController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function userProfile($user_id)
+    {   
+        $staff = User::findOrFail($user_id);
+        $staff_level = User::join('staff_levels','users.stafflevel_id','staff_levels.id')->select('users.stafflevel_id','staff_levels.name as stafflevelname')->where('users.id', $user_id)->first();
+        $staff_dept = User::join('departments','users.department_id','departments.id')->select('users.department_id','departments.name as dept_name')->where('users.id', $user_id)->first();
+        return view('staffs.staff-profile', compact('staff','staff_level','staff_dept'));
+    }
+
+    public function changePassword(Request $request)
+    {
+        return view('staffs.change-password');
+    }
+
+    public function postChangePassword(Request $request)
+    {
+
+        if (Hash::check($request->current_password, Auth::user()->password)) {
+            $staff = new User();
+            $new_password = Hash::make($request->new_password);
+            $staff->password = $new_password;
+            $staff->updated([
+                'password' => $new_password,
+            ]);
+            return redirect(url('/'));
+        }else{
+            return redirect()->back();
+        }
     }
 }

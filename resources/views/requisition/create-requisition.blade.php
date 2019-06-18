@@ -96,7 +96,13 @@ select,option {
                                             {{RequisitionsController::getTheLatestRequisitionNumber()}}
                                         </p>
                                     </span>
+
                                     <a href="{{url('create-requisition')}}" data-value="{{Auth::user()->id}}" class="btn btn-sm btn-twitter refresh float-right" style="margin-top: -2px; margin-right:25px; border-radius:0px !important">Refresh</a>
+
+                                    <button class="btn btn-sm btn-twitter float-right" style="margin-top: -2px; margin-right:25px; width: 160px; border-radius:0px !important">
+                                        <input disabled type="" id="total_amount" value="" class="form-control float-right" name="">
+                                    </button>
+                                    <p class="float-right font-weight-bold mr-2 mt-2">Total Budget Available</p>
 
                                 </div>
                             </div>
@@ -164,7 +170,6 @@ select,option {
 
 
                                     </div>
-
 
                                 <table class="table table-sm mb-0 mt-3">
                                       <thead class="thead-dark">
@@ -269,6 +274,21 @@ select,option {
         //         $('.render-requisition-row').html(data.result);
         //     });
         // });
+
+        $(document).on('change', '#budget', function(e) {
+            e.preventDefault();
+            var budget_id = $(this).val();
+            var url = '/get_total_budget_amount/' + budget_id;
+            $.get(url, function(data) {
+                console.log(data.result);
+                if(data.result <= 0)
+                {
+                    swal('Oops','Budget is insufficient','info');
+                }
+                $('#total_amount').val(data.result);
+                $('#total_amount').prop('disabled', true);
+            });
+        });
 
         $(document).on('change', '.item', function(e) {
             var itemId = $(this).val();

@@ -178,6 +178,7 @@ $(document).on('click', '.database-backup', function(e) {
     $.get(url, function(data) {
         console.log(data.result);
         swal("Good Job", "Database backup created successfuly", "success");
+        window.location = '/';
     });
 });
 

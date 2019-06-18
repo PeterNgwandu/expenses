@@ -1517,6 +1517,34 @@ class RequisitionsController extends Controller
             $gross_amount = ($request->quantity * $request->unit_price);
         }
 
+        $budget_category = Budget::join('budget_categories','budgets.budget_category_id','budget_categories.id')->where('budgets.id', $request->budget_id)->select('budgets.budget_category_id')->first();
+
+        if($budget_category->budget_category_id == 1)
+        {
+            $total = Item::join('budgets','items.budget_id','budgets.id')->where('budget_id', $request->budget_id)
+                         ->where('budgets.budget_category_id', 1)->sum('total');
+
+            $total_requested = Requisition::join('budgets','requisitions.budget_id','budgets.id')
+                                          ->join('budget_categories','budgets.budget_category_id','budget_categories.id')
+                                          ->where('budgets.id', $request->budget_id)
+                                          ->where('budget_category_id', 1)
+                                          ->where('requisitions.status','!=','Edited')
+                                          ->where('requisitions.status','!=','Deleted')
+                                          ->sum('gross_amount');
+
+            $total_avalilable = $total - $total_requested;                              
+
+            if($budget_category->budget_category_id == 1)
+            {       
+                if($gross_amount > $total_avalilable)
+                {
+                    alert()->error('You have exceeded the budget limit')->persistent('close');
+                    return redirect()->back();
+                }
+            }
+        }
+        
+
         if (Requisition::select('req_no')->latest()->first() == null && RequisitionTemporaryTable::select('req_no')->latest()->first() == null)
         {
             $req_no = 'Req-1';

@@ -45,7 +45,10 @@
                                               <a class="delete-user" href="#" id="{{$user->id}}">
                                                 <span>
                                                      <i style="cursor: pointer;" class="material-icons md-10 align-middle mb-1 text-danger">delete_forever</i>
-                                        				</span>
+                                                        </span>
+                                              </a>
+                                              <a class="text-twitter" href="{{route('staffs.edit',$user->id)}}" id="{{$user->id}}">
+                                                Edit
                                               </a>
                                             </td>
                                         </tr>

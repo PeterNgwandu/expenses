@@ -44,6 +44,7 @@ $financeDirector = $stafflevels[4]->id;
                                         <tr>
                                             <th scope="col" class="text-center">Budget No.</th>
                                             <th scope="col" class="text-center">Title</th>
+                                            <th scope="col" class="text-center">Category</th>
                                             <th scope="col" class="text-center">Description</th>
                                             <th scope="col" class="text-center">Date Created</th>
                                             <th scope="col" class="text-center">Total</th>
@@ -57,15 +58,16 @@ $financeDirector = $stafflevels[4]->id;
                                         @foreach($budgets as $budget)
                                         <tr>
                                             <td class="align-middle text-center">{{ $budget->title_no }}</td>
-                                            <td class="align-middle text-center">
+                                            <td class="align-middle text-left">
                                                 <a href="{{ route('budgets.show', $budget->id) }}">{{ $budget->title }}</a>
                                             </td>
-                                            <td class="align-middle text-center">{{$budget->description}}</td>
-                                            <td class="align-middle text-center">{{$budget->created_at->toFormattedDateString()}}</td>
-                                            <td class="align-middle text-center">{{number_format(BudgetsController::get_sumitems_by_budgetID($budget->id))}}</td>
-                                            <td class="align-middle text-center">{{number_format(BudgetsController::getCommitedAmount($budget->id))}}</td>
-                                            <td class="align-middle text-center">{{number_format(BudgetsController::getSpentAmount($budget->id))}}</td>
-                                            <td class="align-middle text-center">{{number_format(BudgetsController::getBudgetBalance($budget->id))}}</td>
+                                            <td class="align-middle text-left">{{$budget->category}}</td>
+                                            <td class="align-middle text-left">{{$budget->description}}</td>
+                                            <td style="width: 120px;" class="align-middle text-left">{{$budget->created_at->toFormattedDateString()}}</td>
+                                            <td class="align-middle text-right">{{number_format(BudgetsController::get_sumitems_by_budgetID($budget->id))}}</td>
+                                            <td class="align-middle text-right">{{number_format(BudgetsController::getCommitedAmount($budget->id))}}</td>
+                                            <td class="align-middle text-right">{{number_format(BudgetsController::getSpentAmount($budget->id))}}</td>
+                                            <td class="align-middle text-right">{{number_format(BudgetsController::getBudgetBalance($budget->id))}}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>

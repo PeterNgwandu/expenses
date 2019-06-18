@@ -28,16 +28,29 @@ $financeDirector = $stafflevels[4]->id;
                             <form method="POST" action="{{ route('budgets.store') }}">
                                 @csrf
                                 <div class="form-group form-row">
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
                                         <label>Title No.</label>
                                         <div class="input-group input-group--inline">
                                             <div class="input-group-addon">
                                                 <i class="material-icons">receipt</i>
                                             </div>
-                                            <input type="text" class="form-control" name="title_no" placeholder="Title Number" value="{{BudgetsController::generateBudgetNo()}}">
+                                            <input disabled type="text" class="form-control" name="title_no" placeholder="Title Number" value="{{BudgetsController::generateBudgetNo()}}">
                                         </div>
                                     </div>
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
+                                        <label>Budgets Categories</label>
+                                        <div class="input-group input-group--inline">
+                                            <div class="input-group-addon">
+                                                <i class="material-icons">receipt</i>
+                                            </div>
+                                            <select class="form-control" name="budget_category_id">
+                                                @foreach($budget_categories as $category)
+                                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
                                         <label>Budget Title</label>
                                         <div class="input-group input-group--inline">
                                             <div class="input-group-addon">

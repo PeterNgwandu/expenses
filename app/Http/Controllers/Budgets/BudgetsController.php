@@ -6,6 +6,8 @@ use DB;
 use App\Item\Item;
 use App\Accounts\Account;
 use App\Budget\Budget;
+use App\BudgetCategory;
+use App\Requisition\Requisition;
 use Illuminate\Http\Request;
 use App\StaffLevel\StaffLevel;
 use Illuminate\Support\Carbon;
@@ -22,7 +24,10 @@ class BudgetsController extends Controller
     public function index()
     {
         $accounts = Account::all();
-        $budgets = Budget::where('status', 'Confirmed')->get();
+        $budgets = Budget::join('budget_categories','budgets.budget_category_id','budget_categories.id')
+                   ->select('budgets.*','budget_categories.name as category')
+                   ->where('status', 'Confirmed')
+                   ->get();
         // $items = Item::where('title_no', $budgets[1]->title_no)->get();
         $items = Item::all();
         $total = 0;
@@ -42,7 +47,8 @@ class BudgetsController extends Controller
         $accounts = Account::all();
         $budgets = Budget::where('status', 'Confirmed')->limit(5)->latest()->get();
         $items = Item::all();
-        return view('budgets.create-budget')->withBudgets($budgets)->withItems($items)->withAccounts($accounts);
+        $budget_categories = BudgetCategory::all();
+        return view('budgets.create-budget', compact('budget_categories'))->withBudgets($budgets)->withItems($items)->withAccounts($accounts);
     }
 
     /**
@@ -54,14 +60,16 @@ class BudgetsController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate(request(), [
-            'title_no => required',
-            'title => required',
-            'description => required',
-        ]);
+        // $this->validate(request(), [
+        //     'title_no' => 'required',
+        //     'title' => 'required',
+        //     'budget_category_id' => 'required',
+        //     'description' => 'required',
+        // ]);
 
         $budget = new Budget();
-        $budget->title_no = $request->title_no;
+        $budget->title_no = BudgetsController::generateBudgetNo();
+        $budget->budget_category_id = $request->budget_category_id;
         $budget->title = $request->title;
         $budget->description = $request->description;
         $budget->save();
@@ -155,7 +163,10 @@ class BudgetsController extends Controller
         $total = 0;
 
         $accounts = Account::all();
-        $budgets = Budget::where('status', 'Confirmed')->get();
+        $budgets = Budget::join('budget_categories','budgets.budget_category_id','budget_categories.id')
+                   ->select('budgets.*','budget_categories.name as category')
+                   ->where('status', 'Confirmed')
+                   ->get();
         $items = Item::all();
 
         foreach ($items as $item) {
@@ -255,5 +266,22 @@ class BudgetsController extends Controller
     public static function totalBudgetById($budget_id)
     {
         return DB::table('items')->where('budget_id', $budget_id)->sum('total');
+    }
+
+    public function getTotalBudgetAmount($budget_id)
+    {
+        $total = Item::where('budget_id', $budget_id)->sum('total');
+
+        $total_requested = Requisition::join('budgets','requisitions.budget_id','budgets.id')
+                                          ->join('budget_categories','budgets.budget_category_id','budget_categories.id')
+                                          ->where('budgets.id', $budget_id)
+                                          ->where('budget_category_id', 1)
+                                          ->where('requisitions.status','!=','Edited')
+                                          ->where('requisitions.status','!=','Deleted')
+                                          ->sum('gross_amount');
+
+        $total_avalilable = $total - $total_requested;                                  
+
+        return response()->json(['result' => $total_avalilable]);
     }
 }

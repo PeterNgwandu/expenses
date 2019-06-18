@@ -1,3 +1,14 @@
+<?php
+
+use App\User;
+use App\Department\Department;
+use App\Http\Controllers\Department\DepartmentController;
+
+$dept = Department::select('id')->get(); 
+$users_with_depts = User::join('departments','users.department_id','departments.id')
+                          ->select('users.department_id')->get()->pluck('department_id');
+
+?>
 @extends('layout.app')
 
 @section('content')
@@ -35,13 +46,19 @@
                                       @if($department->status == 'Active')
                                         <td class="align-middle text-center">
                                           <a href="{{url('/disable-deparment/'.$department->id)}}" class="btn btn-sm btn-outline-danger">Disable</a>
-                                          <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
+                                          @if(!$users_with_depts->contains($department->id))
+                                              <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-danger">Delete</a> 
+                                            @else  
+
+                                            @endif
                                         </td>
                                         @endif
                                         @if($department->status == 'Disabled')
                                         <td class="align-middle text-center">
                                             <a href="{{url('/enable-deparment/'.$department->id)}}" class="btn btn-sm btn-outline-success">Enable</a>
-                                            <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-outline-danger">Delete</a>
+
+                                            <a data-id="{{$department->id}}" href="{{url('/delete-department/'.$department->id)}}" class=" btn btn-sm btn-danger">Delete</a> 
+
                                         </td>
                                         @endif   
                                       @endif

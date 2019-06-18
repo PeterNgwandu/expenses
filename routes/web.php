@@ -28,6 +28,9 @@ Route::resource('departments', 'Department\DepartmentController');
 Route::resource('staff-levels', 'StaffLevel\StaffLevelController');
 Route::resource('requisitions', 'Requisitions\RequisitionsController');
 Route::resource('comment', 'Comments\CommentsController');
+Route::get('user-profile/{id}', 'StaffController\StaffController@userProfile')->name('user-profile');
+Route::get('change-password', 'StaffController\StaffController@changePassword')->name('change-password');
+Route::put('change-password', 'StaffController\StaffController@postChangePassword')->name('post-change-password');
 Route::get('submitted-requisitions', 'Requisitions\RequisitionsController@submittedRequisition')->name('submitted-requisitions');
 Route::get('submitted-requisitions/{req_no}', 'Requisitions\RequisitionsController@submittedRequisitions')->name('submitted-requisition');
 Route::get('approve-requisition/{req_no}', 'Requisitions\RequisitionsController@approveRequisition');
@@ -271,7 +274,7 @@ Route::get('/delete-expense-retirement-line/{ret_no}/{data_id}', 'ExpenseRetirem
 */
 
 Route::get('get-supplier/{req_id}/{budget}/{item}/{account}/{supplier}', 'Retirements\RetirementController@getSupplier');
-Route::get('get_ref_no/{req_id}/{ref_no}', 'Retirements\Retirements\RetirementController@getRefNo');
+Route::get('get_ref_no/{req_id}/{ref_no}', 'Retirements\RetirementController@getRefNo');
 
 Route::get('/edit-expense-retirement-line/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@editExpenseRetirement');
 Route::get('/send-expense-retirement-line/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@sendExpenseRetirement');
@@ -288,10 +291,13 @@ Route::get('/update-expense-retirement-account/{data_id}/{account}', 'ExpenseRet
 Route::get('/update-expense-retirement-description/{data_id}/{description}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirementDescription');
 Route::get('/bring-expense-retirement-to-permanent-table/{user_id}/{ret_no}', 'ExpenseRetirements\ExpenseRetirementController@updateExpenseRetirement');
 
+Route::get('/get_total_budget_amount/{budget_id}', 'Budgets\BudgetsController@getTotalBudgetAmount');
+
+Route::get('download-backup', 'Backup\BackupController@downloadBackup');
+
 
 /*
  	END AJAX Routes
 */
 Auth::routes();
-
 Route::get('/home', 'HomeController@index')->name('home');
