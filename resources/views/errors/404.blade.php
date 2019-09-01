@@ -1,7 +1,7 @@
 @extends('layout.app')
 
 @section('content')
-<div class="mdk-drawer-layout js-mdk-drawer-layout" data-fullbleed data-push data-has-scrolling-region>
+<div class="mdk-drawer-layout js-mdk-drawer-layout mydata" data-fullbleed data-push data-has-scrolling-region>
     <div class="mdk-drawer-layout__content mdk-header-layout__content--scrollable">
         <!-- CONTENT BODY -->
 
@@ -17,7 +17,7 @@
                 </p>
             </div>
             <p class="mb-0">
-                Click <a href="dashboard.html">here</a> to go back to your dashboard.
+                Click <a href="{{url('/')}}">here</a> to go back to your dashboard.
             </p>
         </div>
 

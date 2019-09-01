@@ -11,9 +11,6 @@
 |
 */
 
-
-
-
 Route::middleware(['auth'])->group(function () {
 	Route::get('/', function () {
     return view('layout.index');
@@ -168,7 +165,7 @@ Route::get('retirements-associated-with-requisition/{req_no}', 'Retirements\Reti
 Route::get('retire/{req_no}', 'Retirements\RetirementController@getRetirementForm')->name('retire');
 Route::get('add-retirement/{ret_no}/{req_no}', 'Retirements\RetirementController@addRetirement');
 Route::get('all-retirements/{ret_no}', 'Retirements\RetirementController@getAllRetirement')->name('view-retirements');
-Route::get('retirements-details/{req_no}', 'Retirements\RetirementController@getRetirementDetails')->name('retirements->details');
+Route::get('retirements-details/{req_no}', 'Retirements\RetirementController@getRetirementDetails')->name('retirements-details');
 
 Route::get('submitted-retirements', 'Retirements\RetirementController@submittedRetirements')->name('retirements.submitted');
 Route::get('confirmed-retirements', 'Retirements\RetirementController@confirmedRetirements')->name('retirements.confirmed');
@@ -183,10 +180,24 @@ Route::post('retirement_submitted_filter_by_date', 'DataFilter\DataFilterControl
 	Journals
 */
 Route::resource('journals', 'Journal\JournalController');
-Route::get('journal/report', 'Journal\JournalController@printJournal');
+Route::get('journal/report/{journal_no}', 'Journal\JournalController@printJournal');
+Route::get('journal/expense-retirement-report/{journal_no}', 'Journal\JournalController@printExpenseRetirementJournal');
+Route::get('journal/retirement-report/{journal_no}', 'Journal\JournalController@printRetirementJournal');
 Route::post('journal/report', 'Journal\JournalController@postJournal');
+Route::post('retirement-journal/report', 'Journal\JournalController@postRetirementJournal');
+Route::post('expense-retirement-journal/report', 'Journal\JournalController@postExpenseRetirementJournal');
 Route::get('journal/view', 'Journal\JournalController@viewJournals')->name('journals.view');
+Route::get('retirement-journal/view', 'Journal\JournalController@viewRetirementJournals')->name('retirement-journals.view');
+Route::get('expense-retirement-journal/view', 'Journal\JournalController@viewExpenseRetirementJournals')->name('expense-retirement-journals.view');
 Route::get('/journal/{journal_no}', 'Journal\JournalController@viewJournalEntry');
+Route::get('/retirement-journal/{journal_no}', 'Journal\JournalController@viewRetirementJournalsEntry');
+Route::get('/expense-retirement-journal/{journal_no}', 'Journal\JournalController@viewExpenseRetirementJournalsEntry');
+
+
+Route::get('create-retirements-journal', 'Journal\JournalController@createRetirementJournal')->name('create-retirements-journal');
+
+Route::get('create-expense-retirements-journal', 'Journal\JournalController@createExpenseRetirementJournal')->name('create-expense-retirements-journal');
+
 
 
 /*
@@ -227,6 +238,8 @@ Route::get('get/file', function(){
 Route::get('/approve-budget/{budget_id}', 'Budgets\BudgetsController@approveBudget');
 Route::get('/reject-budget/{budget_id}', 'Budgets\BudgetsController@rejectBudget');
 Route::get('/delete-budget/{budget_id}', 'Budgets\BudgetsController@deleteBudget');
+Route::get('/freeze/{budget_id}', 'Budgets\BudgetsController@freezeBudget')->name('freeze-budget');
+Route::get('/unfreeze/{budget_id}', 'Budgets\BudgetsController@unfreezeBudget')->name('unfreeze-budget');
 // Route::get('/adjust-limit/{data_id}/{da}', 'Limits\LimitsController@adjustLimit');
 
 // Updating requisitions on temporary table
@@ -295,9 +308,50 @@ Route::get('/get_total_budget_amount/{budget_id}', 'Budgets\BudgetsController@ge
 
 Route::get('download-backup', 'Backup\BackupController@downloadBackup');
 
+/*
+	REPORTS ROUTES
+*/
+Route::get('/budgets-report', 'Reports\ReportsController@showBudgets')->name('budgets-report');
+Route::get('/budget/{id}', 'Reports\ReportsController@generateBudgetReport');
+Route::get('/budget-report/{budget_id}', 'Reports\ReportsController@printBudgetReport');
+Route::get('/uretired-imprests', 'Reports\ReportsController@showUnretiredImprests')->name('unretired-imprests');
+Route::get('/unretired-imprests-report/{from}/{to}', 'Reports\ReportsController@printUnretiredImprestReport');
+Route::post('/unretired-imprest-custom-filter/{from}/{to}', 'Reports\ReportsController@reportCustomFilter')->name('custom-filter');
+Route::get('/unretired-imprest-aging-filter/{option}', 'Reports\ReportsController@reportAgingFilter');
+
+Route::get('/update-bank-account/{ret_no}/{account_id}', 'Journal\JournalController@updateExpenseRetiremenBankAccount');
+Route::get('/update-imprest-bank-account/{req_no}/{account_id}', 'Journal\JournalController@updateImprestBankAccount');
+Route::get('/update-retirement-bank-account/{ret_no}/{account_id}', 'Journal\JournalController@updateRetirementBankAccount');
+
+Route::get('/refunds_received', 'Reports\ReportsController@showRefundsReceived')->name('refunds-received');
+Route::post('/refunds_received-custom-filter/{from}/{to}', 'Reports\ReportsController@refundReceivedCustomFilter');
+Route::get('/all-refunds_received', 'Reports\ReportsController@showRefundsReceived');
+Route::post('/grouping-received-funds', 'Reports\ReportsController@groupingReceivedFunds');
+
+Route::get('export-refunds-received/{from}/{to}', 'Reports\ReportsController@exportRefundsReceived')->name('export-refunds-received');
+
+Route::get('/refunds-received-pdf-report/{from}/{to}', 'Reports\ReportsController@printRefundsReceived');
+/*
+	EXCEL EXPORTS REPORTS ROUTES
+*/
+
+Route::get('export-budgets/{budget_id}', 'Reports\ReportsController@exportBudgets')->name('export-budgets');
+Route::get('export-imprests/{from}/{to}', 'Reports\ReportsController@exportImprests')->name('export-imprests');
+
+Route::get('export-imprests-journal/{journal_no}', 'Journal\JournalController@exportImprestJournal')->name('export-imprests-journal');
+
+Route::get('export-retirement-journal/{journal_no}', 'Journal\JournalController@exportRetirementJournal')->name('export-retirement-journal');
+
+Route::get('export-expense-retirement-journal/{journal_no}', 'Journal\JournalController@exportExpenseRetirementJournal')->name('export-expense-retirement-journal');
+
+
+Route::get('rejected-budgets', 'Budgets\BudgetsController@rejectedBudgets')->name('budgets.rejected');
+
 
 /*
  	END AJAX Routes
 */
 Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
+
+

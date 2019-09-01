@@ -1,6 +1,7 @@
 <?php
-use App\Limits\Limit;
 
+use App\Limits\Limit;
+use Illuminate\Support\Facades\Auth;
 
 ?>
 
@@ -20,8 +21,10 @@ use App\Limits\Limit;
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Approval Limits for Different Staff Levels</h4>
-                                    <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Set Limits</a>
 
+                                    @if(Auth::user()->username == 'Admin')
+                                        <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Set Limits</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

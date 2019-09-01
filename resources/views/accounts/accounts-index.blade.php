@@ -21,7 +21,9 @@ use App\Http\Controllers\Accounts\AccountController;
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Accounts</h4>
-                                     <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Account</a>
+
+                                      <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Account</a>
+
                                 </div>
                             </div>
                         </div>

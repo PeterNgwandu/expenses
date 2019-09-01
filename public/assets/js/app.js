@@ -47,6 +47,7 @@
     })
 }, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}, function(n, o) {}]);
 
+
 $(document).ready(function() {
     $('.preload').fadeOut('3000', function() {
         $('.mydata').fadeIn('2000');
@@ -56,6 +57,10 @@ $(document).ready(function() {
 $(function() {
     $('[data-toggle="tooltip"]').tooltip()
 })
+
+$(document).on('click', '.all-refunds-received', function() {
+    window.location = 'refunds_received';
+});
 
 $(document).on('click', '#print', function(e) {
     e.preventDefault();
@@ -69,6 +74,23 @@ $(document).on('click', '.print', function() {
     var journal_no = $("#journal_no").val();
     var currency = $("#currency").val();
     var url = 'journal/report/' + journal_no + '/' + currency;
+    $.get(url, function(data) {
+
+    });
+});
+
+$(document).on('click', '.print-budget-report', function() {
+    var budget_id = $(this).attr('budget_id');
+    var url = 'budget-report' + budget_id;
+    $.get(url, function(data) {
+
+    });
+});
+
+$(document).on('click', '.print-imprest-report', function() {
+    var from = $(this).attr('from');
+    var to = $(this).attr('to');
+    var url = 'unretired-imprests-report/' + from + '/' + to;
     $.get(url, function(data) {
 
     });
@@ -88,6 +110,16 @@ $(document).on('click', '.print-confirmation-form', function() {
     $.get(url, function(data) {
         window.location = url;
     });
+});
+
+$(document).on('change', '.aging-data-filter', function(e) {
+    e.preventDefault();
+    var option = $(".aging-data-filter").val();
+    var url = 'unretired-imprest-aging-filter/' + option;
+    $.get(url, function(data) {
+        console.log(data.result);
+    });
+    
 });
 
 $(document).on('click', '.delete', function(e) {
@@ -537,8 +569,15 @@ $(document).on('click', '.approve-budget', function(e) {
     var url = '/approve-budget/' + data_id;
     $.get(url, function(data) {
         console.log(data.result);
+        if(data.result.length == 0)
+        {
+            swal("","Budget line(s) have not been added", "info");
+        }else
+        {
+            window.location = '/budgets/create';
+        }    
         // swal("Good Job", "Budget has been approved successfuly", "success");
-        window.location = '/budgets/create';
+        
     });
 });
 
@@ -975,6 +1014,58 @@ $(document).on('click', '.update-expense-retirement', function(e) {
     $.get(url, function(data) {
         console.log(data.result);
         window.location = '/expense_retirements/' + exp_retire_no;
+    });
+});
+
+
+/* 
+    Changing Account on Imprest Journal
+*/
+
+$(document).on('change', '.change-account', function(e) {
+    e.preventDefault();
+    var req_no = $(this).attr('req-no');
+    var account_id = $(this).val();
+    alert(account_id);
+    console.log(account_id);
+});
+
+$(document).on('change', '.change-accounts', function(e) {
+    e.preventDefault();
+    var ret_no = $(this).attr('ret-no');
+    var account_id = $(this).val();
+    // alert(account_id);
+    // alert(ret_no);
+    var url = '/update-bank-account/' + ret_no + '/' + account_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = 'create-expense-retirements-journal';
+    });
+});
+
+$(document).on('change', '.change-imprest-accounts', function(e) {
+    e.preventDefault();
+    var req_no = $(this).attr('req-no');
+    var account_id = $(this).val();
+    // alert(account_id);
+    // alert(req_no);
+    var url = '/update-imprest-bank-account/' + req_no + '/' + account_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/journals/create';
+    });
+});
+
+$(document).on('change', '.change-retirement-accounts', function(e) {
+    e.preventDefault();
+    var ret_no = $(this).attr('ret-no');
+    var account_id = $(this).val();
+    // alert(account_id);
+    // alert(req_no);
+    var url = '/update-retirement-bank-account/' + ret_no + '/' + account_id;
+    $.get(url, function(data) {
+        console.log(data.result);
+        window.location = '/create-retirements-journal';
     });
 });
 

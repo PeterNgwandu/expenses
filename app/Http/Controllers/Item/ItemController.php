@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Item;
 
 use Alert;
 use App\Item\Item;
-use App\Accounts\Account;
 use App\Budget\Budget;
+use App\Accounts\Account;
 use Illuminate\Http\Request;
+use App\StaffLevel\StaffLevel;
 USE Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller
 {
@@ -103,6 +105,15 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        $stafflevels = StaffLevel::all();
+
+        $hod = $stafflevels[0]->id;
+        $ceo = $stafflevels[1]->id;
+        $supervisor = $stafflevels[2]->id;
+        $normalStaff = $stafflevels[3]->id;
+        $financeDirector = $stafflevels[4]->id;
+
         $item = Item::findOrFail($id);
         $result = Item::where('id', $item->id)->update([
           'budget_id' => $request->budget_id,
@@ -115,6 +126,28 @@ class ItemController extends Controller
           'quantity' => $request->quantity,
           'total' => $request->unit_price * $request->quantity,
         ]);
+
+        if(Auth::user()->stafflevel_id == $supervisor)
+        {
+            Budget::where('id', $item->budget_id)->update([
+                'status' => 'Edited',
+            ]);
+        }elseif(Auth::user()->stafflevel_id == $hod)
+        {
+            Budget::where('id', $item->budget_id)->update([
+                'status' => 'Edited, HOD',
+            ]);
+        }elseif(Auth::user()->stafflevel_id == $financeDirector)
+        {
+            Budget::where('id', $item->budget_id)->update([
+                'status' => 'Edited, Finance',
+            ]);
+        }elseif (Auth::user()->stafflevel_id == $ceo) {
+            Budget::where('id', $item->budget_id)->update([
+                'status' => 'Edited, CEO',
+            ]);
+        }
+        
 
         alert()->success('Item Updated Successfuly', 'Good Job');
         return redirect(url('budgets/'.$item->budget_id));

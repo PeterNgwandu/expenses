@@ -61,6 +61,7 @@ $financeDirector = $stafflevels[4]->id;
                 <div class="dropdown-menu">
                     <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a>
                     <a href="{{ route('budgets.index') }}" class="dropdown-item dropdown-item-action">View Budgets</a>
+                    <a href="{{ route('budgets.rejected') }}" class="dropdown-item dropdown-item-action">Rejected Budgets</a>
                 </div>
             </li>
             <li class="nav-item">
@@ -129,6 +130,7 @@ $financeDirector = $stafflevels[4]->id;
                 <div class="dropdown-menu">
                     <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a>
                     <a href="{{ route('budgets.index') }}" class="dropdown-item dropdown-item-action">View Budgets</a>
+                    <a href="{{ route('budgets.rejected') }}" class="dropdown-item dropdown-item-action">Rejected Budgets</a>
                 </div>
             </li>
             <li class="nav-item">
@@ -167,12 +169,35 @@ $financeDirector = $stafflevels[4]->id;
             </li>
 
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Journal</a>
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Reports</a>
                 <div class="dropdown-menu">
-                    <a href="{{ route('journals.create') }}" class="dropdown-item dropdown-item-action active">Create Journals</a>
-                    <a href="{{ route('journals.view') }}" class="dropdown-item dropdown-item-action">View Journals</a>
+                    <!-- <a href="{{ route('journals.create') }}" class="dropdown-item dropdown-item-action">Journals Reports</a>
+                    <a href="{{ route('journals.view') }}" class="dropdown-item dropdown-item-action">View Imprest Journals</a>
+                    <a href="{{ route('retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Retirement Journals</a>
+                    <a href="{{ route('expense-retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Expense Retirement Journals</a> -->
+                    <a href="{{ route('budgets-report') }}" class="dropdown-item dropdown-item-action">Budget Reports</a>
+                    <a href="{{ route('unretired-imprests') }}" class="dropdown-item dropdown-item-action">Unretired Imprest Reports</a>  
+
+                    <a href="{{ route('refunds-received') }}" class="dropdown-item dropdown-item-action">Refunds Received Reports</a>
+
+                   <!--  <a href="{{ route('unretired-imprests') }}" class="dropdown-item dropdown-item-action">View Refunds Received </a>  -->          
                 </div>
             </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Journals</a>
+                <div class="dropdown-menu">
+                    <a href="{{ route('journals.create') }}" class="dropdown-item dropdown-item-action">Create Imprest Journals</a>
+                    <a href="{{ route('create-retirements-journal') }}" class="dropdown-item dropdown-item-action">Create Retirement Journals</a>
+                    <a style="border: none;" href="{{ route('create-expense-retirements-journal') }}" class="dropdown-item dropdown-item-action">Create Expense Retirement Journals</a> 
+                    ..............................................................................
+                    <a href="{{ route('journals.view') }}" class="dropdown-item dropdown-item-action">View Imprest Journals</a>
+                    <a href="{{ route('retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Retirement Journals</a>
+                    <a href="{{ route('expense-retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Expense Retirement Journals</a>  
+
+                </div>             
+            </li>
+
             @elseif(Auth::user()->stafflevel_id == $ceo)
             <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Department</a>
@@ -196,6 +221,7 @@ $financeDirector = $stafflevels[4]->id;
                     <div class="dropdown-menu">
                         <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a>
                         <a href="{{ route('budgets.index') }}" class="dropdown-item dropdown-item-action">View Budgets</a>
+                        <a href="{{ route('budgets.rejected') }}" class="dropdown-item dropdown-item-action">Rejected Budgets</a>
                     </div>
                 </li>
                 <li class="nav-item">
@@ -233,6 +259,22 @@ $financeDirector = $stafflevels[4]->id;
                 </li>
 
                 <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Reports</a>
+                    <div class="dropdown-menu">
+                        <!-- <a href="{{ route('journals.create') }}" class="dropdown-item dropdown-item-action">Journals Reports</a>
+                        <a href="{{ route('journals.view') }}" class="dropdown-item dropdown-item-action">View Imprest Journals</a>
+                        <a href="{{ route('retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Retirement Journals</a>
+                        <a href="{{ route('expense-retirement-journals.view') }}" class="dropdown-item dropdown-item-action">View Expense Retirement Journals</a> -->
+                        <a href="{{ route('budgets-report') }}" class="dropdown-item dropdown-item-action">Budget Reports</a>
+                        <a href="{{ route('unretired-imprests') }}" class="dropdown-item dropdown-item-action">Unretired Imprest Reports</a>  
+
+                        <a href="{{ route('refunds-received') }}" class="dropdown-item dropdown-item-action">Refunds Received Reports</a>
+
+                       <!--  <a href="{{ route('unretired-imprests') }}" class="dropdown-item dropdown-item-action">View Refunds Received </a>  -->          
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Journal</a>
                     <div class="dropdown-menu">
                         {{-- <a href="{{ route('journals.create') }}" class="dropdown-item dropdown-item-action active">Create Journals</a> --}}
@@ -262,6 +304,7 @@ $financeDirector = $stafflevels[4]->id;
                 <div class="dropdown-menu">
                     <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a>
                     <a href="{{ route('budgets.index') }}" class="dropdown-item dropdown-item-action">View Budgets</a>
+                    <a href="{{ route('budgets.rejected') }}" class="dropdown-item dropdown-item-action">Rejected Budgets</a>
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -290,8 +333,56 @@ $financeDirector = $stafflevels[4]->id;
                     <a href="{{ route('expense-retirements.paid') }}" class="dropdown-item dropdown-item-action">Paid Expense Retirements</a>
                 </div>
             </li>
-            @elseif(Auth::user()->stafflevel_id == $supervisor || Auth::user()->stafflevel_id == $normalStaff)
+
             <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Reports</a>
+                <div class="dropdown-menu">
+ 
+                    <a href="{{ route('budgets-report') }}" class="dropdown-item dropdown-item-action">Budget Reports</a>
+                    <!-- <a href="{{ route('unretired-imprests') }}" class="dropdown-item dropdown-item-action">Unretired Imprest Reports</a>  
+
+                    <a href="{{ route('refunds-received') }}" class="dropdown-item dropdown-item-action">Refunds Received Reports</a> -->
+          
+                </div>
+            </li>
+
+            @elseif(Auth::user()->stafflevel_id == $supervisor)
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Budget</a>
+                <div class="dropdown-menu">
+                    <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a>
+                    <a href="{{ route('budgets.index') }}" class="dropdown-item dropdown-item-action">View Budgets</a>
+                    <a href="{{ route('budgets.rejected') }}" class="dropdown-item dropdown-item-action">Rejected Budgets</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Requisition</a>
+                <div class="dropdown-menu">
+                    <!-- <a href="{{ route('requisitions.create') }}" class="dropdown-item dropdown-item-action active">Create Requisition(s)</a> -->
+                    <a href="{{ route('requisitions.create') }}" class="dropdown-item dropdown-item-action active">Create Requisition</a>
+                    <a href="{{ route('pending-requisitions') }}" class="dropdown-item dropdown-item-action">Pending Requisitions</a>
+                    <a href="{{ route('submitted-requisitions') }}" class="dropdown-item dropdown-item-action">Submitted Requisitions</a>
+                    <a href="{{ route('approved-requisitions') }}" class="dropdown-item dropdown-item-action">Approved Requisitions</a>
+                    <a href="{{ route('paid-requisitions') }}" class="dropdown-item dropdown-item-action">Paid Requisitions</a>
+                    {{-- <a href="{{ route('retired-requisitions') }}" class="dropdown-item dropdown-item-action">Retired Requisitions</a> --}}
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Retirement</a>
+                <div class="dropdown-menu">
+                    <a href="{{ route('retirements.create') }}" class="dropdown-item dropdown-item-action active">Retire Requisition</a>
+                    <a href="{{ route('retirements.index') }}" class="dropdown-item dropdown-item-action">Pending Retirements</a>
+                    <a href="{{ route('retirements.submitted') }}" class="dropdown-item dropdown-item-action">Submitted Retirements</a>
+                    <a href="{{ route('retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Retirements</a>
+                    <a href="{{route('expense-retirements.create')}}" class="dropdown-item dropdown-item-action">Create Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.pending') }}" class="dropdown-item dropdown-item-action">Pending Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.index') }}" class="dropdown-item dropdown-item-action">Submitted Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
+                    <a href="{{ route('expense-retirements.paid') }}" class="dropdown-item dropdown-item-action">Paid Expense Retirements</a>
+                </div>
+            </li>
+            @elseif(Auth::user()->stafflevel_id == $normalStaff)
+             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Budget</a>
                 <div class="dropdown-menu">
                     <!-- <a href="{{ route('budgets.create') }}" class="dropdown-item dropdown-item-action active">Create Budgets</a> -->
@@ -323,21 +414,34 @@ $financeDirector = $stafflevels[4]->id;
                     <a href="{{ route('expense-retirements.confirmed') }}" class="dropdown-item dropdown-item-action">Confirmed Expense Retirements</a>
                     <a href="{{ route('expense-retirements.paid') }}" class="dropdown-item dropdown-item-action">Paid Expense Retirements</a>
                 </div>
-            </li>
+            </li>       
             @endif
 
         </ul>
-        <ul class="navbar-nav">
+        <ul class="navbar-nav" style="margin-right: -120px;">
             <li class="nav-item dropdown ml-2">
                 <a href="#" class="nav-link dropdown-toggle dropdown-clear-caret" data-toggle="dropdown" aria-expanded="false">
-    <span class="d-none d-lg-inline-block">{{ Auth::user()->username }}</span> <img src="{{url('assets/images/avatars/andrew-robles-300868.jpg')}}" class="img-fluid rounded-circle ml-1" width="35" alt="">
-  </a>
+                    <span class="d-none d-lg-inline-block">{{ Auth::user()->username }}</span> 
+                    <img src="{{url('assets/images/avatars/andrew-robles-300868.jpg')}}" class="img-fluid rounded-circle ml-1" width="35" alt="">
+                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a href="account.html" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">lock</i> <span class="align-middle">Account</span></a>
-                    <a href="{{route('user-profile',Auth::user()->id)}}" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">account_circle</i> <span class="align-middle">Profile</span></a>
-                    <a href="{{route('change-password')}}" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">settings</i> <span class="align-middle">Settings</span></a>
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="dropdown-item dropdown-item-action"><i class="material-icons md-18 align-middle mr-1">exit_to_app</i> <span class="align-middle">Logout</span></a>
+                    <a href="account.html" class="dropdown-item dropdown-item-action">
+                        <i class="material-icons md-18 align-middle mr-1">lock</i> 
+                        <span class="align-middle">Account</span>
+                    </a>
+                    <a href="{{route('user-profile',Auth::user()->id)}}" class="dropdown-item dropdown-item-action">
+                        <i class="material-icons md-18 align-middle mr-1">account_circle</i> 
+                        <span class="align-middle">Profile</span>
+                    </a>
+                    <a href="{{route('change-password')}}" class="dropdown-item dropdown-item-action">
+                        <i class="material-icons md-18 align-middle mr-1">settings</i> 
+                        <span class="align-middle">Settings</span>
+                    </a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="dropdown-item dropdown-item-action">
+                        <i class="material-icons md-18 align-middle mr-1">exit_to_app</i> 
+                        <span class="align-middle">Logout</span>
+                    </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         {{ csrf_field() }}
                     </form>

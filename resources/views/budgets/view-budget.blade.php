@@ -28,8 +28,12 @@ $financeDirector = $stafflevels[4]->id;
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">{{ $budget->title }} Budget</h4>
-                                    @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo)
-                                      <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Items</a>
+                                    @if($budget->user_id == Auth::user()->id)
+                                    @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $supervisor)
+                                        @if($budget->status != 'Confirmed' || $budget->status == 'onprocess' || $budget->status == 'onprocess, hod')
+                                          <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Items</a>
+                                        @endif
+                                    @endif
                                     @endif
                                 </div>
                             </div>
@@ -44,8 +48,12 @@ $financeDirector = $stafflevels[4]->id;
                                             <th scope="col" class="text-center">Unit Price</th>
                                             <th scope="col" class="text-center">Quantity</th>
                                             <th scope="col" class="text-center">Total</th>
-                                            @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo)
+                                            @if($budget->status != 'Confirmed' || $budget->status == 'Rejected By HOD' || $budget->status == 'Rejected')
+                                            @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $supervisor)
+                                            @if($budget->user_id == Auth::user()->id)
                                              <th scope="col" class="text-center">Action</th>
+                                            @endif
+                                            @endif
                                             @endif
                                         </tr>
                                     </thead>
@@ -53,13 +61,15 @@ $financeDirector = $stafflevels[4]->id;
                                        @foreach($itemsUnderBudget as $item)
                                         <tr>
                                             <td class="align-middle text-center">{{ $item->item_no }}</td>
-                                            <td class="align-middle text-center">{{ $item->item_name }}</td>
+                                            <td class="align-middle text-left">{{ $item->item_name }}</td>
                                             <td class="align-middle text-center">{{ $item->unit_measure }}</td>
-                                            <td class="align-middle text-center">{{ $item->description }}</td>
+                                            <td class="align-middle text-left">{{ $item->description }}</td>
                                             <td class="align-middle text-center">{{ number_format($item->unit_price) }}</td>
                                             <td class="align-middle text-center">{{ number_format($item->quantity,0) }}</td>
-                                            <td class="align-middle text-center">{{ number_format($item->unit_price * $item->quantity) }}</td>
-                                            @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo)
+                                            <td class="align-middle text-right">{{ number_format($item->unit_price * $item->quantity) }}</td>
+                                            @if($budget->status != 'Confirmed' || $budget->status == 'Rejected By HOD' || $budget->status == 'Rejected')
+                                            @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $supervisor)
+                                            @if($budget->user_id == Auth::user()->id)
                                             <td class="align-middle text-center">
                                               <a class="edit-item" href="{{url('edit-item/'.$item->id)}}" id="">
                                                 <span>
@@ -67,6 +77,8 @@ $financeDirector = $stafflevels[4]->id;
                                         				</span>
                                               </a>
                                             </td>
+                                            @endif
+                                            @endif
                                             @endif
                                         </tr>
 
@@ -78,7 +90,7 @@ $financeDirector = $stafflevels[4]->id;
                                             <td class="align-middle text-center"></td>
                                             <td class="align-middle text-center"></td>
                                             <td class="align-middle text-center text-success font-weight-bold">TOTAL</td>
-                                            <td class="align-middle text-center text-danger font-weight-bold">{{ isset($item->budget_id) ? number_format(BudgetsController::totalBudgetById($item->budget_id)) : 0 }}</td>
+                                            <td class="align-middle text-right text-danger font-weight-bold">{{ isset($item->budget_id) ? number_format(BudgetsController::totalBudgetById($item->budget_id)) : 0 }}</td>
                                             @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $financeDirector || Auth::user()->stafflevel_id == $ceo)
                                               <td class="align-middle text-center"></td>
                                             @endif
@@ -113,7 +125,7 @@ $financeDirector = $stafflevels[4]->id;
                                     @csrf
                                     <div class="row">
 
-                                        <div class="col-lg-4">
+                                        <!-- <div class="col-lg-4">
                                             <div class="form-group">
                                                <select id="budget" name="budget_id" class="form-control">
                                                 <option value="Select Budget Line" selected disabled>Select Budget</option>
@@ -123,8 +135,9 @@ $financeDirector = $stafflevels[4]->id;
                                                </select>
                                             </div>
 
-                                        </div>
-                                        <div class="col-lg-4">
+                                        </div> -->
+                                        <input type="hidden" name="budget_id" value="{{$id}}">
+                                        <div class="col-lg-6">
                                             <div class="form-group">
                                                <select name="account_id" class="form-control">
                                                 <option value="Select Account">Select Account</option>
@@ -136,7 +149,7 @@ $financeDirector = $stafflevels[4]->id;
 
                                         </div>
 
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-6">
                                             <div class="form-group">
                                                <input type="text" name="item_name" class="form-control" placeholder="Item Name">
                                             </div>

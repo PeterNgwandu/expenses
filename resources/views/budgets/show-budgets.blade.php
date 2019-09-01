@@ -28,18 +28,18 @@ $financeDirector = $stafflevels[4]->id;
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card card-earnings">
-                        <div class="card-header bg-faded">
+                        <div class="card-header bg-faded mb-3">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
                                     <h4 class="card-title">Budget</h4>
-                                    @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $financeDirector)
+                                    <!-- @if(Auth::user()->username == 'Admin' || Auth::user()->stafflevel_id == $hod || Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $financeDirector)
                                     <a href="#" class="float-right btn btn-primary" data-toggle="modal" data-target="#add_items">Add Items</a>
-                                    @endif
+                                    @endif -->
                                 </div>
                             </div>
                         </div>
 
-                           <table class="table  table-sm table-bordered table-striped table-dark mb-0">
+                           <table id="data-table" class="table table-sm table-bordered table-striped table-dark mb-0">
                                     <thead>
                                         <tr>
                                             <th scope="col" class="text-center">Budget No.</th>
@@ -48,9 +48,13 @@ $financeDirector = $stafflevels[4]->id;
                                             <th scope="col" class="text-center">Description</th>
                                             <th scope="col" class="text-center">Date Created</th>
                                             <th scope="col" class="text-center">Total</th>
-                                            <th scope="col" class="text-center">Commited</th>
+                                            <th scope="col" class="text-center">Is Active</th>
+                                            @if(Auth::user()->username == 'Admin')
+                                                <th scope="col" class="text-center">Action</th>
+                                            @endif    
+                                            <!-- <th scope="col" class="text-center">Commited</th>
                                             <th scope="col" class="text-center">Amount Spent</th>
-                                            <th scope="col" class="text-center">Budget Balance</th>
+                                            <th scope="col" class="text-center">Budget Balance</th> -->
                                         </tr>
 
                                     </thead>
@@ -59,15 +63,34 @@ $financeDirector = $stafflevels[4]->id;
                                         <tr>
                                             <td class="align-middle text-center">{{ $budget->title_no }}</td>
                                             <td class="align-middle text-left">
-                                                <a href="{{ route('budgets.show', $budget->id) }}">{{ $budget->title }}</a>
+                                                <a class="text-info" href="{{ route('budgets.show', $budget->id) }}">{{ $budget->title }}</a>
                                             </td>
                                             <td class="align-middle text-left">{{$budget->category}}</td>
                                             <td class="align-middle text-left">{{$budget->description}}</td>
                                             <td style="width: 120px;" class="align-middle text-left">{{$budget->created_at->toFormattedDateString()}}</td>
                                             <td class="align-middle text-right">{{number_format(BudgetsController::get_sumitems_by_budgetID($budget->id))}}</td>
-                                            <td class="align-middle text-right">{{number_format(BudgetsController::getCommitedAmount($budget->id))}}</td>
+                                            <!-- <td class="align-middle text-right">{{number_format(BudgetsController::getCommitedAmount($budget->id))}}</td>
                                             <td class="align-middle text-right">{{number_format(BudgetsController::getSpentAmount($budget->id))}}</td>
-                                            <td class="align-middle text-right">{{number_format(BudgetsController::getBudgetBalance($budget->id))}}</td>
+                                            <td class="align-middle text-right">{{number_format(BudgetsController::getBudgetBalance($budget->id))}}</td> -->
+
+                                            <td class="align-middle text-left">
+                                                @if($budget->is_active == 'Active')
+                                                    <span class="text-success">{{$budget->is_active}}</span>
+                                                @else
+                                                    <span class="text-info">{{$budget->is_active}}</span>
+                                                @endif
+                                            </td>
+
+                                            @if(Auth::user()->username == 'Admin')
+                                                <td class="align-middle text-center">
+                                                    @if($budget->is_active == 'Active')
+                                                        <a class="btn btn-sm btn-danger" href="{{route('freeze-budget',$budget->id)}}">Freeze</a>
+                                                    @elseif($budget->is_active == 'Frozen')
+                                                        <a class="btn btn-sm btn-twitter" href="{{route('unfreeze-budget',$budget->id)}}">Unfreeze</a>
+                                                    @endif
+                                                </td>
+                                            @endif
+
                                         </tr>
                                         @endforeach
                                     </tbody>
@@ -97,6 +120,7 @@ $financeDirector = $stafflevels[4]->id;
             <div class="modal-body">
                     <form method="POST" action="{{ route('items.store') }}">
                                     @csrf
+
                                     <div class="row">
 
                                         <div class="col-lg-4">
@@ -110,6 +134,7 @@ $financeDirector = $stafflevels[4]->id;
                                             </div>
 
                                         </div>
+                                        <input type="hidden" name="budget_id" value="{{$budget_line->id}}">
                                         <div class="col-lg-4">
                                             <div class="form-group">
                                                <select name="account_id" class="form-control">

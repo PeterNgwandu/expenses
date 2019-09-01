@@ -37,7 +37,7 @@
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Posted Journals</h4>
+                                    <h4 class="card-title">Posted Expense Retirement Journals</h4>
                                     <p class="lead float-right" style="color: #35A45A;">
                                         
                                     </p>
@@ -66,7 +66,7 @@
                                                     <td scope="col" class="text-center">{{$journal->created_at}}</td>
                                                     <td scope="col" class="text-center">{{$journal->status}}</td>
                                                     <td scope="col" class="text-center">
-                                                        <a class="btn btn-sm btn-outline-success" href="{{url('/journal/'.$journal->journal_no)}}">View</a>
+                                                        <a class="btn btn-sm btn-outline-success" href="{{url('/expense-retirement-journal/'.$journal->journal_no)}}">View</a>
                                                     </td>
                                                 </tr>   
                                             @endforeach

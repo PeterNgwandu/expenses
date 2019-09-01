@@ -404,7 +404,8 @@ class RetirementController extends Controller
             $ret_no = 'RET-'.(RetirementController::getLatestRetNoCount() + 1);
         }
 
-        $accounts = Account::all();
+        $sub_acc_type = DB::table('sub_account_types')->where('account_subtype_name','Expenditure')->select('id')->value('id');
+        $accounts = Account::where('sub_account_type',$sub_acc_type)->get();
         $retirements = Retirement::select('req_no')->get();
         $paid_requisitions = Requisition::where('requisitions.status','Paid')
                             ->where('requisitions.user_id',Auth::user()->id)
@@ -1314,7 +1315,8 @@ class RetirementController extends Controller
 
     public function getRetirementForm($req_no)
     {
-        $accounts = Account::all();
+        $sub_acc_type = DB::table('sub_account_types')->where('account_subtype_name','Expenditure')->select('id')->value('id');
+        $accounts = Account::where('sub_account_type',$sub_acc_type)->get();
         $requisition = Requisition::where('req_no', $req_no)->get();
         $submitted_requisitions = Requisition::where('req_no', $req_no)
                                   ->where('requisitions.status', 'Paid')

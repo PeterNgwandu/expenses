@@ -1,3 +1,9 @@
+<?php
+
+use Illuminate\Support\Facades\Auth;
+
+?>
+
 @extends('layout.app')
 
 @section('content')
@@ -29,7 +35,10 @@
                                             <th scope="col" class="text-center">Email</th>
                                             <th scope="col" class="text-center">Department</th>
                                             <th scope="col" class="text-center">Staff Level</th>
-                                            <th scope="col" class="text-center">Action</th>
+
+                                            @if(Auth::user()->username == 'Admin')
+                                                <th scope="col" class="text-center">Action</th>
+                                            @endif    
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -37,10 +46,11 @@
 
                                         <tr>
                                             <td scope="col" class="align-middle text-center">{{ $user->id }}</td>
-                                            <td scope="col" class="align-middle text-center">{{ $user->username ? $user->username : 'Admin' }}</td>
-                                            <td scope="col" class="align-middle text-center">{{ $user->email }}</td>
-                                            <td scope="col" class="align-middle text-center">{{ $user->department }}</td>
-                                            <td scope="col" class="align-middle text-center">{{ $user->stafflevel }}</td>
+                                            <td scope="col" class="align-middle text-left">{{ $user->username ? $user->username : 'Admin' }}</td>
+                                            <td scope="col" class="align-middle text-left">{{ $user->email }}</td>
+                                            <td scope="col" class="align-middle text-left">{{ $user->department }}</td>
+                                            <td scope="col" class="align-middle text-left">{{ $user->stafflevel }}</td>
+                                            @if(Auth::user()->username == 'Admin')
                                             <td scope="col" class="align-middle text-center">
                                               <a class="delete-user" href="#" id="{{$user->id}}">
                                                 <span>
@@ -51,6 +61,7 @@
                                                 Edit
                                               </a>
                                             </td>
+                                            @endif
                                         </tr>
 
                                        @endforeach

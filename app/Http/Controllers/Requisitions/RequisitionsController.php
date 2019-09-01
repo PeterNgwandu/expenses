@@ -71,6 +71,8 @@ class RequisitionsController extends Controller
 
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                                ->join('departments','users.department_id','departments.id')
+                                               ->join('budgets','requisitions.budget_id','budgets.id')
+                                               ->where('budgets.is_active', 'Active')
                                                ->select('requisitions.req_no','users.username as username','departments.name as department')
 
                                                ->where('requisitions.user_id', Auth::user()->id)
@@ -96,6 +98,8 @@ class RequisitionsController extends Controller
 
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                             ->join('departments','users.department_id','departments.id')
+                                            ->join('budgets','requisitions.budget_id','budgets.id')
+                                            ->where('budgets.is_active', 'Active')
                                             ->select('requisitions.req_no','users.username as username','departments.name as department')
                                             // ->whereBetween('requisitions.gross_amount',  [0, $limitSupervisor->max_amount])
                                             ->where('departments.status', 'Active')
@@ -122,6 +126,8 @@ class RequisitionsController extends Controller
 
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                             ->join('departments','users.department_id','departments.id')
+                                            ->join('budgets','requisitions.budget_id','budgets.id')
+                                            ->where('budgets.is_active', 'Active')
                                             ->select('requisitions.req_no','users.username as username','departments.name as department')
 
                                             ->where('requisitions.gross_amount', '>=', $limitSupervisor->max_amount)
@@ -150,6 +156,8 @@ class RequisitionsController extends Controller
 
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                                ->join('departments','users.department_id','departments.id')
+                                               ->join('budgets','requisitions.budget_id','budgets.id')
+                                               ->where('budgets.is_active', 'Active')
                                                ->select('requisitions.req_no','users.username as username','departments.name as department')
                                                ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo,$financeDirector])
                                                ->whereBetween('requisitions.gross_amount', [$limitHOD->max_amount, 100000000000])
@@ -174,6 +182,8 @@ class RequisitionsController extends Controller
 
             $pending_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                                ->join('departments','users.department_id','departments.id')
+                                               ->join('budgets','requisitions.budget_id','budgets.id')
+                                               ->where('budgets.is_active', 'Active')
                                                ->select('requisitions.req_no','users.username as username','departments.name as department')
                                                ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo, $financeDirector])
                                                // ->where('requisitions.status', 'onprocess')
@@ -205,7 +215,7 @@ class RequisitionsController extends Controller
     {
         $user_id = Auth::user()->id;
         $items = Item::all();
-        $budgets = Budget::where('budgets.status', 'Confirmed')->get();
+        $budgets = Budget::where('budgets.status', 'Confirmed')->where('is_active', 'Active')->get();
         $accounts = Account::all();
         $data = RequisitionTemporaryTable::where('user_id', $user_id)->where('status', 'onprocess')->get();
         $activity_name = RequisitionTemporaryTable::where('user_id', Auth::user()->id)->select('activity_name')->first();
@@ -530,9 +540,11 @@ class RequisitionsController extends Controller
 
                                 $submitted_requisitions = Requisition::join('users','users.id','requisitions.user_id')
                                                         ->join('departments','users.department_id','departments.id')
+                                                        ->join('budgets','requisitions.budget_id','budgets.id')
+                                                        ->where('budgets.is_active', 'Active')
                                                         ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
                                                         ->where('departments.id',$user_dept->dept_id)
-                                                        ->where('users.stafflevel_id','!=',[$ceo])
+                                                        // ->where('users.stafflevel_id','!=',[$ceo])
                                                         // ->whereBetween('requisitions.gross_amount', [0,$limitSupervisor->max_amount])
                                                         ->whereIn('users.stafflevel_id',[$normalStaff, $supervisor, $hod])
                                                         // ->where('requisitions.status', 'Approved By Finance')
@@ -541,8 +553,8 @@ class RequisitionsController extends Controller
                                                         // ->orWhere('requisitions.status', 'like', '%Paid%')
                                                     //   ->orWhere('requisitions.status', 'like', '%onprocess%')
                                                         // ->where('requisitions.gross_amount','>',$limitNormalStaff->max_amount)
-                                                        ->whereBetween('requisitions.gross_amount', [$limitSupervisor->max_amount, $limitHOD->max_amount])
-                                                        ->where('requisitions.gross_amount', '<=', $limitHOD->max_amount)
+                                                        // ->whereBetween('requisitions.gross_amount', [$limitSupervisor->max_amount, $limitHOD->max_amount])
+                                                        // ->where('requisitions.gross_amount', '<=', $limitHOD->max_amount)
                                                         ->distinct('req_no')
                                                         ->get();
 
@@ -565,6 +577,8 @@ class RequisitionsController extends Controller
 
             $submitted_requisitions = Requisition::join('users','users.id','requisitions.user_id')
                                       ->join('departments','users.department_id','departments.id')
+                                      ->join('budgets','requisitions.budget_id','budgets.id')
+                                      ->where('budgets.is_active', 'Active')
                                       ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
 
                                       // ->whereBetween('requisitions.gross_amount', [0,$limitSupervisor->max_amount])
@@ -596,6 +610,8 @@ class RequisitionsController extends Controller
             $submitted_requisitions = Requisition::select('user_id')
                                       ->join('users','users.id','requisitions.user_id')
                                       ->join('departments','users.department_id','departments.id')
+                                      ->join('budgets','requisitions.budget_id','budgets.id')
+                                      ->where('budgets.is_active', 'Active')
                                       ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
 
                                       // ->orWhere('requisitions.status', 'like', '%Confirmed%')
@@ -620,6 +636,8 @@ class RequisitionsController extends Controller
 
             $submitted_requisitions = Requisition::join('users','users.id','requisitions.user_id')
                                       ->join('departments','users.department_id','departments.id')
+                                      ->join('budgets','requisitions.budget_id','budgets.id')
+                                      ->where('budgets.is_active', 'Active')
                                       ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
                                       ->where('users.id', Auth::user()->id)
                                       ->where('departments.id',$user_dept->dept_id)
@@ -639,6 +657,8 @@ class RequisitionsController extends Controller
             $submitted_requisitions = Requisition::join('users','users.id','requisitions.user_id')
                                       ->join('staff_levels','users.stafflevel_id','staff_levels.id')
                                       ->join('departments','users.department_id','departments.id')
+                                      ->join('budgets','requisitions.budget_id','budgets.id')
+                                      ->where('budgets.is_active', 'Active')
                                       ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
                                       // ->where('requisitions.status', 'Confirmed')
                                       ->orWhere('requisitions.status', 'onprocess finance')
@@ -658,6 +678,8 @@ class RequisitionsController extends Controller
             $submitted_requisitions = Requisition::join('users','users.id','requisitions.user_id')
                                       ->join('staff_levels','users.stafflevel_id','staff_levels.id')
                                       ->join('departments','users.department_id','departments.id')
+                                      ->join('budgets','requisitions.budget_id','budgets.id')
+                                      ->where('budgets.is_active', 'Active')
                                       ->where('departments.name','Finance')
                                       ->select('requisitions.req_no','users.*','user_id','users.username as username','departments.name as department')
                                       ->where('requisitions.status', 'Approved By CEO')
@@ -1093,6 +1115,8 @@ class RequisitionsController extends Controller
         if(Auth::user()->stafflevel_id == $normalStaff){
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff])
                                  ->where('users.department_id', $user_dept->dept_id)
@@ -1109,6 +1133,8 @@ class RequisitionsController extends Controller
         }elseif(Auth::user()->stafflevel_id == $supervisor){
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  // ->where('users.department_id', 'departments.id')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
@@ -1126,6 +1152,8 @@ class RequisitionsController extends Controller
         }elseif(Auth::user()->stafflevel_id == $hod){
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod])
                                  ->where('users.department_id', $user_dept->dept_id)
@@ -1141,6 +1169,8 @@ class RequisitionsController extends Controller
         }elseif(Auth::user()->stafflevel_id == $ceo || Auth::user()->stafflevel_id == $financeDirector){
             $approved_requisitions = Requisition::join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo, $financeDirector])
                                  ->where('requisitions.status', '!=', 'Deleted')
@@ -1178,6 +1208,8 @@ class RequisitionsController extends Controller
             $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  // ->whereIn('users.stafflevel_id', [$normalStaff])
                                  ->where('users.id', Auth::user()->id)
@@ -1191,6 +1223,8 @@ class RequisitionsController extends Controller
             $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor])
                                  ->where('users.department_id', $user_dept->dept_id)
@@ -1204,6 +1238,8 @@ class RequisitionsController extends Controller
             $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod])
                                  ->where('users.department_id', $user_dept->dept_id)
@@ -1217,6 +1253,8 @@ class RequisitionsController extends Controller
             $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereIn('users.stafflevel_id', [$normalStaff, $supervisor, $hod, $ceo, $financeDirector])
                                  ->where('requisitions.status', '!=', 'Deleted')
@@ -1296,7 +1334,7 @@ class RequisitionsController extends Controller
     {
         $user_id = Auth::user()->id;
         $items = Item::all();
-        $budgets = Budget::where('budgets.status', 'Confirmed')->get();
+        $budgets = Budget::where('budgets.status', 'Confirmed')->where('is_active', 'Active')->get();
         $accounts = Account::all();
         $data = RequisitionTemporaryTable::where('user_id', $user_id)->where('status', 'onprocess')->get();
         return view('requisitions.create-requisitions')->withBudgets($budgets)->withItems($items)->withData($data)->withAccounts($accounts);
@@ -1325,8 +1363,9 @@ class RequisitionsController extends Controller
 
         $user_id = Auth::user()->id;
         $items = Item::all();
-        $budgets = Budget::where('budgets.status', 'Confirmed')->get();
-        $accounts = Account::all();
+        $budgets = Budget::where('budgets.status', 'Confirmed')->where('is_active', 'Active')->where('budgets.department_id', Auth::user()->department_id)->get();
+        $sub_acc_type = DB::table('sub_account_types')->where('account_subtype_name','Expenditure')->select('id')->value('id');
+        $accounts = Account::where('sub_account_type',$sub_acc_type)->get();
         $data = RequisitionTemporaryTable::where('user_id', $user_id)->where('status', 'onprocess')->get();
         $activity = RequisitionTemporaryTable::where('user_id', Auth::user()->id)->select('activity_name')->first();
         return view('requisition.create-requisition', compact('activity'))->withBudgets($budgets)->withItems($items)->withData($data)->withAccounts($accounts);
@@ -1517,32 +1556,37 @@ class RequisitionsController extends Controller
             $gross_amount = ($request->quantity * $request->unit_price);
         }
 
-        $budget_category = Budget::join('budget_categories','budgets.budget_category_id','budget_categories.id')->where('budgets.id', $request->budget_id)->select('budgets.budget_category_id')->first();
-
-        if($budget_category->budget_category_id == 1)
-        {
-            $total = Item::join('budgets','items.budget_id','budgets.id')->where('budget_id', $request->budget_id)
-                         ->where('budgets.budget_category_id', 1)->sum('total');
-
-            $total_requested = Requisition::join('budgets','requisitions.budget_id','budgets.id')
-                                          ->join('budget_categories','budgets.budget_category_id','budget_categories.id')
-                                          ->where('budgets.id', $request->budget_id)
-                                          ->where('budget_category_id', 1)
-                                          ->where('requisitions.status','!=','Edited')
-                                          ->where('requisitions.status','!=','Deleted')
-                                          ->sum('gross_amount');
-
-            $total_avalilable = $total - $total_requested;                              
+        if ($request->budget_id != 0) {
+          
+            $budget_category = Budget::join('budget_categories','budgets.budget_category_id','budget_categories.id')->where('budgets.id', $request->budget_id)->select('budgets.budget_category_id')->first();
 
             if($budget_category->budget_category_id == 1)
-            {       
-                if($gross_amount > $total_avalilable)
-                {
-                    alert()->error('You have exceeded the budget limit')->persistent('close');
-                    return redirect()->back();
+            {
+                $total = Item::join('budgets','items.budget_id','budgets.id')->where('budget_id', $request->budget_id)
+                             ->where('budgets.budget_category_id', 1)->sum('total');
+
+                $total_requested = Requisition::join('budgets','requisitions.budget_id','budgets.id')
+                                              ->join('budget_categories','budgets.budget_category_id','budget_categories.id')
+                                              ->where('budgets.id', $request->budget_id)
+                                              ->where('budget_category_id', 1)
+                                              ->where('requisitions.status','!=','Edited')
+                                              ->where('requisitions.status','!=','Deleted')
+                                              ->sum('gross_amount');
+
+                $total_avalilable = $total - $total_requested;                              
+
+                if($budget_category->budget_category_id == 1)
+                {       
+                    if($gross_amount > $total_avalilable)
+                    {
+                        alert()->error('You have exceeded the budget limit')->persistent('close');
+                        return redirect()->back();
+                    }
                 }
             }
         }
+        
+
         
 
         if (Requisition::select('req_no')->latest()->first() == null && RequisitionTemporaryTable::select('req_no')->latest()->first() == null)
@@ -1932,6 +1976,8 @@ class RequisitionsController extends Controller
         $paid_requisitions = Requisition::where('requisitions.status','Paid')
                                  ->join('users','requisitions.user_id','users.id')
                                  ->join('departments','users.department_id','departments.id')
+                                 ->join('budgets','requisitions.budget_id','budgets.id')
+                                 ->where('budgets.is_active', 'Active')
                                  ->select('requisitions.req_no','requisitions.status','users.username as username','departments.name as department')
                                  ->whereDate('requisitions.created_at', '>=', $from)
                                  ->whereDate('requisitions.created_at', '<=', $to)
@@ -2023,6 +2069,8 @@ class RequisitionsController extends Controller
         $submitted_requisitions = Requisition::where('requisitions.req_no', $req_no)
                                     ->join('budgets','requisitions.budget_id','budgets.id')
                                     ->join('items','requisitions.item_id','items.id')
+                                    ->join('budgets','requisitions.budget_id','budgets.id')
+                                    ->where('budgets.is_active', 'Active')
                                     ->select('requisitions.*','budgets.title as budget','items.item_name as item')
                                     ->where('requisitions.status', '!=', 'Deleted')
                                     ->where('requisitions.status', '!=', 'Edited')

@@ -5,6 +5,7 @@ use App\Comments\Comment;
 use App\StaffLevel\StaffLevel;
 use Illuminate\Support\Carbon;
 use App\Requisition\Requisition;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Requisitions\RequisitionsController;
 
 ?>
@@ -86,11 +87,11 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
                                           </thead>
                                           <body>
                                               <td>
-                                                <p>Received By: {{$lastRow->username}}</p>
+                                                <p>Received By: {{$lastRow->cash_collector}}</p>
                                                 <p class="mt-2">Sign: ......................................................</p>
                                               </td>
                                               <td>
-                                                <p>Paid By: {{$lastRow->cash_collector}}</p>
+                                                <p>Paid By: {{Auth::user()->username}}</p>
                                                 <p class="mt-2">Sign: ...........................................................</p>
                                               </td>
                                           </body>

@@ -104,7 +104,7 @@ $amount_claimed = ($amount_retired + $amount_received) - $paid_amount;
                         <div class="card-header bg-faded">
                             <div class="row align-items-center">
                                 <div class="col-lg-12">
-                                    <h4 class="card-title">Retirement for Requisitions : {{$req_no}}</h4>
+                                    <h4 class="card-title">Retirements for Requisition : {{$req_no}}</h4>
                                     <p class="lead float-right" style="color: #35A45A;">
 
                                     </p>

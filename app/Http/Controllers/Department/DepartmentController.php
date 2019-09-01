@@ -74,7 +74,9 @@ class DepartmentController extends Controller
      */
     public function edit($id)
     {
-        //
+        $company = Company::first();
+        $department = Department::findOrFail($id);
+        return view('departments.edit-department')->withDepartment($department)->withCompany($company);
     }
 
     /**
@@ -86,7 +88,12 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $department = Department::findOrFail($id);
+        $result = $department->update([
+            'name' => $request->name,
+        ]);
+
+        return redirect(url('view-departments'));
     }
 
     /**

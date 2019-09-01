@@ -109,7 +109,7 @@ use App\Http\Controllers\Requisitions\RequisitionsController;
 
 
 
-                                                        <a href="{{route('retirements->details',$retirement->req_no)}}" class="btn btn-sm btn-twitter">View</a>
+                                                        <a href="{{route('retirements-details',$retirement->req_no)}}" class="btn btn-sm btn-twitter">View</a>
 
                                                 </td>
                                             </tr>

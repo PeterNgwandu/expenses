@@ -52,6 +52,9 @@ $users_with_depts = User::join('departments','users.department_id','departments.
 
                                             @endif
                                         </td>
+                                        <td class="align-middle text-center">
+                                            <a href="{{route('departments.edit',$department->id)}}" class="btn btn-sm btn-info">Edit</a>
+                                        </td>
                                         @endif
                                         @if($department->status == 'Disabled')
                                         <td class="align-middle text-center">

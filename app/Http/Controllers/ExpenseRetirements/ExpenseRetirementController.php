@@ -91,7 +91,7 @@ class ExpenseRetirementController extends Controller
                                ->whereIn('users.stafflevel_id',[$ceo])
                                ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                // ->whereBetween('expense_retirements.gross_amount', ['500000','5000000'])
-                               ->where('expense_retirements.status', 'Retired')
+                               ->where('expense_retirements.status', 'Retired, ceo')
                                ->where('departments.status', 'Active')
                                ->distinct('ret_no')
                                ->get();
@@ -101,7 +101,7 @@ class ExpenseRetirementController extends Controller
                                ->join('departments','users.department_id','departments.id')
                                ->where('users.stafflevel_id',[$financeDirector])
                                ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
-                               ->where('expense_retirements.status', 'Retired')
+                               ->where('expense_retirements.status', 'Retired, finance')
                                ->where('departments.status', 'Active')
                                ->distinct('ret_no')
 
@@ -203,6 +203,7 @@ class ExpenseRetirementController extends Controller
                                ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
                                ->where('expense_retirements.status', 'Retired, hod')
                                ->where('departments.status', 'Active')
+                               ->orWhere('expense_retirements.status', 'Retired, finance')
                                ->orWhere('expense_retirements.status', 'Approved By Finance')
                                ->orWhere('expense_retirements.status', 'Rejected By Finance')
                                ->distinct('ret_no')
@@ -211,9 +212,9 @@ class ExpenseRetirementController extends Controller
             $expense_retirements = DB::table('expense_retirements')
                                ->join('users','expense_retirements.user_id','users.id')
                                ->join('departments','users.department_id','departments.id')
-                               ->where('users.stafflevel_id',[$financeDirector])
+                               ->where('users.stafflevel_id',[$normalStaff, $supervisor, $hod, $ceo,$financeDirector])
                                ->select('expense_retirements.ret_no','expense_retirements.activity_name','users.username as username')
-                               ->where('expense_retirements.status', 'Retired,ceo')
+                               ->where('expense_retirements.status', 'Retired, ceo')
                                ->where('departments.status', 'Active')
                                ->orWhere('expense_retirements.status', 'Approved By HOD')
                                ->orWhere('expense_retirements.status', 'Rejected By CEO')
@@ -501,8 +502,9 @@ class ExpenseRetirementController extends Controller
         }
 
         $items = Item::all();
-        $budgets = Budget::all();
-        $accounts = Account::all();
+        $budgets = Budget::where('status', 'Confirmed')->where('is_active', 'Active')->where('budgets.department_id', Auth::user()->department_id)->get();
+        $sub_acc_type = DB::table('sub_account_types')->where('account_subtype_name','Expenditure')->select('id')->value('id');
+        $accounts = Account::where('sub_account_type',$sub_acc_type)->get();
         return view('expense-retirements.create-expense-retirement')->withItems($items)->withBudgets($budgets)->withAccounts($accounts);
     }
 

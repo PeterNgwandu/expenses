@@ -223,7 +223,7 @@ class DataFilterController extends Controller
         $approved_requisitions = DB::table('requisitions')
                                    ->join('users','requisitions.user_id','users.id')
                                    ->join('departments','users.department_id','departments.id')
-                                   ->select('requisitions.*','users.username as username','departments.name as deparment')
+                                   ->select('requisitions.*','users.username as username','departments.name as department')
                                    ->where('requisitions.status','Confirmed')
                                    ->whereDate('requisitions.created_at', '>=', $from)
                                    ->whereDate('requisitions.created_at', '<=', $to)
@@ -259,7 +259,7 @@ class DataFilterController extends Controller
                             ->where('users.stafflevel_id',$normalStaff)
                             ->where('retirements.status', 'Confirmed')
                             ->orWhere('retirements.status', 'like', '%Approved%')
-                            ->select('retirements.ret_no','users.username as username','departments.name as department')
+                            ->select('retirements.ret_no','retirements.req_no','users.username as username','departments.name as department')
                             ->whereDate('retirements.created_at', '>=', $from)
                             ->whereDate('retirements.created_at', '<=', $to)
                             ->distinct('ret_no')->get();
@@ -274,7 +274,7 @@ class DataFilterController extends Controller
                             ->where('retirements.status', 'Confirmed')
                             ->orWhere('retirements.status', 'like', '%Approved%')
                             ->whereBetween('retirements.gross_amount',[0,$limitSupervisor->max_amount])
-                            ->select('retirements.ret_no','users.username as username','departments.name as department')
+                            ->select('retirements.ret_no','retirements.req_no','users.username as username','departments.name as department')
                             ->whereDate('retirements.created_at', '>=', $from)
                             ->whereDate('retirements.created_at', '<=', $to)
                             ->distinct('retirements.ret_no')->get();
@@ -289,7 +289,7 @@ class DataFilterController extends Controller
                             ->where('retirements.status', 'Confirmed')
                             ->orWhere('retirements.status', 'like', '%Approved%')
                             ->whereBetween('retirements.gross_amount',[0,$limitHOD->max_amount])
-                            ->select('retirements.ret_no','users.username as username','departments.name as department')
+                            ->select('retirements.ret_no','retirements.req_no','users.username as username','departments.name as department')
                             ->whereDate('retirements.created_at', '>=', $from)
                             ->whereDate('retirements.created_at', '<=', $to)
                             ->distinct('ret_no')->get();
@@ -299,7 +299,7 @@ class DataFilterController extends Controller
             $retirements = Retirement::join('requisitions','retirements.req_no','requisitions.req_no')
                             ->join('users','retirements.user_id','users.id')
                             ->join('departments','users.department_id','departments.id')
-                            ->select('retirements.ret_no','users.username as username','departments.name as department')
+                            ->select('retirements.ret_no','retirements.req_no','users.username as username','departments.name as department')
                             ->where('retirements.status', 'Confirmed')
                             ->orWhere('retirements.status', 'like', '%Approved%')
                             ->whereIn('users.stafflevel_id',[$hod,$financeDirector])
@@ -315,7 +315,7 @@ class DataFilterController extends Controller
                             ->join('departments','users.department_id','departments.id')
                             ->where('retirements.status', 'Confirmed')
                             ->orWhere('retirements.status', 'like', '%Approved%')
-                            ->select('retirements.ret_no','users.username as username','departments.name as department')
+                            ->select('retirements.ret_no','retirements.req_no','users.username as username','departments.name as department')
                             ->whereDate('retirements.created_at', '>=', $from)
                             ->whereDate('retirements.created_at', '<=', $to)
                             ->distinct('ret_no')->get();
